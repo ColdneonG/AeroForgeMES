@@ -356,6 +356,40 @@ public class ProductionRepository {
                 """, shopTaskParams(task));
     }
 
+    public List<ShopTask> listShopTasks(
+            String keyword,
+            String status,
+            Long workOrderId,
+            Long dispatchId,
+            Long lineId,
+            Long teamId
+    ) {
+        StringBuilder sql = new StringBuilder("""
+                select id, task_no, work_order_id, dispatch_id, product_id, route_id,
+                       line_id, team_id, plan_qty, started_at, ended_at, status
+                from shop_task
+                where 1 = 1
+                """);
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        appendKeyword(sql, params, keyword, "task_no");
+        appendEquals(sql, params, "status", status);
+        appendEquals(sql, params, "work_order_id", workOrderId);
+        appendEquals(sql, params, "dispatch_id", dispatchId);
+        appendEquals(sql, params, "line_id", lineId);
+        appendEquals(sql, params, "team_id", teamId);
+        sql.append(" order by id desc");
+        return jdbc.query(sql.toString(), params, shopTaskMapper());
+    }
+
+    public Optional<ShopTask> findShopTaskById(Long id) {
+        return findOne("""
+                select id, task_no, work_order_id, dispatch_id, product_id, route_id,
+                       line_id, team_id, plan_qty, started_at, ended_at, status
+                from shop_task
+                where id = :id
+                """, Map.of("id", id), shopTaskMapper());
+    }
+
     public Optional<ShopTask> findTaskByDispatchId(Long dispatchId) {
         return findOne("""
                 select id, task_no, work_order_id, dispatch_id, product_id, route_id,
@@ -371,6 +405,10 @@ public class ProductionRepository {
                 set status = :status
                 where dispatch_id = :dispatchId
                 """, Map.of("dispatchId", dispatchId, "status", newStatus));
+    }
+
+    public int updateShopTaskStatus(Long id, String oldStatus, String newStatus) {
+        return updateStatus("shop_task", id, oldStatus, newStatus);
     }
 
     private int updateStatus(String tableName, Long id, String oldStatus, String newStatus) {

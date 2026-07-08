@@ -7,35 +7,35 @@
       </div>
       <div class="siemens-actions">
         <button class="siemens-btn">Export Report</button>
-        <button class="siemens-btn primary">Refresh Query</button>
+        <button class="siemens-btn primary" @click="loadTrace">Refresh Query</button>
       </div>
     </header>
 
+    <p v-if="loading" class="api-state">Loading traceability data...</p>
+    <p v-if="error" class="api-state error">{{ error }}</p>
+
     <div class="siemens-content trace-layout">
       <div class="siemens-toolbar">
-        <input value="SN20260706000158" />
+        <input v-model="keyword" placeholder="Scan or enter barcode" />
         <select><option>By SN</option><option>By work order</option><option>By batch</option></select>
-        <select><option>Complete genealogy</option><option>Exceptions only</option></select>
-        <button class="siemens-btn primary">Search</button>
-        <span class="siemens-muted">Complete chain / last acquisition 14:30 / 7 process nodes</span>
+        <button class="siemens-btn primary" @click="loadTrace">Search</button>
+        <span class="siemens-muted">Mock data disabled</span>
       </div>
 
       <section class="siemens-grid trace-main">
         <article class="siemens-panel">
           <header>
             <h2>Genealogy Chain / Timeline</h2>
-            <span class="siemens-status ok">Complete</span>
+            <span class="siemens-status">{{ traceRoot || 'No data' }}</span>
           </header>
           <div class="siemens-panel-body siemens-scroll trace-tree-panel">
-            <h3><span class="mono">{{ traceTree.root }}</span></h3>
+            <h3><span class="mono">{{ traceRoot || '-' }}</span></h3>
             <ul class="genealogy-tree">
-              <li>
-                <span class="mono">{{ traceTree.order }}</span> / <span class="mono">{{ traceTree.batch }}</span>
-                <ul>
-                  <li v-for="child in traceTree.nodes[0].children" :key="child.title">{{ child.title }}</li>
-                </ul>
+              <li v-for="node in traceNodes" :key="node.id || node.title">
+                {{ node.title || node.name || node.id }}
               </li>
             </ul>
+            <p v-if="!loading && traceNodes.length === 0" class="api-state">No genealogy data.</p>
           </div>
         </article>
 
@@ -46,23 +46,15 @@
           <div class="siemens-panel-body object-panel">
             <table class="siemens-table">
               <tbody>
-                <tr v-for="row in traceTree.details" :key="row[0]">
+                <tr v-for="row in details" :key="row[0]">
                   <td>{{ row[0] }}</td>
                   <td><strong>{{ row[1] }}</strong></td>
                 </tr>
+                <tr v-if="!loading && details.length === 0">
+                  <td colspan="2">No detail data.</td>
+                </tr>
               </tbody>
             </table>
-            <div class="siemens-step-line">
-              <span class="siemens-step done">Material</span>
-              <span class="siemens-step-join"></span>
-              <span class="siemens-step done">Process</span>
-              <span class="siemens-step-join"></span>
-              <span class="siemens-step done">Equipment</span>
-              <span class="siemens-step-join"></span>
-              <span class="siemens-step done">Operator</span>
-              <span class="siemens-step-join"></span>
-              <span class="siemens-step active">Quality</span>
-            </div>
           </div>
         </aside>
       </section>
@@ -86,6 +78,9 @@
                 <td>{{ event.owner }}</td>
                 <td><span :class="['siemens-status', statusTone(event.status)]">{{ event.status }}</span></td>
               </tr>
+              <tr v-if="!loading && events.length === 0">
+                <td colspan="6">No event data.</td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -95,23 +90,53 @@
 </template>
 
 <script setup>
-import { traceTree } from '../../mock/mesData'
+import { ref } from 'vue'
+import { traceBarcode } from '../../api/barcode'
 
-const events = [
-  { time: '08:21', object: 'SN20260706000158', action: 'Scan online', equipment: 'Scanner 2#', owner: 'Wang', status: '合格' },
-  { time: '09:12', object: 'BATCH-MTR-0706A', action: 'Motor assembly', equipment: 'Assembly Line 1#', owner: 'Liu', status: '已完成' },
-  { time: '09:48', object: 'BATCH-BLD-0706C', action: 'Blade assembly', equipment: 'Assembly Line 01', owner: 'Wang', status: '已完成' },
-  { time: '10:06', object: 'FQC-0706-021', action: 'Final inspection', equipment: 'Inspection Bench 1#', owner: 'Li', status: '合格' },
-  { time: '10:22', object: 'BATCH-PKG-0706B', action: 'Package batch binding', equipment: 'Packaging Line 1#', owner: 'Zhao', status: '已完成' },
-  { time: '10:44', object: 'WAREHOUSE-IN', action: 'Inbound pending', equipment: 'WMS Interface', owner: 'System', status: '进行中' }
-]
+const keyword = ref('')
+const traceRoot = ref('')
+const traceNodes = ref([])
+const details = ref([])
+const events = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+
+const loadTrace = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const data = await traceBarcode(keyword.value || '-')
+    traceRoot.value = data.root || data.barcode || keyword.value || ''
+    traceNodes.value = recordsOf(data.nodes || data.children || data.events || [])
+    details.value = Object.entries(data.details || {}).map(([key, value]) => [key, value])
+    events.value = recordsOf(data.events || []).map((row) => ({
+      time: row.time || row.createdAt || row.created_at || '-',
+      object: row.object || row.barcode || row.id || '-',
+      action: row.action || row.event || '-',
+      equipment: row.equipment || row.equipmentName || row.equipment_name || '-',
+      owner: row.owner || row.operatorName || row.operator_name || '-',
+      status: row.status || row.result || '-'
+    }))
+  } catch (e) {
+    traceRoot.value = ''
+    traceNodes.value = []
+    details.value = []
+    events.value = []
+    error.value = e?.message || 'Traceability API is not connected yet.'
+  } finally {
+    loading.value = false
+  }
+}
 
 const statusTone = (status) => ({
-  合格: 'ok',
-  已完成: 'ok',
-  进行中: 'running',
-  异常: 'danger'
-}[status] || '')
+  PASS: 'ok',
+  COMPLETED: 'ok',
+  RUNNING: 'running',
+  FAILED: 'danger',
+  ERROR: 'danger'
+}[String(status || '').toUpperCase()] || '')
 </script>
 
 <style scoped>
@@ -128,33 +153,29 @@ const statusTone = (status) => ({
   font-size: 20px;
 }
 
-.genealogy-tree,
-.genealogy-tree ul {
+.genealogy-tree {
   margin: 0;
   padding-left: 22px;
   list-style: none;
 }
 
 .genealogy-tree li {
-  position: relative;
   margin: 10px 0;
-  padding-left: 18px;
   line-height: 1.6;
-}
-
-.genealogy-tree li::before {
-  content: "";
-  position: absolute;
-  top: 8px;
-  left: 0;
-  width: 8px;
-  height: 8px;
-  background: #00799f;
 }
 
 .object-panel {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
   gap: 18px;
+}
+
+.api-state {
+  margin: 12px 24px;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
 }
 </style>

@@ -4,10 +4,14 @@
       <div>
         <p>电子看板</p>
         <h1>车间看板</h1>
-        <span>按车间区域展示注塑、电机装配、扇叶装配、总装、质检和包装区域状态。</span>
+        <span>演示数据已关闭，区域数据只从真实接口加载。</span>
       </div>
       <div class="board-time">车间总览 · {{ activeAreas }}/{{ areas.length }} 区域正常</div>
     </div>
+
+    <p v-if="loading" class="board-state">Loading workshop board...</p>
+    <p v-if="error" class="board-state error">{{ error }}</p>
+    <p v-if="!loading && !error && areas.length === 0" class="board-state">暂无车间看板数据</p>
 
     <div class="workshop-layout">
       <article v-for="area in areas" :key="area.name" class="workshop-area-card" :class="area.tone">
@@ -26,38 +30,62 @@
         </div>
       </article>
     </div>
-
-    <div class="workshop-summary-row">
-      <article>
-        <span>车间产出</span>
-        <strong>1,832 台</strong>
-        <p>较计划 +6.2%</p>
-      </article>
-      <article>
-        <span>区域 OEE</span>
-        <strong>84.7%</strong>
-        <p>老化区拉低 3.1%</p>
-      </article>
-      <article>
-        <span>质量合格率</span>
-        <strong>98.1%</strong>
-        <p>重点关注电机异响</p>
-      </article>
-    </div>
   </section>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { getWorkshopBoard } from '../../api/dashboard'
 
-const areas = [
-  { short: '注塑', name: '注塑区', status: '运行', description: '后壳与网罩注塑稳定供给。', orders: 3, equipment: '8/8', exceptions: 0, tone: 'running' },
-  { short: '电机', name: '电机装配区', status: '运行', description: '绕线与电机装配节拍正常。', orders: 4, equipment: '7/8', exceptions: 1, tone: 'warn' },
-  { short: '扇叶', name: '扇叶装配区', status: '待料', description: '前网罩短缺影响总装二线。', orders: 2, equipment: '5/5', exceptions: 1, tone: 'warn' },
-  { short: '总装', name: '总装区', status: '运行', description: '总装一线满负荷，二线等待补料。', orders: 5, equipment: '10/11', exceptions: 1, tone: 'running' },
-  { short: '质检', name: '质检区', status: '运行', description: '首末件与巡检按计划执行。', orders: 6, equipment: '4/4', exceptions: 0, tone: 'running' },
-  { short: '包装', name: '包装区', status: '异常', description: '扫码失败率偏高，已通知维护。', orders: 3, equipment: '5/6', exceptions: 2, tone: 'danger' }
-]
+const areas = ref([])
+const loading = ref(false)
+const error = ref('')
 
-const activeAreas = computed(() => areas.filter((area) => area.tone === 'running').length)
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const toneOf = (status) => {
+  const text = String(status || '').toUpperCase()
+  if (['ALARM', 'ERROR', 'FAILED', 'DANGER'].includes(text)) return 'danger'
+  if (['WARN', 'WARNING', 'PENDING', 'WAITING'].includes(text)) return 'warn'
+  return 'running'
+}
+
+const mapArea = (row) => ({
+  short: row.short || row.areaCode || row.area_code || row.id || '-',
+  name: row.areaName || row.area_name || row.name || '-',
+  status: row.status || '-',
+  description: row.description || row.remark || '-',
+  orders: row.orders ?? row.orderCount ?? row.order_count ?? 0,
+  equipment: row.equipment || row.equipmentCount || row.equipment_count || '-',
+  exceptions: row.exceptions ?? row.exceptionCount ?? row.exception_count ?? 0,
+  tone: row.tone || toneOf(row.status)
+})
+
+const loadRows = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    areas.value = recordsOf(await getWorkshopBoard()).map(mapArea)
+  } catch (e) {
+    areas.value = []
+    error.value = e?.message || 'Workshop board API is not connected yet.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const activeAreas = computed(() => areas.value.filter((area) => area.tone === 'running').length)
+
+onMounted(loadRows)
 </script>
+
+<style scoped>
+.board-state {
+  margin: 12px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.board-state.error {
+  color: #b42318;
+}
+</style>

@@ -15,3 +15,11 @@ export function getMaintenanceOrders(params) {
 export function getMaintenancePlans(params) {
   return request.get('/equipment/inspections', { params })
 }
+
+export function getFaultReasons(params) {
+  return request.get('/equipment/fault-reasons', { params })
+}
+
+export function getOeeSnapshots(params) {
+  return request.get('/equipment/oee-snapshots', { params })
+}

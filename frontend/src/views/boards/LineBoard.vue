@@ -4,10 +4,14 @@
       <div>
         <p>电子看板</p>
         <h1>产线看板</h1>
-        <span>按产线展示当前工单、产品、计划与完成进度、设备状态、异常状态和预计完成时间。</span>
+        <span>演示数据已关闭，数据只从真实接口加载。</span>
       </div>
       <div class="board-time">实时刷新 · {{ now }}</div>
     </div>
+
+    <p v-if="loading" class="board-state">Loading line board...</p>
+    <p v-if="error" class="board-state error">{{ error }}</p>
+    <p v-if="!loading && !error && lines.length === 0" class="board-state">暂无产线看板数据</p>
 
     <div class="line-board-grid">
       <article v-for="line in lines" :key="line.name" class="line-board-card" :class="line.tone">
@@ -23,18 +27,9 @@
           <strong>{{ line.order }}</strong>
         </div>
         <div class="line-card-metrics">
-          <div>
-            <span>计划</span>
-            <strong>{{ line.plan }}</strong>
-          </div>
-          <div>
-            <span>完成</span>
-            <strong>{{ line.done }}</strong>
-          </div>
-          <div>
-            <span>完成率</span>
-            <strong>{{ line.rate }}%</strong>
-          </div>
+          <div><span>计划</span><strong>{{ line.plan }}</strong></div>
+          <div><span>完成</span><strong>{{ line.done }}</strong></div>
+          <div><span>完成率</span><strong>{{ line.rate }}%</strong></div>
         </div>
         <div class="line-progress"><span :style="{ width: `${line.rate}%` }"></span></div>
         <div class="line-card-foot">
@@ -48,14 +43,64 @@
 </template>
 
 <script setup>
-const now = new Date().toLocaleString('zh-CN', { hour12: false })
+import { onMounted, ref } from 'vue'
+import { getLineBoard } from '../../api/dashboard'
 
-const lines = [
-  { name: '总装一线', product: 'FS-500 落地扇', order: 'WO20260706001', plan: 420, done: 326, rate: 78, status: '运行', equipment: '正常', exception: '无', eta: '18:20', tone: 'running' },
-  { name: '总装二线', product: 'TF-230 台扇', order: 'WO20260706002', plan: 280, done: 188, rate: 67, status: '待机', equipment: '等料', exception: '前网罩短缺', eta: '20:10', tone: 'warn' },
-  { name: '电机装配线', product: 'MTR-65 电机', order: 'WO20260706003', plan: 760, done: 620, rate: 82, status: '运行', equipment: '正常', exception: '无', eta: '17:45', tone: 'running' },
-  { name: '老化测试区', product: 'IF-750 工业风扇', order: 'WO20260706004', plan: 220, done: 154, rate: 70, status: '异常', equipment: '温控报警', exception: '设备安灯', eta: '待评估', tone: 'danger' },
-  { name: '包装一线', product: 'FS-500 包装', order: 'WO20260706005', plan: 360, done: 298, rate: 83, status: '运行', equipment: '正常', exception: '无', eta: '17:20', tone: 'running' },
-  { name: '包装二线', product: 'TF-230 包装', order: 'WO20260706006', plan: 300, done: 246, rate: 82, status: '运行', equipment: '扫码枪维护', exception: '扫码失败率偏高', eta: '18:00', tone: 'warn' }
-]
+const now = new Date().toLocaleString('zh-CN', { hour12: false })
+const lines = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const numberOrZero = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+const toneOf = (status) => {
+  const text = String(status || '').toUpperCase()
+  if (['ALARM', 'ERROR', 'FAILED', 'DANGER'].includes(text)) return 'danger'
+  if (['WARN', 'WARNING', 'PENDING', 'WAITING'].includes(text)) return 'warn'
+  return 'running'
+}
+
+const mapLine = (row) => ({
+  name: row.lineName || row.line_name || row.name || row.id,
+  product: row.productName || row.product_name || row.product || '-',
+  order: row.workOrderNo || row.work_order_no || row.order || '-',
+  plan: row.planQty ?? row.plan_qty ?? row.plan ?? '-',
+  done: row.completedQty ?? row.completed_qty ?? row.done ?? '-',
+  rate: numberOrZero(row.rate ?? row.progress),
+  status: row.status || '-',
+  equipment: row.equipmentStatus || row.equipment_status || row.equipment || '-',
+  exception: row.exception || row.alert || '-',
+  eta: row.eta || row.estimatedAt || row.estimated_at || '-',
+  tone: row.tone || toneOf(row.status)
+})
+
+const loadRows = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    lines.value = recordsOf(await getLineBoard()).map(mapLine)
+  } catch (e) {
+    lines.value = []
+    error.value = e?.message || 'Line board API is not connected yet.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadRows)
 </script>
+
+<style scoped>
+.board-state {
+  margin: 12px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.board-state.error {
+  color: #b42318;
+}
+</style>

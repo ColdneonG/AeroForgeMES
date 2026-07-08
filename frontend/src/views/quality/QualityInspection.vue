@@ -26,6 +26,7 @@
               </div>
               <div class="siemens-progress"><span :style="{ width: Math.min(defect.count * 6, 100) + '%' }"></span></div>
             </div>
+            <p v-if="!loading && defectTypes.length === 0" class="api-state">No defect data.</p>
           </div>
         </aside>
 
@@ -47,6 +48,9 @@
                   <td><span :class="['siemens-status', statusTone(task.result)]">{{ task.result }}</span></td>
                   <td>{{ task.passRate }}%</td>
                 </tr>
+                <tr v-if="!loading && qualityRows.length === 0">
+                  <td colspan="5">No inspection data.</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -66,9 +70,13 @@
                 <span class="siemens-muted">{{ alert.owner }}</span>
               </div>
             </article>
+            <p v-if="!loading && qualityAlerts.length === 0" class="api-state">No open nonconformance data.</p>
           </div>
         </aside>
       </section>
+
+      <p v-if="loading" class="api-state">Loading quality data...</p>
+      <p v-if="error" class="api-state error">{{ error }}</p>
 
       <section class="siemens-grid quality-bottom">
         <article class="siemens-panel">
@@ -105,9 +113,15 @@
                   <tr><th>Node</th><th>Owner</th><th>Time</th><th>Status</th></tr>
                 </thead>
                 <tbody>
-                  <tr><td>Register</td><td>Li</td><td>10:18</td><td><span class="siemens-status ok">Done</span></td></tr>
-                  <tr><td>Judgement</td><td>Zhou</td><td>10:31</td><td><span class="siemens-status running">Running</span></td></tr>
-                  <tr><td>Rework dispatch</td><td>Wang</td><td>Pending</td><td><span class="siemens-status">Pending</span></td></tr>
+              <tr v-for="item in dispositionRows" :key="item.node">
+                <td>{{ item.node }}</td>
+                <td>{{ item.owner }}</td>
+                <td>{{ item.time }}</td>
+                <td><span :class="['siemens-status', statusTone(item.status)]">{{ item.status }}</span></td>
+              </tr>
+              <tr v-if="!loading && dispositionRows.length === 0">
+                <td colspan="4">No disposition flow data.</td>
+              </tr>
                 </tbody>
               </table>
             </div>
@@ -120,20 +134,17 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
-import { qualityTasks, defectTypes as mockDefectTypes, qualityAlerts as mockQualityAlerts } from '../../mock/mesData'
-import { mesApi } from '../../services/mesApi'
+import { getDefectRecords, getInspectionResults, getQualityInspections } from '../../api/quality'
 
-const useMock = import.meta.env.VITE_USE_MOCK === 'true'
+const qualityRows = ref([])
+const defectTypes = ref([])
+const qualityAlerts = ref([])
+const dispositionRows = ref([])
+const passRateTrend = ref([])
+const loading = ref(false)
+const error = ref('')
 
-const qualityRows = ref([...qualityTasks, ...qualityTasks.slice(0, 3)].map((task, index) => ({
-  ...task,
-  rowKey: `${task.task}-${index}`
-})))
-const defectTypes = ref(mockDefectTypes)
-const qualityAlerts = ref(mockQualityAlerts)
-const passRateTrend = [96, 97, 98, 97, 99, 98, 96, 95, 98, 99, 98, 97]
-
-const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || [])
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
 
 const mapInspection = (row, index) => ({
   rowKey: `${row.inspectionNo || row.inspection_no || row.id}-${index}`,
@@ -163,16 +174,40 @@ const summarizeDefects = (rows) => {
 }
 
 const loadRows = async () => {
-  if (useMock) return
-  const [inspections, defects] = await Promise.all([
-    mesApi.quality.inspections(),
-    mesApi.quality.defects()
-  ])
-  const inspectionRecords = recordsOf(inspections)
-  const defectRecords = recordsOf(defects)
-  qualityRows.value = inspectionRecords.map(mapInspection)
-  qualityAlerts.value = defectRecords.map(mapAlert)
-  defectTypes.value = summarizeDefects(defectRecords)
+  loading.value = true
+  error.value = ''
+
+  try {
+    const [inspections, defects, results] = await Promise.all([
+      getQualityInspections(),
+      getDefectRecords(),
+      getInspectionResults()
+    ])
+    const inspectionRecords = recordsOf(inspections)
+    const defectRecords = recordsOf(defects)
+    const resultRecords = recordsOf(results)
+    qualityRows.value = inspectionRecords.map(mapInspection)
+    qualityAlerts.value = defectRecords.map(mapAlert)
+    defectTypes.value = summarizeDefects(defectRecords)
+    dispositionRows.value = defectRecords.slice(0, 5).map((row) => ({
+      node: row.defectNo || row.defect_no || row.id,
+      owner: row.ownerName || row.owner_name || row.handlerId || row.handler_id || '-',
+      time: row.updatedAt || row.updated_at || row.createdAt || row.created_at || '-',
+      status: row.status || '-'
+    }))
+    passRateTrend.value = resultRecords
+      .map((row) => Number(row.passRate ?? row.pass_rate ?? row.qualifiedRate ?? row.qualified_rate))
+      .filter((value) => Number.isFinite(value))
+  } catch (e) {
+    qualityRows.value = []
+    qualityAlerts.value = []
+    defectTypes.value = []
+    dispositionRows.value = []
+    passRateTrend.value = []
+    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+  } finally {
+    loading.value = false
+  }
 }
 
 const statusTone = (status) => ({
@@ -233,5 +268,15 @@ onMounted(loadRows)
 .disposition-table-wrap {
   overflow-y: auto;
   min-height: 0;
+}
+
+.api-state {
+  margin: 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
 }
 </style>

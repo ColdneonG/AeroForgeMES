@@ -12,13 +12,14 @@
       </div>
     </header>
 
+    <p v-if="loading" class="api-state">Loading work orders...</p>
+    <p v-if="error" class="api-state error">{{ error }}</p>
+
     <div class="siemens-content work-order-layout">
       <div class="siemens-toolbar">
-        <input value="WO202607" />
-        <select><option>All status</option><option>In progress</option><option>Exception</option></select>
-        <select><option>All lines</option><option>Assembly Line 01</option><option>Motor Line</option></select>
-        <button class="siemens-btn primary">Search</button>
-        <span class="siemens-muted">Updated 14:30 / Shift A</span>
+        <input v-model="keyword" placeholder="Work order keyword" />
+        <button class="siemens-btn primary" @click="loadRows">Search</button>
+        <span class="siemens-muted">Mock execution data disabled</span>
       </div>
 
       <section class="siemens-grid work-order-main">
@@ -32,11 +33,11 @@
               v-for="(order, index) in orderRows"
               :key="order.rowKey"
               class="siemens-work-card"
-              :class="{ active: index === 0, warn: order.status === '暂停', danger: order.status === '异常' }"
+              :class="{ active: index === 0, warn: order.tone === 'warn', danger: order.tone === 'danger' }"
             >
               <div class="order-card-head">
                 <h3>{{ order.id }}</h3>
-                <span :class="['siemens-status', statusTone(order.status)]">{{ order.status }}</span>
+                <span :class="['siemens-status', order.tone]">{{ order.status }}</span>
               </div>
               <p>{{ order.product }} / {{ order.line }} / {{ order.process }}</p>
               <div class="order-card-progress">
@@ -45,37 +46,30 @@
               </div>
               <div class="siemens-progress"><span :style="{ width: order.progress + '%' }"></span></div>
             </article>
+            <p v-if="!loading && orderRows.length === 0" class="api-state">No work order data.</p>
           </div>
         </aside>
 
         <main class="siemens-panel">
           <header>
             <h2>Routing / Current Operation</h2>
-            <span class="siemens-status running">In progress</span>
+            <span :class="['siemens-status', selectedOrder?.tone]">{{ selectedOrder?.status || 'No data' }}</span>
           </header>
           <div class="siemens-panel-body selected-order">
             <section>
-              <h3><span class="mono">WO20260706001</span> / FS-500 Floor Fan</h3>
+              <h3><span class="mono">{{ selectedOrder?.id || '-' }}</span> / {{ selectedOrder?.product || '-' }}</h3>
               <div class="siemens-kv">
-                <div><span>Responsible Team</span><strong>Assembly A</strong></div>
-                <div><span>Target Completion</span><strong>18:20</strong></div>
-                <div><span>Station</span><strong>A03</strong></div>
-                <div><span>Current Process</span><strong>Assembly</strong></div>
+                <div><span>Responsible Team</span><strong>-</strong></div>
+                <div><span>Target Completion</span><strong>-</strong></div>
+                <div><span>Station</span><strong>-</strong></div>
+                <div><span>Current Process</span><strong>{{ selectedOrder?.process || '-' }}</strong></div>
               </div>
             </section>
-
-            <section class="siemens-step-line">
-              <template v-for="(step, index) in productionSteps" :key="step">
-                <span class="siemens-step" :class="{ done: index < 5, active: index === 5, warn: index === 7 }">{{ step }}</span>
-                <span v-if="index < productionSteps.length - 1" class="siemens-step-join"></span>
-              </template>
-            </section>
-
             <section class="route-visual">
-              <div class="route-node active">Assembly</div>
+              <div class="route-node active">{{ selectedOrder?.process || '-' }}</div>
               <div class="route-meta">
-                <strong>Operation OP-ASM-060</strong>
-                <span>Cycle time 42s / operator Liu / scanner gun 2#</span>
+                <strong>{{ selectedOrder?.id || 'No operation selected' }}</strong>
+                <span>Waiting for backend routing and operation task data.</span>
               </div>
             </section>
           </div>
@@ -84,28 +78,14 @@
         <aside class="siemens-panel">
           <header>
             <h2>Execution State</h2>
-            <span class="siemens-status warn">1 alert</span>
           </header>
           <div class="siemens-panel-body execution-side">
             <div class="siemens-kv">
-              <div><span>Plan Qty.</span><strong>420</strong></div>
-              <div><span>Finished</span><strong>326</strong></div>
-              <div><span>OEE</span><strong>88%</strong></div>
-              <div><span>Defects</span><strong>1</strong></div>
+              <div><span>Plan Qty.</span><strong>{{ selectedOrder?.plan || '-' }}</strong></div>
+              <div><span>Finished</span><strong>{{ selectedOrder?.done || '-' }}</strong></div>
+              <div><span>Progress</span><strong>{{ selectedOrder?.progress ?? '-' }}%</strong></div>
+              <div><span>Status</span><strong>{{ selectedOrder?.status || '-' }}</strong></div>
             </div>
-            <table class="siemens-table">
-              <thead>
-                <tr><th>Record</th><th>Owner</th><th>Time</th><th>Result</th></tr>
-              </thead>
-              <tbody>
-                <tr v-for="record in records" :key="record.name">
-                  <td>{{ record.name }}</td>
-                  <td>{{ record.owner }}</td>
-                  <td>{{ record.time }}</td>
-                  <td><span :class="['siemens-status', statusTone(record.status)]">{{ record.status }}</span></td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </aside>
       </section>
@@ -129,10 +109,13 @@
                 <td>{{ order.line }}</td>
                 <td>{{ order.process }}</td>
                 <td>{{ order.priority }}</td>
-                <td><span :class="['siemens-status', statusTone(order.status)]">{{ order.status }}</span></td>
+                <td><span :class="['siemens-status', order.tone]">{{ order.status }}</span></td>
                 <td>{{ order.plan }}</td>
                 <td>{{ order.done }}</td>
                 <td><div class="siemens-progress"><span :style="{ width: order.progress + '%' }"></span></div></td>
+              </tr>
+              <tr v-if="!loading && orderRows.length === 0">
+                <td colspan="9">No production records.</td>
               </tr>
             </tbody>
           </table>
@@ -143,31 +126,63 @@
 </template>
 
 <script setup>
-import { workOrders, productionSteps } from '../../mock/mesData'
+import { computed, onMounted, ref } from 'vue'
+import { getWorkOrders } from '../../api/production'
 
-const orderRows = [...workOrders, ...workOrders.slice(0, 5)].map((order, index) => ({
-  ...order,
-  rowKey: `${order.id}-${index}`
-}))
+const keyword = ref('')
+const orderRows = ref([])
+const loading = ref(false)
+const error = ref('')
 
-const records = [
-  { name: 'Start confirmation', owner: 'Wang', time: '08:12', status: '已完成' },
-  { name: 'Material check', owner: 'Chen', time: '08:18', status: '合格' },
-  { name: 'Assembly execution', owner: 'Liu', time: 'Running', status: '进行中' },
-  { name: 'Torque capture', owner: 'Liu', time: 'Pending', status: '待开始' }
-]
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const numberOrZero = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+const toneOf = (status) => {
+  const text = String(status || '').toUpperCase()
+  if (['PAUSED', 'PENDING', 'WAIT_ISSUE'].includes(text)) return 'warn'
+  if (['VOIDED', 'CANCELLED', 'ERROR'].includes(text)) return 'danger'
+  if (['RUNNING', 'ISSUED', 'COMPLETED', 'CLOSED'].includes(text)) return 'running'
+  return ''
+}
 
-const statusTone = (status) => ({
-  运行: 'running',
-  进行中: 'running',
-  合格: 'ok',
-  已完成: 'ok',
-  暂停: 'warn',
-  待开始: '',
-  待检: '',
-  异常: 'danger',
-  不合格: 'danger'
-}[status] || '')
+const mapOrder = (row, index) => {
+  const plan = numberOrZero(row.planQty ?? row.plan_qty)
+  const done = numberOrZero(row.completedQty ?? row.completed_qty)
+  const progress = plan > 0 ? Math.round((done / plan) * 100) : 0
+  return {
+    rowKey: `${row.id}-${index}`,
+    id: row.workOrderNo || row.work_order_no || row.id,
+    product: row.productName || row.product_name || row.productId || row.product_id || '-',
+    line: row.lineName || row.line_name || row.lineId || row.line_id || '-',
+    process: row.processName || row.process_name || row.routeId || row.route_id || '-',
+    priority: row.priority || '-',
+    status: row.status || '-',
+    plan,
+    done,
+    progress,
+    tone: toneOf(row.status),
+    raw: row
+  }
+}
+
+const loadRows = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    orderRows.value = recordsOf(await getWorkOrders({ keyword: keyword.value || undefined })).map(mapOrder)
+  } catch (e) {
+    orderRows.value = []
+    error.value = e?.message || 'Work order API failed.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const selectedOrder = computed(() => orderRows.value[0] || null)
+
+onMounted(loadRows)
 </script>
 
 <style scoped>
@@ -200,7 +215,7 @@ const statusTone = (status) => ({
 .selected-order,
 .execution-side {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 16px;
   overflow: hidden;
 }
@@ -239,5 +254,15 @@ const statusTone = (status) => ({
 .route-meta span {
   margin-top: 8px;
   color: #71818b;
+}
+
+.api-state {
+  margin: 12px 24px;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
 }
 </style>

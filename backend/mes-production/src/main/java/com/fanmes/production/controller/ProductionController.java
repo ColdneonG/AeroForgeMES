@@ -298,4 +298,36 @@ public class ProductionController {
     ) {
         return ApiResponse.ok(service.createTaskFromDispatch(id, request));
     }
+
+    @GetMapping("/tasks")
+    public ApiResponse<List<ShopTask>> listShopTasks(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long workOrderId,
+            @RequestParam(required = false) Long dispatchId,
+            @RequestParam(required = false) Long lineId,
+            @RequestParam(required = false) Long teamId
+    ) {
+        return ApiResponse.ok(service.listShopTasks(keyword, status, workOrderId, dispatchId, lineId, teamId));
+    }
+
+    @PostMapping("/tasks/{id}/start")
+    public ApiResponse<ShopTask> startShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
+        return ApiResponse.ok(service.startShopTask(id, request));
+    }
+
+    @PostMapping("/tasks/{id}/pause")
+    public ApiResponse<ShopTask> pauseShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
+        return ApiResponse.ok(service.pauseShopTask(id, request));
+    }
+
+    @PostMapping("/tasks/{id}/resume")
+    public ApiResponse<ShopTask> resumeShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
+        return ApiResponse.ok(service.resumeShopTask(id, request));
+    }
+
+    @PostMapping("/tasks/{id}/complete")
+    public ApiResponse<ShopTask> completeShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
+        return ApiResponse.ok(service.completeShopTask(id, request));
+    }
 }

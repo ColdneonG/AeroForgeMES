@@ -2,6 +2,9 @@
   <div class="plant-dashboard">
     <section class="line-panel">
       <h1>Packaging Lines</h1>
+      <p v-if="loading" class="dashboard-state">Loading dashboard data...</p>
+      <p v-if="error" class="dashboard-state error">{{ error }}</p>
+      <p v-if="!loading && !error && lines.length === 0" class="dashboard-state">No dashboard data.</p>
 
       <div class="line-grid">
         <article
@@ -140,78 +143,67 @@
 </template>
 
 <script setup>
-const lines = [
-  {
-    id: 'PCK-LINE-01',
-    name: 'Packaging Line 01',
-    lot: 'BAT202201',
-    workOrder: 'OF0000001',
-    product: '101010 MLK TYPE A',
-    produced: '375.000 / 500.000',
-    forecastText: '485.000',
-    oee: 75,
-    performance: 97,
-    forecast: [30, 52, 70, 92, 66],
-    counts: [7, 2, 4],
-    active: true
-  },
-  {
-    id: 'PCK-LINE-02',
-    name: 'Packaging Line 02',
-    lot: 'BAT202202',
-    workOrder: 'OF0000005',
-    product: '202020 CHOCO-RUSH PLUS',
-    produced: '390.000 / 650.000',
-    forecastText: '671.000',
-    oee: 75,
-    performance: 97,
-    forecast: [35, 56, 78, 88, 62],
-    counts: [4, 2, 4]
-  },
-  {
-    id: 'PCK-LINE-03',
-    name: 'Packaging Line 03',
-    lot: 'BAT202201',
-    workOrder: 'OF0000007',
-    product: '101010 MLK TYPE A',
-    produced: '375.000 / 500.000',
-    forecastText: '485.000',
-    oee: 17,
-    performance: 65,
-    forecast: [15, 24, 34, 84, 68],
-    counts: [7, 2, 4]
-  },
-  {
-    id: 'PCK-LINE-04',
-    name: 'Packaging Line 04',
-    lot: 'N.A.',
-    workOrder: 'N.A.',
-    product: 'N.A.',
-    produced: 'N.A.',
-    forecastText: 'N.A.',
-    oee: 0,
-    performance: 0,
-    forecast: [8, 12, 18, 30, 12],
-    counts: [4, 2, 4]
-  },
-  { id: 'PCK-LINE-05', name: 'Packaging Line 05', collapsed: true },
-  { id: 'PCK-LINE-06', name: 'Packaging Line 06', collapsed: true },
-  { id: 'PCK-LINE-07', name: 'Packaging Line 07', collapsed: true }
-]
+import { onMounted, ref } from 'vue'
+import { getManufacturingDashboard } from '../../api/dashboard'
 
-const gauges = [
-  { label: 'OEE', value: 88 },
-  { label: 'Availability', value: 97 },
-  { label: 'Performance', value: 88 },
-  { label: 'Quality', value: 95 }
-]
+const lines = ref([])
+const gauges = ref([])
+const stock = ref([])
+const loading = ref(false)
+const error = ref('')
 
-const stock = [
-  { state: 'ok', code: '19934985', material: 'CARDBOARD CARTONS X30', required: '750 PC', actual: '942 PC' },
-  { state: 'danger', code: '1993475', material: 'CARDBOARD CARTONS X25', required: '500 PC', actual: '342 PC' },
-  { state: 'info', code: '1993474', material: 'CARDBOARD CARTONS X20', required: '500 PC', actual: '490 PC' },
-  { state: 'ok', code: '1999470 16 x 3', material: 'POLYESTER STRAP', required: '50 PC', actual: '63 PC' }
-]
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const numberOrZero = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+
+const mapLine = (row) => ({
+  id: row.lineCode || row.line_code || row.id,
+  name: row.lineName || row.line_name || row.name || '-',
+  lot: row.lotNo || row.lot_no || row.lot || '-',
+  workOrder: row.workOrderNo || row.work_order_no || row.workOrder || '-',
+  product: row.productName || row.product_name || row.product || '-',
+  produced: row.producedText || row.produced_text || `${row.completedQty ?? row.completed_qty ?? 0} / ${row.planQty ?? row.plan_qty ?? 0}`,
+  forecastText: row.forecastText || row.forecast_text || row.forecast || '-',
+  oee: numberOrZero(row.oee),
+  performance: numberOrZero(row.performance),
+  forecast: Array.isArray(row.forecast) ? row.forecast : [],
+  counts: Array.isArray(row.counts) ? row.counts : [0, 0, 0],
+  active: Boolean(row.active)
+})
+
+const mapGauge = (row) => ({
+  label: row.label || row.metricName || row.metric_name || row.metricCode || row.metric_code || '-',
+  value: numberOrZero(row.value ?? row.metricValue ?? row.metric_value)
+})
+
+const mapStock = (row) => ({
+  state: row.state || row.tone || 'info',
+  code: row.materialCode || row.material_code || row.code || row.id,
+  material: row.materialName || row.material_name || row.material || '-',
+  required: row.requiredQty || row.required_qty || row.required || '-',
+  actual: row.actualQty || row.actual_qty || row.actual || '-'
+})
+
+const loadDashboard = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const data = await getManufacturingDashboard()
+    lines.value = recordsOf(data.lines || data.lineStatus || data.line_status || data).map(mapLine)
+    gauges.value = recordsOf(data.gauges || data.metrics || []).map(mapGauge)
+    stock.value = recordsOf(data.stock || data.materialStock || data.material_stock || []).map(mapStock)
+  } catch (e) {
+    lines.value = []
+    gauges.value = []
+    stock.value = []
+    error.value = e?.message || 'Dashboard API is not connected yet.'
+  } finally {
+    loading.value = false
+  }
+}
 
 function needlePoint(value) {
   const angle = Math.PI - (Math.PI * value) / 100
@@ -221,4 +213,18 @@ function needlePoint(value) {
     y: 112 - Math.sin(angle) * radius
   }
 }
+
+onMounted(loadDashboard)
 </script>
+
+<style scoped>
+.dashboard-state {
+  margin: 12px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.dashboard-state.error {
+  color: #b42318;
+}
+</style>

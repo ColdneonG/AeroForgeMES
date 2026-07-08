@@ -10,18 +10,20 @@
     flow-type="equipment"
     :row-actions="rowActions"
   />
+  <p v-if="loading" class="api-state">Loading equipment ledger...</p>
+  <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import CrudBoard from '../../components/CrudBoard.vue'
-import { equipmentLedger } from '../../mock/mesExtendedData'
-import { mesApi } from '../../services/mesApi'
+import { getEquipmentLedgers } from '../../api/equipment'
 
-const useMock = import.meta.env.VITE_USE_MOCK === 'true'
-const rows = ref(equipmentLedger)
+const rows = ref([])
+const loading = ref(false)
+const error = ref('')
 
-const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || [])
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
 
 const mapEquipment = (row) => ({
   id: row.equipmentCode || row.equipment_code || row.id,
@@ -34,8 +36,17 @@ const mapEquipment = (row) => ({
 })
 
 const loadRows = async () => {
-  if (useMock) return
-  rows.value = recordsOf(await mesApi.equipment.equipments()).map(mapEquipment)
+  loading.value = true
+  error.value = ''
+
+  try {
+    rows.value = recordsOf(await getEquipmentLedgers()).map(mapEquipment)
+  } catch (e) {
+    rows.value = []
+    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+  } finally {
+    loading.value = false
+  }
 }
 
 const columns = [
@@ -56,3 +67,15 @@ const rowActions = [
 
 onMounted(loadRows)
 </script>
+
+<style scoped>
+.api-state {
+  margin: 12px 24px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
+}
+</style>

@@ -10,16 +10,20 @@
     flow-type="workOrder"
     :row-actions="rowActions"
   />
+  <p v-if="loading" class="api-state">Loading kitting records...</p>
+  <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
 import CrudBoard from '../../components/CrudBoard.vue'
-import { kittingRows } from '../../mock/mesExtendedData'
-import { mesApi } from '../../services/mesApi'
+import { getKittingBoard } from '../../api/production'
 
-const useMock = import.meta.env.VITE_USE_MOCK === 'true'
-const rows = ref(kittingRows)
+const rows = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
 
 const mapKitting = (row) => {
   const missing = row.missingCount ?? row.missing_count ?? 0
@@ -36,8 +40,17 @@ const mapKitting = (row) => {
 }
 
 const loadRows = async () => {
-  if (useMock) return
-  rows.value = (await mesApi.production.listKittingAnalyses()).map(mapKitting)
+  loading.value = true
+  error.value = ''
+
+  try {
+    rows.value = recordsOf(await getKittingBoard()).map(mapKitting)
+  } catch (e) {
+    rows.value = []
+    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+  } finally {
+    loading.value = false
+  }
 }
 
 const columns = [
@@ -57,3 +70,15 @@ const rowActions = [
 
 onMounted(loadRows)
 </script>
+
+<style scoped>
+.api-state {
+  margin: 12px 24px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
+}
+</style>

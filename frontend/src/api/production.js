@@ -83,3 +83,27 @@ export function getKittingBoard(params) {
 export function getKittingMissingBoard() {
   return request.get('/production/kitting-missing-board')
 }
+
+export function createTaskFromDispatch(id, data = {}) {
+  return request.post(`/production/dispatch-orders/${id}/tasks`, data)
+}
+
+export function getShopTasks(params) {
+  return request.get('/production/tasks', { params })
+}
+
+export function startShopTask(id, data = {}) {
+  return request.post(`/production/tasks/${id}/start`, data)
+}
+
+export function pauseShopTask(id, data = {}) {
+  return request.post(`/production/tasks/${id}/pause`, data)
+}
+
+export function resumeShopTask(id, data = {}) {
+  return request.post(`/production/tasks/${id}/resume`, data)
+}
+
+export function completeShopTask(id, data = {}) {
+  return request.post(`/production/tasks/${id}/complete`, data)
+}

@@ -15,3 +15,7 @@ export function submitInspection(data) {
 export function getDefectRecords(params) {
   return request.get('/quality/defect-records', { params })
 }
+
+export function getInspectionResults(params) {
+  return request.get('/quality/inspection-results', { params })
+}

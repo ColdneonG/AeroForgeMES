@@ -11,19 +11,22 @@
       </div>
     </header>
 
+    <p v-if="loading" class="api-state">Loading equipment monitoring data...</p>
+    <p v-if="error" class="api-state error">{{ error }}</p>
+
     <div class="siemens-content equipment-layout">
       <section class="siemens-grid equipment-card-grid">
         <article
           v-for="item in equipments"
           :key="item.id"
           class="siemens-work-card equipment-card"
-          :class="{ active: item.status === '运行', warn: item.status === '维护中' || item.status === '待机', danger: item.status === '故障' }"
+          :class="{ active: item.tone === 'running', warn: item.tone === 'warn', danger: item.tone === 'danger' }"
         >
           <div class="equipment-head">
             <h3>{{ item.name }}</h3>
-            <span :class="['siemens-status', statusTone(item.status)]">{{ item.status }}</span>
+            <span :class="['siemens-status', item.tone]">{{ item.status }}</span>
           </div>
-          <p><span class="mono">{{ item.id }}</span> / {{ item.area }} / Updated 14:30</p>
+          <p><span class="mono">{{ item.id }}</span> / {{ item.area }}</p>
           <div class="equipment-oee">
             <span>OEE</span>
             <strong>{{ item.oee }}%</strong>
@@ -44,16 +47,13 @@
               <strong>{{ metric.value }}</strong>
               <div class="siemens-progress"><span :style="{ width: metric.bar }"></span></div>
             </div>
-            <div class="siemens-mini-chart">
-              <i v-for="(value, index) in [74, 82, 86, 79, 88, 91, 84, 86, 89, 92, 87, 90]" :key="index" :style="{ height: value + '%' }"></i>
-            </div>
+            <p v-if="!loading && metrics.length === 0" class="api-state">No metric data.</p>
           </div>
         </article>
 
         <aside class="siemens-panel">
           <header>
             <h2>Downtime Reasons</h2>
-            <span class="siemens-status warn">125 min</span>
           </header>
           <div class="siemens-panel-body downtime-list">
             <div v-for="item in downtimeReasons" :key="item.reason" class="downtime-row">
@@ -63,6 +63,7 @@
               </div>
               <div class="siemens-progress"><span :style="{ width: item.minutes * 1.4 + '%' }"></span></div>
             </div>
+            <p v-if="!loading && downtimeReasons.length === 0" class="api-state">No downtime data.</p>
           </div>
         </aside>
 
@@ -80,7 +81,10 @@
                   <td>{{ item.name }}</td>
                   <td><span class="mono">{{ item.id }}</span></td>
                   <td>{{ item.next }}</td>
-                  <td><span :class="['siemens-status', statusTone(item.status)]">{{ item.status }}</span></td>
+                  <td><span :class="['siemens-status', item.tone]">{{ item.status }}</span></td>
+                </tr>
+                <tr v-if="!loading && eventRows.length === 0">
+                  <td colspan="4">No event data.</td>
                 </tr>
               </tbody>
             </table>
@@ -92,28 +96,79 @@
 </template>
 
 <script setup>
-import { equipments, downtimeReasons } from '../../mock/mesData'
+import { onMounted, ref } from 'vue'
+import { getEquipmentLedgers, getFaultReasons, getMaintenanceOrders, getOeeSnapshots } from '../../api/equipment'
 
-const eventRows = [...equipments, ...equipments.slice(0, 4)].map((item, index) => ({
-  ...item,
-  rowKey: `${item.id}-${index}`
-}))
+const equipments = ref([])
+const metrics = ref([])
+const downtimeReasons = ref([])
+const eventRows = ref([])
+const loading = ref(false)
+const error = ref('')
 
-const metrics = [
-  { label: 'OEE', value: '86%', bar: '86%' },
-  { label: 'Availability', value: '92%', bar: '92%' },
-  { label: 'Performance', value: '88%', bar: '88%' },
-  { label: 'Quality', value: '97%', bar: '97%' }
-]
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const numberOrZero = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+const toneOf = (status) => {
+  const text = String(status || '').toUpperCase()
+  if (['FAULT', 'ERROR', 'FAILED', 'DANGER'].includes(text)) return 'danger'
+  if (['MAINTENANCE', 'WAITING', 'PENDING', 'WARN'].includes(text)) return 'warn'
+  return 'running'
+}
 
-const statusTone = (status) => ({
-  运行: 'running',
-  合格: 'ok',
-  待机: 'warn',
-  维护中: 'warn',
-  故障: 'danger',
-  异常: 'danger'
-}[status] || '')
+const mapEquipment = (row) => ({
+  id: row.equipmentCode || row.equipment_code || row.id,
+  name: row.equipmentName || row.equipment_name || row.name || '-',
+  area: row.lineName || row.line_name || row.lineId || row.line_id || '-',
+  status: row.equipmentStatus || row.equipment_status || row.status || '-',
+  oee: numberOrZero(row.oee),
+  tone: toneOf(row.equipmentStatus || row.equipment_status || row.status)
+})
+
+const mapMetric = (row) => ({
+  label: row.metricName || row.metric_name || row.pointName || row.point_name || row.statDate || row.stat_date || row.id,
+  value: `${numberOrZero(row.oee ?? row.availability ?? row.performance ?? row.quality_rate)}%`,
+  bar: `${numberOrZero(row.oee ?? row.availability ?? row.performance ?? row.quality_rate)}%`
+})
+
+const loadRows = async () => {
+  loading.value = true
+  error.value = ''
+  try {
+    const [equipmentPayload, oeePayload, faultPayload, maintenancePayload] = await Promise.all([
+      getEquipmentLedgers(),
+      getOeeSnapshots().catch(() => []),
+      getFaultReasons().catch(() => []),
+      getMaintenanceOrders().catch(() => [])
+    ])
+    equipments.value = recordsOf(equipmentPayload).map(mapEquipment)
+    metrics.value = recordsOf(oeePayload).map(mapMetric)
+    downtimeReasons.value = recordsOf(faultPayload).map((row) => ({
+      reason: row.reasonName || row.reason_name || row.reasonCode || row.reason_code || row.id,
+      minutes: numberOrZero(row.minutes ?? row.duration)
+    }))
+    eventRows.value = recordsOf(maintenancePayload).map((row, index) => ({
+      rowKey: `${row.id}-${index}`,
+      id: row.maintenanceNo || row.maintenance_no || row.id,
+      name: row.equipmentName || row.equipment_name || row.equipmentId || row.equipment_id || '-',
+      next: row.planAt || row.plan_at || row.completedAt || row.completed_at || '-',
+      status: row.status || '-',
+      tone: toneOf(row.status)
+    }))
+  } catch (e) {
+    equipments.value = []
+    metrics.value = []
+    downtimeReasons.value = []
+    eventRows.value = []
+    error.value = e?.message || 'Equipment monitoring API failed.'
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadRows)
 </script>
 
 <style scoped>
@@ -153,7 +208,6 @@ const statusTone = (status) => ({
 .metric-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-template-rows: 104px minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -177,10 +231,6 @@ const statusTone = (status) => ({
   font-size: 30px;
 }
 
-.metric-board .siemens-mini-chart {
-  grid-column: 1 / -1;
-}
-
 .downtime-list {
   display: grid;
   align-content: start;
@@ -193,5 +243,15 @@ const statusTone = (status) => ({
 
 .downtime-row .siemens-progress {
   margin-top: 8px;
+}
+
+.api-state {
+  margin: 12px 24px;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
 }
 </style>

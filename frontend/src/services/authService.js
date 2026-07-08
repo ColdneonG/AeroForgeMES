@@ -1,7 +1,4 @@
 import request from './http'
-import { mockLogin, mockPermissions, mockUser } from '../mock/mesExtendedData'
-
-const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 const adaptPermissions = (session) => {
   const rawPermissions = Array.isArray(session?.permissions) ? session.permissions : []
@@ -42,23 +39,19 @@ const adaptLoginSession = (session) => {
 }
 
 export const login = async (credentials) => {
-  if (useMock) return mockLogin(credentials)
   return adaptLoginSession(await request.post('/api/auth/login', credentials))
 }
 
 export const logout = async () => {
-  if (useMock) return { success: true }
   return request.post('/api/auth/logout')
 }
 
 export const getCurrentUser = async () => {
-  if (useMock) return mockUser
   const session = await request.get('/api/auth/me')
   return adaptLoginSession(session)?.user || session
 }
 
 export const getCurrentPermissions = async () => {
-  if (useMock) return mockPermissions
   const session = await request.get('/api/auth/me/permissions')
   return adaptPermissions(session)
 }

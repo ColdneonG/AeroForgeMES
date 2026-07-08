@@ -8,6 +8,10 @@
       <strong>{{ now }}</strong>
     </div>
 
+    <p v-if="loading" class="board-state">Loading control-center data...</p>
+    <p v-if="error" class="board-state error">{{ error }}</p>
+    <p v-if="!loading && !error && isEmpty" class="board-state">No board data.</p>
+
     <div class="control-kpi-strip">
       <article v-for="item in kpis" :key="item.label" :class="item.tone">
         <span>{{ item.label }}</span>
@@ -19,9 +23,9 @@
     <div class="control-grid">
       <section class="control-panel production-radar">
         <div class="control-panel-title">实时产量</div>
-        <div class="control-big-number">1,832</div>
+        <div class="control-big-number">{{ outputTotal }}</div>
         <div class="control-bars">
-          <i v-for="value in trend" :key="value" :style="{ height: `${value}%` }"></i>
+          <i v-for="(value, index) in trend" :key="index" :style="{ height: `${value}%` }"></i>
         </div>
       </section>
 
@@ -60,30 +64,100 @@
 </template>
 
 <script setup>
+import { computed, onMounted, ref } from 'vue'
+import { getControlCenterBoard } from '../../api/dashboard'
+
 const now = new Date().toLocaleString('zh-CN', { hour12: false })
-const kpis = [
-  { label: '实时产量', value: '1,832 台', note: '今日计划 2,160', tone: 'ok' },
-  { label: '运行产线', value: '5/6', note: '1 条待料', tone: 'warn' },
-  { label: '设备报警', value: '3 起', note: '温控/扫码/张力', tone: 'danger' },
-  { label: '质量异常', value: '2 起', note: '电机异响重点跟踪', tone: 'warn' },
-  { label: '库存预警', value: '4 项', note: '前网罩、温控模块', tone: 'danger' }
-]
-const trend = [48, 58, 66, 72, 68, 76, 84, 79, 88, 92, 86, 95]
-const lines = [
-  { name: '总装一线', status: '运行', rate: 78, tone: 'ok' },
-  { name: '总装二线', status: '待料', rate: 67, tone: 'warn' },
-  { name: '电机装配线', status: '运行', rate: 82, tone: 'ok' },
-  { name: '老化测试区', status: '报警', rate: 70, tone: 'danger' },
-  { name: '包装一线', status: '运行', rate: 83, tone: 'ok' }
-]
-const alerts = [
-  { code: 'EQ-AGE-04', text: '老化测试台温控模块报警', tone: 'danger' },
-  { code: 'QC-0707-02', text: '总装一线电机异响不良上升', tone: 'warn' },
-  { code: 'MAT-0707-01', text: '前网罩库存低于安全线', tone: 'danger' }
-]
-const workOrders = [
-  { id: 'WO20260706001', product: 'FS-500 落地扇', rate: 78, warning: '正常' },
-  { id: 'WO20260706002', product: 'TF-230 台扇', rate: 67, warning: '前网罩短缺' },
-  { id: 'WO20260706004', product: 'IF-750 工业风扇', rate: 70, warning: '设备报警影响 ETA' }
-]
+const kpis = ref([])
+const trend = ref([])
+const lines = ref([])
+const alerts = ref([])
+const workOrders = ref([])
+const outputTotal = ref('-')
+const loading = ref(false)
+const error = ref('')
+
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const numberOrZero = (value) => {
+  const number = Number(value)
+  return Number.isFinite(number) ? number : 0
+}
+
+const toneOf = (status) => {
+  const text = String(status || '').toUpperCase()
+  if (['ALARM', 'DANGER', 'ERROR', 'FAIL'].includes(text)) return 'danger'
+  if (['WARN', 'WARNING', 'WAITING', 'PENDING'].includes(text)) return 'warn'
+  return 'ok'
+}
+
+const mapKpi = (row) => ({
+  label: row.label || row.metricName || row.metric_name || row.metricCode || row.metric_code || '-',
+  value: row.value ?? row.metricValue ?? row.metric_value ?? '-',
+  note: row.note || row.remark || '',
+  tone: row.tone || toneOf(row.status)
+})
+
+const mapLine = (row) => ({
+  name: row.lineName || row.line_name || row.name || row.id,
+  status: row.status || '-',
+  rate: numberOrZero(row.rate ?? row.progress ?? row.oee),
+  tone: row.tone || toneOf(row.status)
+})
+
+const mapAlert = (row) => ({
+  code: row.code || row.alertCode || row.alert_code || row.id,
+  text: row.text || row.message || row.description || '-',
+  tone: row.tone || toneOf(row.level || row.status)
+})
+
+const mapWorkOrder = (row) => ({
+  id: row.workOrderNo || row.work_order_no || row.id,
+  product: row.productName || row.product_name || row.product || '-',
+  rate: numberOrZero(row.rate ?? row.progress),
+  warning: row.warning || row.remark || row.status || '-'
+})
+
+const loadBoard = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    const data = await getControlCenterBoard()
+    outputTotal.value = data.outputTotal ?? data.output_total ?? data.realtimeOutput ?? data.realtime_output ?? '-'
+    kpis.value = recordsOf(data.kpis || data.metrics || []).map(mapKpi)
+    trend.value = recordsOf(data.trend || data.outputTrend || data.output_trend || [])
+      .map((item) => numberOrZero(item.value ?? item))
+    lines.value = recordsOf(data.lines || data.lineStatus || data.line_status || []).map(mapLine)
+    alerts.value = recordsOf(data.alerts || data.exceptions || []).map(mapAlert)
+    workOrders.value = recordsOf(data.workOrders || data.work_orders || []).map(mapWorkOrder)
+  } catch (e) {
+    outputTotal.value = '-'
+    kpis.value = []
+    trend.value = []
+    lines.value = []
+    alerts.value = []
+    workOrders.value = []
+    error.value = e?.message || 'Control-center board API is not connected yet.'
+  } finally {
+    loading.value = false
+  }
+}
+
+const isEmpty = computed(
+  () => kpis.value.length + trend.value.length + lines.value.length + alerts.value.length + workOrders.value.length === 0
+)
+
+onMounted(loadBoard)
 </script>
+
+<style scoped>
+.board-state {
+  margin: 12px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.board-state.error {
+  color: #b42318;
+}
+</style>

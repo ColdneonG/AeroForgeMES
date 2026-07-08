@@ -8,16 +8,46 @@
     :columns="columns"
     row-key="id"
   />
+  <p v-if="loading" class="api-state">Loading piecework wages...</p>
+  <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
+import { onMounted, ref } from 'vue'
 import CrudBoard from '../../components/CrudBoard.vue'
+import { getPieceworkWages } from '../../api/wage'
 
-const rows = [
-  { id: 'WAGE-0707-001', operator: '张工', process: '总装', good: 326, bad: 3, amount: '489.00', status: '待审核' },
-  { id: 'WAGE-0707-002', operator: '王工', process: '扇叶装配', good: 188, bad: 5, amount: '244.40', status: '待审核' },
-  { id: 'WAGE-0707-003', operator: '赵工', process: '包装', good: 246, bad: 1, amount: '196.80', status: '已完成' }
-]
+const rows = ref([])
+const loading = ref(false)
+const error = ref('')
+
+const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+
+const mapWage = (row) => ({
+  id: row.wageNo || row.wage_no || row.settlementNo || row.settlement_no || row.id,
+  operator: row.operatorName || row.operator_name || row.operator || row.userId || row.user_id || '-',
+  process: row.processName || row.process_name || row.process || '-',
+  good: row.goodQty ?? row.good_qty ?? row.qualifiedQty ?? row.qualified_qty ?? '-',
+  bad: row.badQty ?? row.bad_qty ?? row.defectiveQty ?? row.defective_qty ?? '-',
+  amount: row.amount ?? row.totalAmount ?? row.total_amount ?? '-',
+  status: row.status || '-',
+  raw: row
+})
+
+const loadRows = async () => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    rows.value = recordsOf(await getPieceworkWages()).map(mapWage)
+  } catch (e) {
+    rows.value = []
+    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+  } finally {
+    loading.value = false
+  }
+}
+
 const columns = [
   { key: 'id', label: '核算单' },
   { key: 'operator', label: '人员' },
@@ -27,4 +57,18 @@ const columns = [
   { key: 'amount', label: '金额' },
   { key: 'status', label: '状态' }
 ]
+
+onMounted(loadRows)
 </script>
+
+<style scoped>
+.api-state {
+  margin: 12px 24px 0;
+  color: #52616b;
+  font-size: 14px;
+}
+
+.api-state.error {
+  color: #b42318;
+}
+</style>
