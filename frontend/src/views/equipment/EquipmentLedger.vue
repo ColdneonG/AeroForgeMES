@@ -18,7 +18,7 @@ import CrudBoard from '../../components/CrudBoard.vue'
 import { equipmentLedger } from '../../mock/mesExtendedData'
 import { mesApi } from '../../services/mesApi'
 
-const useMock = import.meta.env.VITE_USE_MOCK !== 'false'
+const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 const rows = ref(equipmentLedger)
 
 const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || [])

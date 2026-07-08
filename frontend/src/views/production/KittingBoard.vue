@@ -18,7 +18,7 @@ import CrudBoard from '../../components/CrudBoard.vue'
 import { kittingRows } from '../../mock/mesExtendedData'
 import { mesApi } from '../../services/mesApi'
 
-const useMock = import.meta.env.VITE_USE_MOCK !== 'false'
+const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 const rows = ref(kittingRows)
 
 const mapKitting = (row) => {

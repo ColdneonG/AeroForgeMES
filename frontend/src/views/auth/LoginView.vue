@@ -27,17 +27,22 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { nextTick, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import logoSquare from '../../assets/icons/logo2.png'
 import { login } from '../../services/authService'
-import { setAuthSession } from '../../stores/auth'
+import { setAuthSession, isAuthenticated } from '../../stores/auth'
 
 const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
 const error = ref('')
-const form = reactive({ username: 'admin', password: 'admin123' })
+const form = reactive({ username: '', password: '' })
+
+const getRedirectTarget = () => {
+  const redirect = Array.isArray(route.query.redirect) ? route.query.redirect[0] : route.query.redirect
+  return redirect || { name: 'dashboard' }
+}
 
 const submitLogin = async () => {
   loading.value = true
@@ -45,7 +50,12 @@ const submitLogin = async () => {
   try {
     const session = await login(form)
     setAuthSession(session)
-    router.replace(route.query.redirect || '/dashboard')
+    await nextTick()
+    if (!isAuthenticated.value) {
+      error.value = '认证状态异常，请刷新后重试'
+      return
+    }
+    await router.push(getRedirectTarget())
   } catch (err) {
     error.value = err.message || '登录失败'
   } finally {

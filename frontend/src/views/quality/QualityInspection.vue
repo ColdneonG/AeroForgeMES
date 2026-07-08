@@ -123,7 +123,7 @@ import { onMounted, ref } from 'vue'
 import { qualityTasks, defectTypes as mockDefectTypes, qualityAlerts as mockQualityAlerts } from '../../mock/mesData'
 import { mesApi } from '../../services/mesApi'
 
-const useMock = import.meta.env.VITE_USE_MOCK !== 'false'
+const useMock = import.meta.env.VITE_USE_MOCK === 'true'
 
 const qualityRows = ref([...qualityTasks, ...qualityTasks.slice(0, 3)].map((task, index) => ({
   ...task,

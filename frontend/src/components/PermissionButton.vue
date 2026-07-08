@@ -5,7 +5,7 @@
     :disabled="disabledByRule"
     :title="disabledReason"
     type="button"
-    @click="$emit('click')"
+    @click="$emit('click', $event)"
   >
     <slot />
   </button>
@@ -26,7 +26,7 @@ const props = defineProps({
 
 defineEmits(['click'])
 
-const allowedByPermission = computed(() => hasButtonPermission(props.permission || props.action))
+const allowedByPermission = computed(() => hasButtonPermission(props.permission))
 const allowedByStatus = computed(() => {
   if (!props.flowType || !props.status || !props.action) return true
   return canTransition(props.flowType, props.status, props.action)

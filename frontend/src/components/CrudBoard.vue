@@ -1,5 +1,5 @@
 <template>
-  <section class="mes-workspace">
+  <section class="mes-workspace" @click="selected = null">
     <div class="mes-page-heading">
       <div>
         <p>{{ eyebrow }}</p>
@@ -14,7 +14,7 @@
           :flow-type="flowType"
           :status="selected?.status"
           :action="button.action"
-          @click="runAction(button)"
+          @click="runAction(button, selected, 'primary')"
         >
           {{ button.label }}
         </PermissionButton>
@@ -54,7 +54,7 @@
               v-for="row in filteredRows"
               :key="row[rowKey]"
               :class="{ selected: selected?.[rowKey] === row[rowKey] }"
-              @click="selected = row"
+              @click.stop="selected = row"
             >
               <td v-for="column in columns" :key="column.key">
                 <span v-if="column.key === 'status'" class="status-pill">{{ row[column.key] }}</span>
@@ -68,7 +68,7 @@
                   :flow-type="flowType"
                   :status="row.status"
                   :action="button.action"
-                  @click.stop="runAction(button, row)"
+                  @click.stop="runAction(button, row, 'row')"
                 >
                   {{ button.label }}
                 </PermissionButton>
@@ -106,7 +106,6 @@ import AuditLogPanel from './AuditLogPanel.vue'
 import PermissionButton from './PermissionButton.vue'
 import { authState } from '../stores/auth'
 import { buildAuditEntry } from '../utils/statusFlow'
-import { auditLogs } from '../mock/mesExtendedData'
 
 const props = defineProps({
   eyebrow: { type: String, default: 'MES' },
@@ -132,14 +131,17 @@ const props = defineProps({
       { label: '关闭', action: 'close' },
       { label: '审计', action: 'audit' }
     ]
-  }
+  },
+  handleActionsExternally: { type: Boolean, default: false }
 })
+
+const emit = defineEmits(['primary-action', 'row-action'])
 
 const keyword = ref('')
 const status = ref('')
 const selected = ref(props.rows[0] || null)
 const localRows = ref(props.rows)
-const localLogs = ref(auditLogs)
+const localLogs = ref([])
 
 watch(
   () => props.rows,
@@ -180,8 +182,11 @@ const nextStatusByAction = {
   repair: '待维修'
 }
 
-const runAction = (button, target = selected.value) => {
+const runAction = (button, target = selected.value, source = 'primary') => {
   if (!target) return
+
+  emit(source === 'primary' ? 'primary-action' : 'row-action', { action: button.action, button, row: target })
+  if (props.handleActionsExternally) return
 
   const oldStatus = target.status
   const nextStatus = nextStatusByAction[button.action] || oldStatus

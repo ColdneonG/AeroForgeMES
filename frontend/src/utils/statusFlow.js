@@ -2,9 +2,9 @@ export const statusFlows = {
   workOrder: {
     草稿: ['edit', 'import', 'release', 'void'],
     待下发: ['edit', 'release', 'void'],
-    已下发: ['dispatch', 'close'],
+    已下发: ['start', 'complete'],
     生产中: ['pause', 'report', 'complete'],
-    暂停: ['resume', 'report', 'close'],
+    暂停: ['start', 'resume', 'report', 'complete'],
     已完成: ['close'],
     已关闭: ['audit'],
     作废: ['audit']
