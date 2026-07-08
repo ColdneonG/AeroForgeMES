@@ -10,7 +10,7 @@
         :key="group.name"
         class="rail-icon"
         :class="{ active: isGroupActive(group.name), expanded: group.name === activeGroupName && isMenuOpen }"
-        :title="$t(`menu.groups.${group.name}`) || group.name"
+        :title="t(`menu.groups.${group.name}`) || group.name"
         type="button"
         @click="toggleModule(group)"
       >
@@ -24,8 +24,8 @@
     <Transition name="module-drawer">
       <aside v-if="isMenuOpen" class="module-sidebar">
         <div class="module-title">
-          <strong>{{ $t(`menu.groups.${activeGroup?.name}`) || activeGroup?.name }}</strong>
-          <span>{{ $t('layout.featureCount', { count: activeGroup?.items.length || 0 }) }}</span>
+          <strong>{{ t(`menu.groups.${activeGroup?.name}`) || activeGroup?.name }}</strong>
+          <span>{{ t('layout.featureCount', { count: activeGroup?.items.length || 0 }) }}</span>
         </div>
         <RouterLink
           v-for="item in activeGroup?.items"
@@ -46,8 +46,8 @@
     <section class="siemens-main">
       <header class="siemens-topbar">
         <div class="product-title">
-          <span class="product-title-cn">{{ $t('layout.productCn') }}</span>
-          <span class="product-title-en">{{ $t('layout.productEn') }}</span>
+          <span class="product-title-cn">{{ t('layout.productCn') }}</span>
+          <span class="product-title-en">{{ t('layout.productEn') }}</span>
         </div>
         <div class="topbar-tools">
           <span class="data-scope-chip">{{ dataScopeLabel }}</span>
@@ -56,10 +56,10 @@
             <span>{{ languageLabel }}</span>
           </button>
           <button class="topbar-user" type="button" @click="logoutUser">
-            <strong>{{ authState.user?.displayName || $t('layout.notLoggedIn') }}</strong>
-            <span>{{ $t('layout.logout') }}</span>
+            <strong>{{ authState.user?.displayName || t('layout.notLoggedIn') }}</strong>
+            <span>{{ t('layout.logout') }}</span>
           </button>
-          <button class="topbar-help" :title="$t('layout.help')">
+          <button class="topbar-help" :title="t('layout.help')">
             <img :src="helpIcon" alt="Help" />
           </button>
         </div>

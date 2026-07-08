@@ -23,30 +23,30 @@
 
     <div class="mes-filter-bar">
       <label>
-        {{ $t('common.filter.keyword') }}
-        <input v-model="keyword" type="search" :placeholder="$t('common.filter.keywordPlaceholder')" />
+        {{ t('common.filter.keyword') }}
+        <input v-model="keyword" type="search" :placeholder="t('common.filter.keywordPlaceholder')" />
       </label>
       <label>
-        {{ $t('common.filter.status') }}
+        {{ t('common.filter.status') }}
         <select v-model="status">
-          <option value="">{{ $t('common.filter.statusAll') }}</option>
+          <option value="">{{ t('common.filter.statusAll') }}</option>
           <option v-for="item in statuses" :key="item" :value="item">{{ item }}</option>
         </select>
       </label>
-      <span class="data-scope">{{ $t('common.filter.dataScope', { scope: dataScope }) }}</span>
+      <span class="data-scope">{{ t('common.filter.dataScope', { scope: dataScope }) }}</span>
     </div>
 
     <div class="mes-board-grid">
       <section class="mes-panel">
         <div class="mes-panel-title">
           <strong>{{ listTitle }}</strong>
-          <span>{{ $t('common.list.items', { count: filteredRows.length }) }}</span>
+          <span>{{ t('common.list.items', { count: filteredRows.length }) }}</span>
         </div>
         <table class="mes-table">
           <thead>
             <tr>
               <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
-              <th>{{ $t('common.list.action') }}</th>
+              <th>{{ t('common.list.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -75,7 +75,7 @@
               </td>
             </tr>
             <tr v-if="filteredRows.length === 0">
-              <td :colspan="columns.length + 1" class="empty-cell">{{ $t('common.list.noMatch') }}</td>
+              <td :colspan="columns.length + 1" class="empty-cell">{{ t('common.list.noMatch') }}</td>
             </tr>
           </tbody>
         </table>
@@ -83,8 +83,8 @@
 
       <aside class="mes-panel detail-panel">
         <div class="mes-panel-title">
-          <strong>{{ $t('common.detail.title') }}</strong>
-          <span>{{ selected?.[rowKey] || $t('common.detail.unselected') }}</span>
+          <strong>{{ t('common.detail.title') }}</strong>
+          <span>{{ selected?.[rowKey] || t('common.detail.unselected') }}</span>
         </div>
         <dl v-if="selected" class="detail-list">
           <template v-for="column in columns" :key="column.key">
@@ -92,7 +92,7 @@
             <dd>{{ selected[column.key] }}</dd>
           </template>
         </dl>
-        <div v-else class="empty-detail">{{ $t('common.detail.emptyHint') }}</div>
+        <div v-else class="empty-detail">{{ t('common.detail.emptyHint') }}</div>
       </aside>
     </div>
 

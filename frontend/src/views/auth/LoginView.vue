@@ -2,24 +2,24 @@
   <main class="login-page">
     <section class="login-card">
       <div class="login-brand">
-        <img :src="logoSquare" :alt="$t('auth.login.brandName')" />
+        <img :src="logoSquare" :alt="t('auth.login.brandName')" />
         <div>
-          <p>{{ $t('auth.login.brandName') }}</p>
-          <h1>{{ $t('auth.login.brandTitle') }}</h1>
-          <span>{{ $t('auth.login.brandSubtitle') }}</span>
+          <p>{{ t('auth.login.brandName') }}</p>
+          <h1>{{ t('auth.login.brandTitle') }}</h1>
+          <span>{{ t('auth.login.brandSubtitle') }}</span>
         </div>
       </div>
 
       <form class="login-form" @submit.prevent="submitLogin">
         <label>
-          {{ $t('auth.login.username') }}
-          <input v-model="form.username" autocomplete="username" :placeholder="$t('auth.login.usernamePlaceholder')" />
+          {{ t('auth.login.username') }}
+          <input v-model="form.username" autocomplete="username" :placeholder="t('auth.login.usernamePlaceholder')" />
         </label>
         <label>
-          {{ $t('auth.login.password') }}
-          <input v-model="form.password" autocomplete="current-password" type="password" :placeholder="$t('auth.login.passwordPlaceholder')" />
+          {{ t('auth.login.password') }}
+          <input v-model="form.password" autocomplete="current-password" type="password" :placeholder="t('auth.login.passwordPlaceholder')" />
         </label>
-        <button type="submit" :disabled="loading">{{ loading ? $t('auth.login.submitting') : $t('auth.login.submit') }}</button>
+        <button type="submit" :disabled="loading">{{ loading ? t('auth.login.submitting') : t('auth.login.submit') }}</button>
         <p v-if="error">{{ error }}</p>
       </form>
     </section>
