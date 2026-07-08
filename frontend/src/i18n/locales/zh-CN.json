@@ -1,0 +1,352 @@
+{
+  "layout": {
+    "productCn": "风擎工控",
+    "productEn": "Aeroforge Manufacturing Execution System",
+    "dataScopeLabel": "全部数据",
+    "dataScopeUnloaded": "数据范围未加载",
+    "switchToEn": "Switch to English",
+    "switchToZh": "切换为中文",
+    "logout": "退出",
+    "notLoggedIn": "未登录",
+    "help": "Help",
+    "featureCount": "{count} 个功能"
+  },
+  "menu": {
+    "groups": {
+      "生产订单": "生产订单",
+      "条码应用": "条码应用",
+      "现场管理": "现场管理",
+      "设备管理": "设备管理",
+      "设备对接": "设备对接",
+      "计件工资": "计件工资",
+      "工艺管理": "工艺管理",
+      "质量管理": "质量管理",
+      "安灯管理": "安灯管理",
+      "报表分析": "报表分析",
+      "电子看板": "电子看板",
+      "ERP接口": "ERP接口",
+      "标准API接口": "标准API接口",
+      "系统管理": "系统管理",
+      "微信小程序": "微信小程序",
+      "其他": "其他"
+    }
+  },
+  "auth": {
+    "login": {
+      "brandName": "风擎工控",
+      "brandTitle": "Aeroforge MES",
+      "brandSubtitle": "统一身份认证与权限入口",
+      "username": "账号",
+      "password": "密码",
+      "usernamePlaceholder": "admin / operator",
+      "passwordPlaceholder": "任意密码",
+      "submit": "登录 MES",
+      "submitting": "登录中...",
+      "loginFailed": "登录失败",
+      "authStateError": "认证状态异常，请刷新后重试"
+    },
+    "forbidden": {
+      "title": "没有访问权限",
+      "description": "当前账号缺少该菜单、按钮、数据范围或接口权限。请联系系统管理员调整角色授权。",
+      "backToDashboard": "返回生产驾驶舱"
+    }
+  },
+  "common": {
+    "filter": {
+      "keyword": "关键字",
+      "keywordPlaceholder": "编号 / 产品 / 产线 / 责任人",
+      "status": "状态",
+      "statusAll": "全部",
+      "dataScope": "数据范围：{scope}",
+      "dataScopeUnloaded": "未加载"
+    },
+    "list": {
+      "action": "操作",
+      "items": "{count} 条",
+      "noMatch": "暂无匹配数据"
+    },
+    "detail": {
+      "title": "详情",
+      "unselected": "未选择",
+      "emptyHint": "选择左侧记录查看详情与审计。"
+    },
+    "actions": {
+      "create": "新增",
+      "edit": "编辑",
+      "import": "导入",
+      "importSync": "导入/同步",
+      "export": "导出",
+      "close": "关闭",
+      "audit": "审计",
+      "release": "下发",
+      "start": "开工",
+      "complete": "完工",
+      "void": "作废"
+    },
+    "button": {
+      "disabledDefault": "当前不可操作",
+      "noPermission": "无按钮权限",
+      "statusNotAllowed": "当前状态不允许该操作"
+    },
+    "auditLog": {
+      "title": "状态日志 / 操作审计",
+      "defaultOperator": "当前用户",
+      "defaultRemark": "页面操作提交"
+    },
+    "loading": {
+      "generic": "正在加载..."
+    },
+    "error": {
+      "generic": "数据加载失败，请检查后端接口或网关转发配置",
+      "operationFailed": "操作失败，请检查后端接口或网关转发配置",
+      "gatewayFailed": "网关请求失败，请稍后重试",
+      "businessFailed": "业务处理失败",
+      "notImplemented": "该操作尚未接入表单流程，本页当前仅接入列表查询和状态动作"
+    },
+    "feature": {
+      "demoDisabled": "演示数据已关闭，当前功能页等待后端真实接口接入。",
+      "noData": "暂无真实接口数据",
+      "listTitle": "{title}列表",
+      "unknownUser": "未知用户"
+    }
+  },
+  "status": {
+    "draft": "草稿",
+    "pending": "待下发",
+    "released": "已下发",
+    "running": "生产中",
+    "paused": "暂停",
+    "completed": "已完成",
+    "closed": "已关闭",
+    "voided": "作废",
+    "normal": "正常",
+    "idle": "待机",
+    "fault": "故障",
+    "disabled": "停用",
+    "repairing": "维修中",
+    "repairPending": "待维修",
+    "repaired": "返修",
+    "pendingHandle": "待处理",
+    "handling": "处理中",
+    "handled": "已处理",
+    "syncPending": "待同步",
+    "syncFailed": "失败",
+    "syncSuccess": "成功",
+    "qualified": "合格",
+    "unqualified": "不合格",
+    "scrap": "报废",
+    "pendingInspect": "待检",
+    "pendingStart": "待开始"
+  },
+  "statusFlow": {
+    "actions": {
+      "edit": "编辑",
+      "import": "导入",
+      "release": "下发",
+      "void": "作废",
+      "start": "开工",
+      "complete": "完工",
+      "pause": "暂停",
+      "resume": "继续",
+      "report": "报工",
+      "close": "关闭",
+      "audit": "审计",
+      "repair": "返修",
+      "andon": "安灯",
+      "inspect": "点检",
+      "disable": "停用",
+      "acceptRepair": "接修",
+      "finishRepair": "正常",
+      "accept": "接单",
+      "handle": "处理",
+      "retry": "重试"
+    }
+  },
+  "production": {
+    "workOrders": {
+      "eyebrow": "生产订单",
+      "title": "生产工单闭环",
+      "description": "覆盖工单新增、编辑、导入同步、下发、关闭、作废、详情与状态日志。",
+      "listTitle": "生产工单",
+      "loading": "正在加载生产工单...",
+      "operationFailed": "工单操作失败，请检查后端接口或网关转发配置"
+    },
+    "kitting": {
+      "eyebrow": "生产订单",
+      "title": "齐套欠料看板",
+      "description": "展示生产工单物料齐套状态、欠料清单与缺料预警。",
+      "listTitle": "齐套欠料"
+    },
+    "dispatch": {
+      "eyebrow": "生产订单",
+      "title": "派工单管理",
+      "description": "管理生产派工任务、工序分配与人员调度。",
+      "listTitle": "派工单"
+    },
+    "workOrderExecution": {
+      "eyebrow": "生产订单",
+      "title": "工单执行跟踪",
+      "description": "跟踪生产工单实时执行状态、进度与异常。",
+      "listTitle": "工单执行"
+    }
+  },
+  "shopfloor": {
+    "tasks": {
+      "eyebrow": "现场管理",
+      "title": "生产任务单",
+      "description": "管理生产任务下发、执行、报工与完工全流程。",
+      "listTitle": "生产任务单"
+    },
+    "workbench": {
+      "eyebrow": "现场管理",
+      "title": "工序作业台",
+      "description": "工序级作业操作、扫码报工与质量数据录入。",
+      "listTitle": "工序作业"
+    },
+    "operatorTerminal": {
+      "eyebrow": "现场管理",
+      "title": "操作员终端",
+      "description": "面向一线操作员的简化操作界面。",
+      "listTitle": "操作终端"
+    },
+    "sop": {
+      "eyebrow": "现场管理",
+      "title": "电子 SOP",
+      "description": "标准作业指导书电子化展示与版本管理。",
+      "listTitle": "SOP 文档"
+    }
+  },
+  "barcode": {
+    "rules": {
+      "eyebrow": "条码应用",
+      "title": "条码规则",
+      "description": "条码生成规则配置、编码段定义与规则版本管理。",
+      "listTitle": "条码规则"
+    },
+    "generate": {
+      "eyebrow": "条码应用",
+      "title": "条码生成打印",
+      "description": "按规则批量生成条码、标签打印与重印管理。",
+      "listTitle": "条码生成"
+    },
+    "traceability": {
+      "eyebrow": "条码应用",
+      "title": "扫码追溯",
+      "description": "产品全生命周期追溯、物料正向反向查询。",
+      "listTitle": "追溯记录"
+    }
+  },
+  "equipment": {
+    "monitoring": {
+      "eyebrow": "设备管理",
+      "title": "设备监控",
+      "description": "实时设备状态监控、运行参数采集与异常报警。",
+      "listTitle": "设备监控"
+    },
+    "ledger": {
+      "eyebrow": "设备管理",
+      "title": "设备台账",
+      "description": "设备资产档案、技术参数、生命周期管理。",
+      "listTitle": "设备台账"
+    },
+    "maintenance": {
+      "eyebrow": "设备管理",
+      "title": "点检保养维修",
+      "description": "设备点检计划、保养任务、维修工单全流程。",
+      "listTitle": "点检保养维修"
+    }
+  },
+  "quality": {
+    "eyebrow": "质量管理",
+    "title": "质量检验",
+    "description": "来料、过程、成品检验与不良品处理闭环。",
+    "listTitle": "质量检验"
+  },
+  "andon": {
+    "eyebrow": "安灯管理",
+    "title": "安灯管理",
+    "description": "生产异常实时上报、逐级升级与处理闭环。",
+    "listTitle": "安灯异常"
+  },
+  "report": {
+    "eyebrow": "报表分析",
+    "title": "报表分析",
+    "description": "产量、质量、设备、追溯等多维度报表查询。",
+    "listTitle": "报表分析"
+  },
+  "wage": {
+    "eyebrow": "计件工资",
+    "title": "计件工资",
+    "description": "个人/班组计件工资核算、单价配置与工资报表。",
+    "listTitle": "计件工资"
+  },
+  "process": {
+    "eyebrow": "工艺管理",
+    "title": "工艺管理",
+    "description": "产品工艺路线、BOM、标准工时与工艺文档管理。",
+    "listTitle": "工艺管理"
+  },
+  "integration": {
+    "equipment": {
+      "eyebrow": "设备对接",
+      "title": "设备计数与联调日志",
+      "description": "设备计数上报、设备联调、采集日志和失败重试。"
+    },
+    "erp": {
+      "eyebrow": "ERP接口",
+      "title": "ERP 生产任务与工艺数据读取",
+      "description": "ERP生产任务单读取、工艺数据读取、同步日志和失败重试。"
+    },
+    "api": {
+      "eyebrow": "标准API接口",
+      "title": "标准 API 数据读写监控",
+      "description": "计量单位、工单、任务单、设备计数报工和完工单接口监控。"
+    }
+  },
+  "dashboard": {
+    "eyebrow": "电子看板",
+    "title": "生产驾驶舱",
+    "description": "全厂生产概览、关键指标、产线状态与实时预警。",
+    "listTitle": "生产驾驶舱"
+  },
+  "boards": {
+    "line": {
+      "eyebrow": "电子看板",
+      "title": "产线看板",
+      "description": "单条产线实时状态、工单进度与质量数据。",
+      "listTitle": "产线看板"
+    },
+    "workshop": {
+      "eyebrow": "电子看板",
+      "title": "车间看板",
+      "description": "车间级生产概览、产线对比与关键指标。",
+      "listTitle": "车间看板"
+    },
+    "controlCenter": {
+      "eyebrow": "电子看板",
+      "title": "中控看板",
+      "description": "工厂级集中监控大屏，全局生产指标与预警。",
+      "listTitle": "中控看板"
+    }
+  },
+  "system": {
+    "eyebrow": "系统管理",
+    "title": "系统管理",
+    "description": "用户、角色、权限、字典、编号规则等基础配置。",
+    "listTitle": "系统管理"
+  },
+  "tableColumns": {
+    "id": "编号",
+    "workOrderNo": "工单号",
+    "product": "产品",
+    "line": "产线",
+    "plan": "计划",
+    "done": "完成",
+    "status": "状态",
+    "object": "业务对象",
+    "scope": "范围/产线",
+    "owner": "责任人",
+    "progress": "进度",
+    "updatedAt": "更新时间"
+  }
+}

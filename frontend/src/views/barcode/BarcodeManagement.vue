@@ -1,23 +1,25 @@
 <template>
   <CrudBoard
-    eyebrow="条码应用"
-    title="条码规则、模板与应用规则"
-    description="维护产品码、箱码、栈板码、材料码规则，以及标签模板和应用范围。"
-    list-title="条码规则"
+    :eyebrow="t('barcode.rules.eyebrow')"
+    :title="t('barcode.rules.title')"
+    :description="t('barcode.rules.description')"
+    :list-title="t('barcode.rules.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="code"
     :row-actions="rowActions"
   />
-  <p v-if="loading" class="api-state">Loading barcode rules...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getBarcodeRules } from '../../api/barcode'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -41,7 +43,7 @@ const loadRows = async () => {
     rows.value = recordsOf(await getBarcodeRules()).map(mapRule)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }

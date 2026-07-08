@@ -1,23 +1,25 @@
 <template>
   <CrudBoard
-    eyebrow="报表分析"
-    title="生产、质量、物料与车间报表"
-    description="按产量、不良、关键物料追溯和车间时段查询统计数据，支撑管理分析。"
-    list-title="报表目录"
+    :eyebrow="t('report.eyebrow')"
+    :title="t('report.title')"
+    :description="t('report.description')"
+    :list-title="t('report.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="report"
     :row-actions="rowActions"
   />
-  <p v-if="loading" class="api-state">Loading reports...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getBoardConfigs, getMetricDefs } from '../../api/report'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -49,22 +51,22 @@ const loadRows = async () => {
     rows.value = [...recordsOf(metrics).map(mapMetric), ...recordsOf(boards).map(mapBoard)]
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'report', label: '报表' },
-  { key: 'dimension', label: '维度' },
-  { key: 'api', label: '接口路径' },
-  { key: 'status', label: '状态' }
+  { key: 'report', label: 'Report' },
+  { key: 'dimension', label: 'Dimension' },
+  { key: 'api', label: 'API Path' },
+  { key: 'status', label: 'Status' }
 ]
 const rowActions = [
-  { label: '查询', action: 'audit' },
-  { label: '导出', action: 'export' },
-  { label: '审计', action: 'audit' }
+  { label: t('common.actions.audit'), action: 'audit' },
+  { label: t('common.actions.export'), action: 'export' },
+  { label: t('common.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)

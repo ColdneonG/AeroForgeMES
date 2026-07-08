@@ -10,7 +10,7 @@
         :key="group.name"
         class="rail-icon"
         :class="{ active: isGroupActive(group.name), expanded: group.name === activeGroupName && isMenuOpen }"
-        :title="group.name"
+        :title="$t(`menu.groups.${group.name}`) || group.name"
         type="button"
         @click="toggleModule(group)"
       >
@@ -24,8 +24,8 @@
     <Transition name="module-drawer">
       <aside v-if="isMenuOpen" class="module-sidebar">
         <div class="module-title">
-          <strong>{{ activeGroup?.name }}</strong>
-          <span>{{ activeGroup?.items.length || 0 }} 个功能</span>
+          <strong>{{ $t(`menu.groups.${activeGroup?.name}`) || activeGroup?.name }}</strong>
+          <span>{{ $t('layout.featureCount', { count: activeGroup?.items.length || 0 }) }}</span>
         </div>
         <RouterLink
           v-for="item in activeGroup?.items"
@@ -46,8 +46,8 @@
     <section class="siemens-main">
       <header class="siemens-topbar">
         <div class="product-title">
-          <span class="product-title-cn">风擎工控</span>
-          <span class="product-title-en">Aeroforge Manufacturing Execution System</span>
+          <span class="product-title-cn">{{ $t('layout.productCn') }}</span>
+          <span class="product-title-en">{{ $t('layout.productEn') }}</span>
         </div>
         <div class="topbar-tools">
           <span class="data-scope-chip">{{ dataScopeLabel }}</span>
@@ -56,10 +56,10 @@
             <span>{{ languageLabel }}</span>
           </button>
           <button class="topbar-user" type="button" @click="logoutUser">
-            <strong>{{ authState.user?.displayName || '未登录' }}</strong>
-            <span>退出</span>
+            <strong>{{ authState.user?.displayName || $t('layout.notLoggedIn') }}</strong>
+            <span>{{ $t('layout.logout') }}</span>
           </button>
-          <button class="topbar-help" title="Help">
+          <button class="topbar-help" :title="$t('layout.help')">
             <img :src="helpIcon" alt="Help" />
           </button>
         </div>
@@ -74,10 +74,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { menuRoutes } from '../router'
 import { logout } from '../services/authService'
 import { authState, clearAuthSession } from '../stores/auth'
 import { filterRoutesByPermission } from '../utils/menu'
+import { LANGUAGE_STORAGE_KEY } from '../i18n'
 import logoSquare from '../assets/icons/logo2.png'
 import helpIcon from '../assets/icons/help.svg'
 import languageIcon from '../assets/icons/language.svg'
@@ -96,8 +98,7 @@ import settingsIcon from '../assets/icons/settings.svg'
 import shopfloorIcon from '../assets/icons/shopfloor.svg'
 import wageIcon from '../assets/icons/wage.svg'
 
-const LANGUAGE_STORAGE_KEY = 'fan-mes-language'
-const supportedLanguages = ['zh-CN', 'en-US']
+const { t, locale } = useI18n()
 const router = useRouter()
 const route = useRoute()
 
@@ -118,16 +119,9 @@ const groupIcons = {
   系统管理: settingsIcon
 }
 
-const getStoredLanguage = () => {
-  if (typeof window === 'undefined') return 'zh-CN'
-  const storedLanguage = window.localStorage.getItem(LANGUAGE_STORAGE_KEY)
-  return supportedLanguages.includes(storedLanguage) ? storedLanguage : 'zh-CN'
-}
-
-const currentLanguage = ref(getStoredLanguage())
-const languageLabel = computed(() => (currentLanguage.value === 'zh-CN' ? '中' : 'EN'))
+const languageLabel = computed(() => (locale.value === 'zh-CN' ? '中' : 'EN'))
 const languageTitle = computed(() =>
-  currentLanguage.value === 'zh-CN' ? 'Switch to English' : '切换为中文'
+  locale.value === 'zh-CN' ? t('layout.switchToEn') : t('layout.switchToZh')
 )
 
 const visibleRoutes = computed(() => filterRoutesByPermission(menuRoutes))
@@ -149,7 +143,9 @@ const isMenuOpen = ref(false)
 const activeGroup = computed(
   () => moduleGroups.value.find((group) => group.name === activeGroupName.value) || moduleGroups.value[0]
 )
-const dataScopeLabel = computed(() => authState.permissions.dataScopes?.[0] || '数据范围未加载')
+const dataScopeLabel = computed(
+  () => authState.permissions.dataScopes?.[0] || t('layout.dataScopeUnloaded')
+)
 
 watch(
   () => route.name,
@@ -167,19 +163,15 @@ watch(moduleGroups, (groups) => {
   if (!activeGroupName.value && groups[0]) activeGroupName.value = groups[0].name
 })
 
-const applyLanguage = (language) => {
+const toggleLanguage = () => {
+  const next = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
+  locale.value = next
   if (typeof document !== 'undefined') {
-    document.documentElement.lang = language
-    document.documentElement.dataset.language = language
+    document.documentElement.lang = next
   }
   if (typeof window !== 'undefined') {
-    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language)
-    window.dispatchEvent(new CustomEvent('fan-mes-language-change', { detail: { language } }))
+    window.localStorage.setItem(LANGUAGE_STORAGE_KEY, next)
   }
-}
-
-const toggleLanguage = () => {
-  currentLanguage.value = currentLanguage.value === 'zh-CN' ? 'en-US' : 'zh-CN'
 }
 
 const toggleModule = (group) => {
@@ -217,8 +209,8 @@ const logoutUser = async () => {
 }
 
 onMounted(() => {
-  applyLanguage(currentLanguage.value)
+  if (typeof document !== 'undefined') {
+    document.documentElement.lang = locale.value
+  }
 })
-
-watch(currentLanguage, applyLanguage)
 </script>

@@ -1,22 +1,24 @@
 <template>
   <CrudBoard
-    eyebrow="计件工资"
-    title="计件工资核算"
-    description="按工序报工、良品数量、不良扣减和人员维度形成工资核算原型。"
-    list-title="计件记录"
+    :eyebrow="t('wage.eyebrow')"
+    :title="t('wage.title')"
+    :description="t('wage.description')"
+    :list-title="t('wage.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
   />
-  <p v-if="loading" class="api-state">Loading piecework wages...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getPieceworkWages } from '../../api/wage'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -42,20 +44,20 @@ const loadRows = async () => {
     rows.value = recordsOf(await getPieceworkWages()).map(mapWage)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '核算单' },
-  { key: 'operator', label: '人员' },
-  { key: 'process', label: '工序' },
-  { key: 'good', label: '良品' },
-  { key: 'bad', label: '不良' },
-  { key: 'amount', label: '金额' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: 'Settlement#' },
+  { key: 'operator', label: 'Operator' },
+  { key: 'process', label: 'Process' },
+  { key: 'good', label: 'Good' },
+  { key: 'bad', label: 'Bad' },
+  { key: 'amount', label: 'Amount' },
+  { key: 'status', label: 'Status' }
 ]
 
 onMounted(loadRows)
@@ -66,9 +68,5 @@ onMounted(loadRows)
   margin: 12px 24px 0;
   color: #52616b;
   font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
 }
 </style>

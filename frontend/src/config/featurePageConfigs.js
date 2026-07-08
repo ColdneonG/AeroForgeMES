@@ -13,13 +13,13 @@ export const emptyFeatureConfig = {
   kpis: [],
   trend: [],
   columns: [
-    { key: 'id', label: '编号' },
-    { key: 'object', label: '业务对象' },
-    { key: 'line', label: '范围/产线' },
-    { key: 'owner', label: '责任人' },
-    { key: 'progress', label: '进度' },
-    { key: 'status', label: '状态' },
-    { key: 'updatedAt', label: '更新时间' }
+    { key: 'id', label: 'ID' },
+    { key: 'object', label: 'Business Object' },
+    { key: 'line', label: 'Scope / Line' },
+    { key: 'owner', label: 'Owner' },
+    { key: 'progress', label: 'Progress' },
+    { key: 'status', label: 'Status' },
+    { key: 'updatedAt', label: 'Updated' }
   ],
   statusTone
 }

@@ -1,9 +1,9 @@
 <template>
   <CrudBoard
-    eyebrow="生产订单"
-    title="生产派工单"
-    description="基于交期、产线、工位、人员与产能建议生成派工单并下发现场。"
-    list-title="派工建议"
+    :eyebrow="t('production.dispatch.eyebrow')"
+    :title="t('production.dispatch.title')"
+    :description="t('production.dispatch.description')"
+    :list-title="t('production.dispatch.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
@@ -12,12 +12,13 @@
     :handle-actions-externally="true"
     @row-action="handleRowAction"
   />
-  <p v-if="loading" class="api-state">正在加载派工单...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import {
   closeDispatchOrder,
@@ -28,6 +29,7 @@ import {
 } from '../../api/production'
 import { authState } from '../../stores/auth'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -74,27 +76,27 @@ const loadRows = async () => {
     rows.value = recordsOf(await getDispatchOrders()).map(mapDispatch)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || '数据加载失败，请检查后端接口或网关转发配置'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '派工单' },
-  { key: 'order', label: '工单' },
-  { key: 'process', label: '工序' },
-  { key: 'station', label: '工位' },
-  { key: 'operator', label: '操作员' },
-  { key: 'suggestion', label: '建议' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: t('production.dispatch.listTitle') },
+  { key: 'order', label: t('tableColumns.workOrderNo') },
+  { key: 'process', label: t('common.filter.status') },
+  { key: 'station', label: t('tableColumns.line') },
+  { key: 'operator', label: t('tableColumns.owner') },
+  { key: 'suggestion', label: t('tableColumns.plan') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
-  { label: '编辑', action: 'edit' },
-  { label: '下发', action: 'release' },
-  { label: '关闭', action: 'close' },
-  { label: '作废', action: 'void' },
-  { label: '审计', action: 'audit' }
+  { label: t('common.actions.edit'), action: 'edit' },
+  { label: t('common.actions.release'), action: 'release' },
+  { label: t('common.actions.close'), action: 'close' },
+  { label: t('common.actions.void'), action: 'void' },
+  { label: t('common.actions.audit'), action: 'audit' }
 ]
 
 const getApiId = (row) => row?.apiId || row?.raw?.id
@@ -123,7 +125,7 @@ const handleRowAction = async ({ action, row }) => {
     await handler(row)
     await loadRows()
   } catch (e) {
-    error.value = e?.message || '派工单操作失败，请检查后端接口或状态流转规则'
+    error.value = e?.message || t('common.error.operationFailed')
   } finally {
     loading.value = false
   }

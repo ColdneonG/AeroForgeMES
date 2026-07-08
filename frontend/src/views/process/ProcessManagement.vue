@@ -1,24 +1,26 @@
 <template>
   <CrudBoard
-    eyebrow="工艺管理"
-    title="工序、工艺路线与电子 SOP"
-    description="演示数据已关闭，工艺资料只从真实接口加载。"
-    list-title="工艺资料"
+    :eyebrow="t('process.eyebrow')"
+    :title="t('process.title')"
+    :description="t('process.description')"
+    :list-title="t('process.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="code"
     :row-actions="rowActions"
     :handle-actions-externally="true"
   />
-  <p v-if="loading" class="api-state">Loading process data...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getProcessRows } from '../../api/process'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -41,24 +43,24 @@ const loadRows = async () => {
     rows.value = recordsOf(await getProcessRows()).map(mapRow)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Process API is not connected yet.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'code', label: '编码' },
-  { key: 'name', label: '名称' },
-  { key: 'type', label: '类型' },
+  { key: 'code', label: 'Code' },
+  { key: 'name', label: 'Name' },
+  { key: 'type', label: 'Type' },
   { key: 'sop', label: 'SOP' },
-  { key: 'defects', label: '不良原因' },
-  { key: 'status', label: '状态' }
+  { key: 'defects', label: 'Defects' },
+  { key: 'status', label: 'Status' }
 ]
 const rowActions = [
-  { label: '编辑', action: 'edit' },
-  { label: '启用/停用', action: 'close' },
-  { label: '审计', action: 'audit' }
+  { label: t('common.actions.edit'), action: 'edit' },
+  { label: t('common.actions.close'), action: 'close' },
+  { label: t('common.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)
@@ -68,10 +70,5 @@ onMounted(loadRows)
 .api-state {
   margin: 12px 24px 0;
   color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
 }
 </style>

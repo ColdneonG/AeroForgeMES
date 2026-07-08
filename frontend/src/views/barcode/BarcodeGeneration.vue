@@ -1,24 +1,26 @@
 <template>
   <CrudBoard
-    eyebrow="条码应用"
-    title="条码生成与打印"
-    description="演示数据已关闭，生成记录只从真实接口加载。"
-    list-title="生成任务"
+    :eyebrow="t('barcode.generate.eyebrow')"
+    :title="t('barcode.generate.title')"
+    :description="t('barcode.generate.description')"
+    :list-title="t('barcode.generate.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
     :row-actions="rowActions"
     :handle-actions-externally="true"
   />
-  <p v-if="loading" class="api-state">Loading barcode records...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getBarcodeRecords } from '../../api/barcode'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -41,7 +43,7 @@ const loadRows = async () => {
     rows.value = recordsOf(await getBarcodeRecords()).map(mapRow)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Barcode record API is not connected yet.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }

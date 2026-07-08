@@ -3,7 +3,7 @@
     :eyebrow="eyebrow"
     :title="title"
     :description="description"
-    list-title="接口同步记录"
+    list-title="Sync Records"
     :rows="rows"
     :columns="columns"
     row-key="id"
@@ -11,19 +11,22 @@
     :row-actions="rowActions"
     :handle-actions-externally="true"
   />
-  <p v-if="loading" class="api-state">Loading integration logs...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getSyncLogs } from '../../api/integration'
 
+const { t } = useI18n()
+
 defineProps({
-  eyebrow: { type: String, default: '集成接口' },
-  title: { type: String, default: 'ERP 与标准 API 接口' },
-  description: { type: String, default: '演示数据已关闭，接口同步记录只从真实接口加载。' }
+  eyebrow: { type: String, default: 'Integration' },
+  title: { type: String, default: 'ERP & Standard API' },
+  description: { type: String, default: 'Demo data is disabled. Sync records are loaded from real APIs only.' }
 })
 
 const rows = ref([])
@@ -48,24 +51,24 @@ const loadRows = async () => {
     rows.value = recordsOf(await getSyncLogs()).map(mapRow)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Integration API is not connected yet.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '日志号' },
-  { key: 'module', label: '接口' },
-  { key: 'direction', label: '方向' },
-  { key: 'externalNo', label: '外部单号' },
-  { key: 'result', label: '结果' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: 'Log#' },
+  { key: 'module', label: 'API' },
+  { key: 'direction', label: 'Direction' },
+  { key: 'externalNo', label: 'External ID' },
+  { key: 'result', label: 'Result' },
+  { key: 'status', label: 'Status' }
 ]
 const rowActions = [
-  { label: '重试', action: 'retry' },
-  { label: '关闭', action: 'close' },
-  { label: '审计', action: 'audit' }
+  { label: t('statusFlow.actions.retry'), action: 'retry' },
+  { label: t('statusFlow.actions.close'), action: 'close' },
+  { label: t('statusFlow.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)

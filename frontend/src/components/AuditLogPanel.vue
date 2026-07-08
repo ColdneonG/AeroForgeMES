@@ -1,8 +1,8 @@
 <template>
   <section class="mes-panel audit-panel">
     <div class="mes-panel-title">
-      <strong>状态日志 / 操作审计</strong>
-      <span>{{ logs.length }} 条</span>
+      <strong>{{ $t('common.auditLog.title') }}</strong>
+      <span>{{ $t('common.list.items', { count: logs.length }) }}</span>
     </div>
     <div class="audit-list">
       <article v-for="log in logs" :key="`${log.time}-${log.action}-${log.target || log.to}`">

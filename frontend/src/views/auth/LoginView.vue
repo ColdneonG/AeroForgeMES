@@ -2,24 +2,24 @@
   <main class="login-page">
     <section class="login-card">
       <div class="login-brand">
-        <img :src="logoSquare" alt="风擎工控" />
+        <img :src="logoSquare" :alt="$t('auth.login.brandName')" />
         <div>
-          <p>风擎工控</p>
-          <h1>Aeroforge MES</h1>
-          <span>统一身份认证与权限入口</span>
+          <p>{{ $t('auth.login.brandName') }}</p>
+          <h1>{{ $t('auth.login.brandTitle') }}</h1>
+          <span>{{ $t('auth.login.brandSubtitle') }}</span>
         </div>
       </div>
 
       <form class="login-form" @submit.prevent="submitLogin">
         <label>
-          账号
-          <input v-model="form.username" autocomplete="username" placeholder="admin / operator" />
+          {{ $t('auth.login.username') }}
+          <input v-model="form.username" autocomplete="username" :placeholder="$t('auth.login.usernamePlaceholder')" />
         </label>
         <label>
-          密码
-          <input v-model="form.password" autocomplete="current-password" type="password" placeholder="任意密码" />
+          {{ $t('auth.login.password') }}
+          <input v-model="form.password" autocomplete="current-password" type="password" :placeholder="$t('auth.login.passwordPlaceholder')" />
         </label>
-        <button type="submit" :disabled="loading">{{ loading ? '登录中...' : '登录 MES' }}</button>
+        <button type="submit" :disabled="loading">{{ loading ? $t('auth.login.submitting') : $t('auth.login.submit') }}</button>
         <p v-if="error">{{ error }}</p>
       </form>
     </section>
@@ -29,10 +29,12 @@
 <script setup>
 import { nextTick, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import logoSquare from '../../assets/icons/logo2.png'
 import { login } from '../../services/authService'
 import { setAuthSession, isAuthenticated } from '../../stores/auth'
 
+const { t } = useI18n()
 const router = useRouter()
 const route = useRoute()
 const loading = ref(false)
@@ -52,12 +54,12 @@ const submitLogin = async () => {
     setAuthSession(session)
     await nextTick()
     if (!isAuthenticated.value) {
-      error.value = '认证状态异常，请刷新后重试'
+      error.value = t('auth.login.authStateError')
       return
     }
     await router.push(getRedirectTarget())
   } catch (err) {
-    error.value = err.message || '登录失败'
+    error.value = err.message || t('auth.login.loginFailed')
   } finally {
     loading.value = false
   }

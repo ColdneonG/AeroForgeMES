@@ -1,24 +1,26 @@
 <template>
   <CrudBoard
-    eyebrow="生产订单"
-    title="齐套分析与缺料看板"
-    description="按工单、产线、物料缺口和风险等级展示齐套状态，支持发布与冻结。"
-    list-title="齐套记录"
+    :eyebrow="t('production.kitting.eyebrow')"
+    :title="t('production.kitting.title')"
+    :description="t('production.kitting.description')"
+    :list-title="t('production.kitting.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="order"
     flow-type="workOrder"
     :row-actions="rowActions"
   />
-  <p v-if="loading" class="api-state">Loading kitting records...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getKittingBoard } from '../../api/production'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -47,7 +49,7 @@ const loadRows = async () => {
     rows.value = recordsOf(await getKittingBoard()).map(mapKitting)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }

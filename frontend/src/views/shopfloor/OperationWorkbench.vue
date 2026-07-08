@@ -2,18 +2,18 @@
   <section class="mes-workspace">
     <div class="mes-page-heading">
       <div>
-        <p>现场管理</p>
-        <h1>工序作业台</h1>
-        <span>演示数据已关闭，待处理工序只从真实任务接口加载。</span>
+        <p>{{ t('shopfloor.workbench.eyebrow') }}</p>
+        <h1>{{ t('shopfloor.workbench.title') }}</h1>
+        <span>{{ t('common.feature.demoDisabled') }}</span>
       </div>
     </div>
-    <p v-if="loading" class="api-state">Loading operation tasks...</p>
+    <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
     <p v-if="error" class="api-state error">{{ error }}</p>
     <CrudBoard
-      eyebrow="现场管理"
-      title="报工与完工"
-      description="普通报工、不良报工、检测报工、装箱和完工提交。"
-      list-title="待处理工序"
+      :eyebrow="t('shopfloor.workbench.eyebrow')"
+      :title="t('shopfloor.workbench.title')"
+      :description="t('shopfloor.workbench.description')"
+      :list-title="t('shopfloor.workbench.listTitle')"
       :rows="rows"
       :columns="columns"
       row-key="id"
@@ -26,9 +26,11 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getShopTasks } from '../../api/production'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -51,25 +53,25 @@ const loadRows = async () => {
     rows.value = recordsOf(await getShopTasks()).map(mapTask)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Operation task API is not connected yet.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '任务' },
-  { key: 'process', label: '工序' },
-  { key: 'line', label: '产线' },
-  { key: 'good', label: '良品' },
-  { key: 'bad', label: '不良' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: t('tableColumns.id') },
+  { key: 'process', label: t('common.filter.status') },
+  { key: 'line', label: t('tableColumns.line') },
+  { key: 'good', label: t('tableColumns.done') },
+  { key: 'bad', label: t('tableColumns.scope') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
-  { label: '扫码', action: 'report' },
-  { label: '报工', action: 'report' },
-  { label: '完工', action: 'complete' },
-  { label: '安灯', action: 'andon' }
+  { label: t('statusFlow.actions.report'), action: 'report' },
+  { label: t('statusFlow.actions.report'), action: 'report' },
+  { label: t('statusFlow.actions.complete'), action: 'complete' },
+  { label: t('statusFlow.actions.andon'), action: 'andon' }
 ]
 
 onMounted(loadRows)

@@ -48,9 +48,9 @@ export const canTransition = (type, status, action) => {
 
 export const buildAuditEntry = ({ action, operator, from, to, remark }) => ({
   time: new Date().toLocaleString('zh-CN', { hour12: false }),
-  operator: operator || '当前用户',
+  operator: operator || 'Current User',
   action,
   from,
   to: to || from,
-  remark: remark || '页面操作提交'
+  remark: remark || 'Submitted from page'
 })

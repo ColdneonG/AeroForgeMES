@@ -18,7 +18,7 @@ request.interceptors.response.use(
   (response) => {
     const payload = response.data
     if (payload && typeof payload === 'object' && 'code' in payload && String(payload.code) !== '0') {
-      const error = new Error(payload.message || '业务处理失败')
+      const error = new Error(payload.message || 'Business processing failed')
       error.response = response
       throw error
     }
@@ -35,7 +35,7 @@ request.interceptors.response.use(
     }
 
     authState.lastError =
-      error.response?.data?.message || error.message || '网关请求失败，请稍后重试'
+      error.response?.data?.message || error.message || 'Gateway request failed. Please try again later.'
     return Promise.reject(error)
   }
 )

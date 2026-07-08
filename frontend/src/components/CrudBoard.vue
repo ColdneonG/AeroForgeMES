@@ -23,30 +23,30 @@
 
     <div class="mes-filter-bar">
       <label>
-        关键字
-        <input v-model="keyword" type="search" placeholder="编号 / 产品 / 产线 / 责任人" />
+        {{ $t('common.filter.keyword') }}
+        <input v-model="keyword" type="search" :placeholder="$t('common.filter.keywordPlaceholder')" />
       </label>
       <label>
-        状态
+        {{ $t('common.filter.status') }}
         <select v-model="status">
-          <option value="">全部</option>
+          <option value="">{{ $t('common.filter.statusAll') }}</option>
           <option v-for="item in statuses" :key="item" :value="item">{{ item }}</option>
         </select>
       </label>
-      <span class="data-scope">数据范围：{{ dataScope }}</span>
+      <span class="data-scope">{{ $t('common.filter.dataScope', { scope: dataScope }) }}</span>
     </div>
 
     <div class="mes-board-grid">
       <section class="mes-panel">
         <div class="mes-panel-title">
           <strong>{{ listTitle }}</strong>
-          <span>{{ filteredRows.length }} 条</span>
+          <span>{{ $t('common.list.items', { count: filteredRows.length }) }}</span>
         </div>
         <table class="mes-table">
           <thead>
             <tr>
               <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
-              <th>操作</th>
+              <th>{{ $t('common.list.action') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -75,7 +75,7 @@
               </td>
             </tr>
             <tr v-if="filteredRows.length === 0">
-              <td :colspan="columns.length + 1" class="empty-cell">暂无匹配数据</td>
+              <td :colspan="columns.length + 1" class="empty-cell">{{ $t('common.list.noMatch') }}</td>
             </tr>
           </tbody>
         </table>
@@ -83,8 +83,8 @@
 
       <aside class="mes-panel detail-panel">
         <div class="mes-panel-title">
-          <strong>详情</strong>
-          <span>{{ selected?.[rowKey] || '未选择' }}</span>
+          <strong>{{ $t('common.detail.title') }}</strong>
+          <span>{{ selected?.[rowKey] || $t('common.detail.unselected') }}</span>
         </div>
         <dl v-if="selected" class="detail-list">
           <template v-for="column in columns" :key="column.key">
@@ -92,7 +92,7 @@
             <dd>{{ selected[column.key] }}</dd>
           </template>
         </dl>
-        <div v-else class="empty-detail">选择左侧记录查看详情与审计。</div>
+        <div v-else class="empty-detail">{{ $t('common.detail.emptyHint') }}</div>
       </aside>
     </div>
 
@@ -102,10 +102,13 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AuditLogPanel from './AuditLogPanel.vue'
 import PermissionButton from './PermissionButton.vue'
 import { authState } from '../stores/auth'
 import { buildAuditEntry } from '../utils/statusFlow'
+
+const { t } = useI18n()
 
 const props = defineProps({
   eyebrow: { type: String, default: 'MES' },
@@ -118,19 +121,11 @@ const props = defineProps({
   flowType: { type: String, default: '' },
   primaryActions: {
     type: Array,
-    default: () => [
-      { label: '新增', action: 'create' },
-      { label: '导入', action: 'import' },
-      { label: '导出', action: 'export' }
-    ]
+    default: () => []
   },
   rowActions: {
     type: Array,
-    default: () => [
-      { label: '编辑', action: 'edit' },
-      { label: '关闭', action: 'close' },
-      { label: '审计', action: 'audit' }
-    ]
+    default: () => []
   },
   handleActionsExternally: { type: Boolean, default: false }
 })
@@ -154,7 +149,7 @@ watch(
 )
 
 const statuses = computed(() => [...new Set(localRows.value.map((row) => row.status).filter(Boolean))])
-const dataScope = computed(() => authState.permissions.dataScopes?.join(' / ') || '未加载')
+const dataScope = computed(() => authState.permissions.dataScopes?.join(' / ') || t('common.filter.dataScopeUnloaded'))
 
 const filteredRows = computed(() => {
   const term = keyword.value.trim().toLowerCase()
@@ -198,7 +193,7 @@ const runAction = (button, target = selected.value, source = 'primary') => {
       operator: authState.user?.displayName,
       from: oldStatus,
       to: nextStatus,
-      remark: `${target[props.rowKey]} 已提交`
+      remark: `${target[props.rowKey]} ${t('common.auditLog.defaultRemark')}`
     }),
     ...localLogs.value
   ]

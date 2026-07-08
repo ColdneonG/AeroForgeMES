@@ -1,9 +1,9 @@
 <template>
   <CrudBoard
-    eyebrow="安灯管理"
-    title="异常安灯闭环"
-    description="演示数据已关闭，异常数据只从真实接口加载。"
-    list-title="安灯异常"
+    :eyebrow="t('andon.eyebrow')"
+    :title="t('andon.title')"
+    :description="t('andon.description')"
+    :list-title="t('andon.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
@@ -12,15 +12,17 @@
     :row-actions="rowActions"
     :handle-actions-externally="true"
   />
-  <p v-if="loading" class="api-state">Loading andon exceptions...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getAndonExceptions } from '../../api/andon'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -43,30 +45,30 @@ const loadRows = async () => {
     rows.value = recordsOf(await getAndonExceptions()).map(mapRow)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Andon API is not connected yet.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '异常单' },
-  { key: 'type', label: '类型' },
-  { key: 'line', label: '产线' },
-  { key: 'reason', label: '原因' },
-  { key: 'owner', label: '处理人' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: 'Exception#' },
+  { key: 'type', label: 'Type' },
+  { key: 'line', label: 'Line' },
+  { key: 'reason', label: 'Reason' },
+  { key: 'owner', label: 'Handler' },
+  { key: 'status', label: 'Status' }
 ]
 const primaryActions = [
-  { label: '发起安灯', action: 'create' },
-  { label: '异常配置', action: 'edit' },
-  { label: '导出', action: 'export' }
+  { label: t('common.actions.create'), action: 'create' },
+  { label: t('common.actions.edit'), action: 'edit' },
+  { label: t('common.actions.export'), action: 'export' }
 ]
 const rowActions = [
-  { label: '接收', action: 'accept' },
-  { label: '处理', action: 'handle' },
-  { label: '关闭', action: 'close' },
-  { label: '审计', action: 'audit' }
+  { label: t('statusFlow.actions.accept'), action: 'accept' },
+  { label: t('statusFlow.actions.handle'), action: 'handle' },
+  { label: t('statusFlow.actions.close'), action: 'close' },
+  { label: t('statusFlow.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)
@@ -77,9 +79,5 @@ onMounted(loadRows)
   margin: 12px 24px 0;
   color: #52616b;
   font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
 }
 </style>

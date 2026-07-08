@@ -6,7 +6,7 @@ const adaptPermissions = (session) => {
     menus: rawPermissions,
     buttons: rawPermissions,
     apis: rawPermissions.filter((item) => String(item).startsWith('/api/')),
-    dataScopes: ['全部数据']
+    dataScopes: ['All Data']
   }
 }
 
@@ -33,7 +33,7 @@ const adaptLoginSession = (session) => {
   // 确保 user 不为空，防止 isAuthenticated 判定失败
   return {
     token: session.token || '',
-    user: session.user || { username: 'unknown', displayName: '未知用户', roles: [], superAdmin: false },
+    user: session.user || { username: 'unknown', displayName: 'Unknown User', roles: [], superAdmin: false },
     permissions: session.permissions || adaptPermissions(session)
   }
 }

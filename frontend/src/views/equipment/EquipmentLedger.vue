@@ -1,24 +1,26 @@
 <template>
   <CrudBoard
-    eyebrow="设备管理"
-    title="设备台账"
-    description="维护设备类别、制造商、使用部门、管理部门和当前设备状态。"
-    list-title="设备台账"
+    :eyebrow="t('equipment.ledger.eyebrow')"
+    :title="t('equipment.ledger.title')"
+    :description="t('equipment.ledger.description')"
+    :list-title="t('equipment.ledger.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
     flow-type="equipment"
     :row-actions="rowActions"
   />
-  <p v-if="loading" class="api-state">Loading equipment ledger...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getEquipmentLedgers } from '../../api/equipment'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -43,26 +45,26 @@ const loadRows = async () => {
     rows.value = recordsOf(await getEquipmentLedgers()).map(mapEquipment)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '设备编号' },
-  { key: 'type', label: '类别' },
-  { key: 'maker', label: '制造商' },
-  { key: 'dept', label: '使用部门' },
-  { key: 'manager', label: '管理部门' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: 'SN' },
+  { key: 'type', label: 'Type' },
+  { key: 'maker', label: 'Maker' },
+  { key: 'dept', label: 'Department' },
+  { key: 'manager', label: 'Manager' },
+  { key: 'status', label: 'Status' }
 ]
 const rowActions = [
-  { label: '编辑', action: 'edit' },
-  { label: '点检', action: 'inspect' },
-  { label: '报修', action: 'repair' },
-  { label: '停用', action: 'disable' },
-  { label: '审计', action: 'audit' }
+  { label: t('statusFlow.actions.edit'), action: 'edit' },
+  { label: t('statusFlow.actions.inspect'), action: 'inspect' },
+  { label: t('statusFlow.actions.repair'), action: 'repair' },
+  { label: t('statusFlow.actions.disable'), action: 'disable' },
+  { label: t('statusFlow.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)

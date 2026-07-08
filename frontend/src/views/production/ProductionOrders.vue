@@ -1,9 +1,9 @@
 <template>
   <CrudBoard
-    eyebrow="生产订单"
-    title="生产工单闭环"
-    description="覆盖工单新增、编辑、导入同步、下发、关闭、作废、详情与状态日志。"
-    list-title="生产工单"
+    :eyebrow="t('production.workOrders.eyebrow')"
+    :title="t('production.workOrders.title')"
+    :description="t('production.workOrders.description')"
+    :list-title="t('production.workOrders.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
@@ -14,12 +14,13 @@
     @row-action="handleRowAction"
     @primary-action="handlePrimaryAction"
   />
-  <p v-if="loading" class="api-state">正在加载生产工单...</p>
+  <p v-if="loading" class="api-state">{{ t('production.workOrders.loading') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import {
   closeWorkOrder,
@@ -32,6 +33,7 @@ import {
 } from '../../api/production'
 import { authState } from '../../stores/auth'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -58,33 +60,33 @@ const loadRows = async () => {
     rows.value = recordsOf(await getWorkOrders()).map(mapWorkOrder)
   } catch (e) {
     rows.value = []
-    error.value = e?.message || '数据加载失败，请检查后端接口或网关转发配置'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '工单号' },
-  { key: 'product', label: '产品' },
-  { key: 'line', label: '产线' },
-  { key: 'plan', label: '计划' },
-  { key: 'done', label: '完成' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: t('production.workOrders.listTitle') + '#' },
+  { key: 'product', label: t('tableColumns.product') },
+  { key: 'line', label: t('tableColumns.line') },
+  { key: 'plan', label: t('tableColumns.plan') },
+  { key: 'done', label: t('tableColumns.done') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const primaryActions = [
-  { label: '新增', action: 'create' },
-  { label: '导入/同步', action: 'import' },
-  { label: '导出', action: 'export' }
+  { label: t('common.actions.create'), action: 'create' },
+  { label: t('common.actions.importSync'), action: 'import' },
+  { label: t('common.actions.export'), action: 'export' }
 ]
 const rowActions = [
-  { label: '编辑', action: 'edit' },
-  { label: '下发', action: 'release' },
-  { label: '开工', action: 'start' },
-  { label: '完工', action: 'complete' },
-  { label: '关闭', action: 'close' },
-  { label: '作废', action: 'void' },
-  { label: '审计', action: 'audit' }
+  { label: t('common.actions.edit'), action: 'edit' },
+  { label: t('common.actions.release'), action: 'release' },
+  { label: t('common.actions.start'), action: 'start' },
+  { label: t('common.actions.complete'), action: 'complete' },
+  { label: t('common.actions.close'), action: 'close' },
+  { label: t('common.actions.void'), action: 'void' },
+  { label: t('common.actions.audit'), action: 'audit' }
 ]
 
 const getApiId = (row) => row?.apiId || row?.raw?.id
@@ -130,7 +132,7 @@ const handleRowAction = async ({ action, row }) => {
     await handler(row)
     await loadRows()
   } catch (e) {
-    error.value = e?.message || '工单操作失败，请检查后端接口或网关转发配置'
+    error.value = e?.message || t('production.workOrders.operationFailed')
   } finally {
     loading.value = false
   }
@@ -138,7 +140,7 @@ const handleRowAction = async ({ action, row }) => {
 
 const handlePrimaryAction = ({ action }) => {
   if (['create', 'import', 'export'].includes(action)) {
-    error.value = '该操作尚未接入表单流程，本页当前仅接入列表查询和工单状态动作'
+    error.value = t('common.error.notImplemented')
   }
 }
 

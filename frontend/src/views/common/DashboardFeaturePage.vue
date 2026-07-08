@@ -4,19 +4,19 @@
       <div>
         <p>{{ group }}</p>
         <h1>{{ title }}</h1>
-        <span>演示数据已关闭，当前功能页等待后端真实接口接入。</span>
+        <span>{{ $t('common.feature.demoDisabled') }}</span>
       </div>
       <div class="dashboard-feature-actions">
-        <PermissionButton action="create">新增</PermissionButton>
-        <PermissionButton action="import">导入</PermissionButton>
-        <PermissionButton action="export">导出</PermissionButton>
+        <PermissionButton action="create">{{ $t('common.actions.create') }}</PermissionButton>
+        <PermissionButton action="import">{{ $t('common.actions.import') }}</PermissionButton>
+        <PermissionButton action="export">{{ $t('common.actions.export') }}</PermissionButton>
       </div>
     </div>
 
     <section class="feature-card feature-main-card">
       <div class="feature-card-title">
-        <strong>{{ title }}列表</strong>
-        <span>0 条</span>
+        <strong>{{ $t('common.feature.listTitle', { title }) }}</strong>
+        <span>{{ $t('common.list.items', { count: 0 }) }}</span>
       </div>
       <table class="feature-table">
         <thead>
@@ -26,7 +26,7 @@
         </thead>
         <tbody>
           <tr>
-            <td :colspan="columns.length" class="feature-empty">暂无真实接口数据</td>
+            <td :colspan="columns.length" class="feature-empty">{{ $t('common.feature.noData') }}</td>
           </tr>
         </tbody>
       </table>

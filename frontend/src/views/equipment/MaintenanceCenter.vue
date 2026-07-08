@@ -1,24 +1,26 @@
 <template>
   <CrudBoard
-    eyebrow="设备管理"
-    title="点检、保养、报修与维修"
-    description="覆盖点检提交、保养执行、异常转报修、维修接单和维修完成。"
-    list-title="维护任务"
+    :eyebrow="t('equipment.maintenance.eyebrow')"
+    :title="t('equipment.maintenance.title')"
+    :description="t('equipment.maintenance.description')"
+    :list-title="t('equipment.maintenance.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
     flow-type="equipment"
     :row-actions="rowActions"
   />
-  <p v-if="loading" class="api-state">Loading maintenance tasks...</p>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
   <p v-if="error" class="api-state error">{{ error }}</p>
 </template>
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import CrudBoard from '../../components/CrudBoard.vue'
 import { getMaintenanceOrders, getMaintenancePlans } from '../../api/equipment'
 
+const { t } = useI18n()
 const rows = ref([])
 const loading = ref(false)
 const error = ref('')
@@ -47,25 +49,25 @@ const loadRows = async () => {
     ]
   } catch (e) {
     rows.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('common.error.generic')
   } finally {
     loading.value = false
   }
 }
 
 const columns = [
-  { key: 'id', label: '任务号' },
-  { key: 'equipment', label: '设备' },
-  { key: 'type', label: '类型' },
-  { key: 'owner', label: '处理人' },
-  { key: 'due', label: '计划时间' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: 'Task#' },
+  { key: 'equipment', label: 'Equipment' },
+  { key: 'type', label: 'Type' },
+  { key: 'owner', label: 'Assignee' },
+  { key: 'due', label: 'Due' },
+  { key: 'status', label: 'Status' }
 ]
 const rowActions = [
-  { label: '接单', action: 'acceptRepair' },
-  { label: '完成维修', action: 'finishRepair' },
-  { label: '关闭', action: 'close' },
-  { label: '审计', action: 'audit' }
+  { label: t('statusFlow.actions.acceptRepair'), action: 'acceptRepair' },
+  { label: t('statusFlow.actions.finishRepair'), action: 'finishRepair' },
+  { label: t('statusFlow.actions.close'), action: 'close' },
+  { label: t('statusFlow.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)
@@ -76,9 +78,5 @@ onMounted(loadRows)
   margin: 12px 24px 0;
   color: #52616b;
   font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
 }
 </style>

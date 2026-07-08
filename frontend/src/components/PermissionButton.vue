@@ -13,8 +13,11 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { hasButtonPermission } from '../stores/auth'
 import { canTransition } from '../utils/statusFlow'
+
+const { t } = useI18n()
 
 const props = defineProps({
   permission: { type: String, default: '' },
@@ -37,9 +40,9 @@ const disabledByRule = computed(
 )
 
 const disabledReason = computed(() => {
-  if (props.disabled) return '当前不可操作'
-  if (!allowedByPermission.value) return '无按钮权限'
-  if (!allowedByStatus.value) return '当前状态不允许该操作'
+  if (props.disabled) return t('common.button.disabledDefault')
+  if (!allowedByPermission.value) return t('common.button.noPermission')
+  if (!allowedByStatus.value) return t('common.button.statusNotAllowed')
   return ''
 })
 </script>
