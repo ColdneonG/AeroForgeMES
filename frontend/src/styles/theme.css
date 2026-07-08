@@ -1,0 +1,38 @@
+:root {
+  --mes-primary: #00759a;
+  --mes-primary-dark: #006f8e;
+  --mes-primary-active: #006b8f;
+  --mes-primary-hover: #005a78;
+  --mes-blue: #006b8f;
+  --mes-accent: #6ea7c4;
+  --mes-accent-soft: #e7f0f7;
+  --mes-bg: #f2f4f6;
+  --mes-card: #ffffff;
+  --mes-card-bg: #ffffff;
+  --mes-line: #d6e0e6;
+  --mes-line-soft: #e2e8ec;
+  --mes-line-strong: #b9c8d1;
+  --mes-text-title: #1f2d3d;
+  --mes-text: #1f2d3d;
+  --mes-text-main: #1f2d3d;
+  --mes-muted: #5f6f7a;
+  --mes-text-secondary: #5f6f7a;
+  --mes-text-weak: #8a99a6;
+  --mes-success: #2e7d5b;
+  --mes-success-bg: #e7f2ed;
+  --mes-info: #2f75a8;
+  --mes-info-bg: #e7f0f7;
+  --mes-standby: #8a6d3b;
+  --mes-standby-bg: #f4ead7;
+  --mes-warning: #b7791f;
+  --mes-warning-text: #b7791f;
+  --mes-warning-bg: #f8e9c8;
+  --mes-danger: #b23a3a;
+  --mes-danger-bg: #f7e4e4;
+  --mes-stable: #62717b;
+  --mes-stable-bg: #edf1f3;
+  --mes-radius: 3px;
+  --mes-card-radius: 3px;
+  --mes-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --mes-font: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+}

@@ -1,0 +1,17 @@
+server:
+  port: 9103
+
+spring:
+  application:
+    name: mes-production
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${MYSQL_PRODUCTION_URL:jdbc:mysql://localhost:3306/mes_production?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true}
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

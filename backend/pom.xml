@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ================================================================
+         Spring Boot 父工程：统一管理所有 Spring Boot / Spring Cloud 依赖版本
+         ================================================================ -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ================================================================
+         本工程坐标
+         ================================================================ -->
+    <groupId>com.fanmes</groupId>
+    <artifactId>fan-mes-backend</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Fan MES Backend</name>
+    <description>Fan MES 微服务后端 —— 父工程，统一管理所有子模块</description>
+
+    <!-- ================================================================
+         子模块列表
+         ================================================================ -->
+    <modules>
+        <module>mes-common</module>
+        <module>mes-gateway</module>
+        <module>mes-auth</module>
+        <module>mes-system</module>
+        <module>mes-production</module>
+        <module>mes-quality</module>
+        <module>mes-equipment</module>
+        <module>mes-integration</module>
+        <module>mes-report</module>
+    </modules>
+
+    <!-- ================================================================
+         统一版本号
+         ================================================================ -->
+    <properties>
+        <java.version>17</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Spring Cloud -->
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+
+        <!-- Spring Cloud Alibaba -->
+        <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
+
+        <!-- MyBatis -->
+        <mybatis-spring-boot.version>3.0.3</mybatis-spring-boot.version>
+
+        <!-- 数据库驱动 - 由 spring-boot-starter-parent 管理，此处仅声明以示统一 -->
+        <!-- mysql-connector-j 版本由 Spring Boot 3.3.5 的 BOM 统一管理 -->
+
+        <!-- 工具库 -->
+        <lombok.version>1.18.34</lombok.version>
+        <hutool.version>5.8.29</hutool.version>
+        <fastjson2.version>2.0.51</fastjson2.version>
+    </properties>
+
+    <!-- ================================================================
+         全局依赖版本管理（子模块只需写 groupId + artifactId，无需写 version）
+         ================================================================ -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Cloud Alibaba BOM -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- 本工程公共模块 -->
+            <dependency>
+                <groupId>com.fanmes</groupId>
+                <artifactId>mes-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- MyBatis -->
+            <dependency>
+                <groupId>org.mybatis.spring.boot</groupId>
+                <artifactId>mybatis-spring-boot-starter</artifactId>
+                <version>${mybatis-spring-boot.version}</version>
+            </dependency>
+
+            <!-- 工具库 -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-all</artifactId>
+                <version>${hutool.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>${fastjson2.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ================================================================
+         Maven 插件管理
+         ================================================================ -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <!-- 默认所有模块都不作为可启动 jar 打包；
+                             微服务启动模块需要在自己的 pom.xml 里显式声明该插件 -->
+                        <skip>true</skip>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

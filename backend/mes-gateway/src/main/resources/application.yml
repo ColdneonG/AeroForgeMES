@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: mes-gateway
+
+server:
+  port: 8080
+
+fanmes:
+  gateway:
+    auth-enabled: false
+    routes:
+      auth: http://localhost:8081
+      system: http://localhost:8082
+      equipment: http://localhost:8083
+      report: http://localhost:8086
+      integration: http://localhost:8087
+      production: http://localhost:9103
+      quality: http://localhost:9104
