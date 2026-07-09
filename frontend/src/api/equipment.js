@@ -16,6 +16,10 @@ export function getMaintenancePlans(params) {
   return request.get('/equipment/inspections', { params })
 }
 
+export function getRepairOrders(params) {
+  return request.get('/equipment/repairs', { params })
+}
+
 export function getFaultReasons(params) {
   return request.get('/equipment/fault-reasons', { params })
 }

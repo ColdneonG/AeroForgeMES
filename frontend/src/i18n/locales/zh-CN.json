@@ -174,6 +174,8 @@
     "direction": "方向",
     "externalId": "外部ID",
     "result": "结果",
+    "abnormalDesc": "异常描述",
+    "faultReason": "故障原因",
     "kittingRate": "齐套率",
     "risk": "风险",
     "shortage": "缺料",
@@ -239,7 +241,9 @@
     "shutdown": "停机",
     "rework": "返工",
     "info": "信息",
-    "inProgress": "进行中"
+    "inProgress": "进行中",
+    "processing": "处理中",
+    "cancelled": "已取消"
   },
   "barcode": {
     "rules": {
@@ -447,7 +451,10 @@
       "eyebrow": "设备管理",
       "title": "点检保养维修",
       "description": "设备点检计划、保养任务、维修工单全流程。",
-      "listTitle": "点检保养维修"
+      "listTitle": "点检保养维修",
+      "typeMaintenance": "保养",
+      "typeInspection": "点检",
+      "typeRepair": "维修"
     }
   },
   "quality": {
@@ -465,6 +472,7 @@
     "inspectionTasks": "检验任务",
     "inspectionTypes": "IQC / PQC / FQC",
     "task": "任务",
+    "workOrder": "工单",
     "product": "产品",
     "type": "类型",
     "result": "结果",
@@ -487,7 +495,14 @@
     "time": "时间",
     "status": "状态",
     "noDispositionData": "无处置流程数据。",
-    "apiError": "数据加载失败，请检查后端接口或网关转发配置。"
+    "apiError": "数据加载失败，请检查后端接口或网关转发配置。",
+    "backToList": "返回列表",
+    "detailLoadError": "检验单详情加载失败。",
+    "actions": {
+      "start": "开始检验",
+      "pass": "合格",
+      "fail": "不合格"
+    }
   },
   "andon": {
     "eyebrow": "安灯管理",

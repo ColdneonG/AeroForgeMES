@@ -3,6 +3,7 @@ package com.fanmes.auth.service.impl;
 import com.fanmes.auth.domain.dto.LoginRequest;
 import com.fanmes.auth.domain.entity.SysUser;
 import com.fanmes.auth.domain.vo.LoginVO;
+import com.fanmes.auth.domain.vo.UserVO;
 import com.fanmes.auth.repository.AuthRepository;
 import com.fanmes.auth.service.AuthService;
 import com.fanmes.common.exception.BusinessException;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,16 @@ public class AuthServiceImpl implements AuthService {
             throw new BusinessException("token 对应用户不存在");
         }
         return buildLogin(user);
+    }
+
+    @Override
+    public List<UserVO> listUsers() {
+        return authRepository.findAllUsers().stream().map(user -> {
+            UserVO vo = new UserVO();
+            vo.setId(user.getId());
+            vo.setDisplayName(user.getDisplayName());
+            return vo;
+        }).toList();
     }
 
     private LoginVO buildLogin(SysUser user) {

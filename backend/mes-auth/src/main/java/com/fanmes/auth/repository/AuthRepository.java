@@ -32,4 +32,7 @@ public interface AuthRepository {
             where ur.user_id = #{userId}
             """)
     List<String> findPermissionCodes(@Param("userId") Long userId);
+
+    @Select("select id, display_name from sys_user")
+    List<SysUser> findAllUsers();
 }

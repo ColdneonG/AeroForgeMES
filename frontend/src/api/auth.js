@@ -12,6 +12,10 @@ export function getPermissions() {
   return request.get('/auth/me/permissions')
 }
 
+export function getUsers() {
+  return request.get('/auth/users')
+}
+
 export function logout() {
   return request.post('/auth/logout')
 }
