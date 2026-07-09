@@ -57,11 +57,11 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'account', label: 'Account' },
-  { key: 'name', label: 'Name' },
-  { key: 'roles', label: 'Roles' },
-  { key: 'scope', label: 'Data Scope' },
-  { key: 'status', label: 'Status' }
+  { key: 'account', label: t('tableColumns.account') },
+  { key: 'name', label: t('tableColumns.name') },
+  { key: 'roles', label: t('tableColumns.roles') },
+  { key: 'scope', label: t('tableColumns.dataScope') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const primaryActions = [
   { label: t('common.actions.create'), action: 'create' },

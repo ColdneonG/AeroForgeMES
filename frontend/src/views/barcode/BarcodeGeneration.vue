@@ -50,18 +50,18 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'id', label: '任务号' },
-  { key: 'rule', label: '规则' },
-  { key: 'product', label: '产品' },
-  { key: 'qty', label: '数量' },
-  { key: 'printed', label: '已打印' },
-  { key: 'status', label: '状态' }
+  { key: 'id', label: t('tableColumns.taskNo') },
+  { key: 'rule', label: t('tableColumns.rule') },
+  { key: 'product', label: t('tableColumns.product') },
+  { key: 'qty', label: t('tableColumns.qty') },
+  { key: 'printed', label: t('tableColumns.printed') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
-  { label: '生成', action: 'create' },
-  { label: '打印', action: 'print' },
-  { label: '补打', action: 'print' },
-  { label: '审计', action: 'audit' }
+  { label: t('tableColumns.generate'), action: 'create' },
+  { label: t('tableColumns.print'), action: 'print' },
+  { label: t('tableColumns.reprint'), action: 'print' },
+  { label: t('statusFlow.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)

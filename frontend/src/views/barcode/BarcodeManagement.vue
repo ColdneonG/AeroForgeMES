@@ -50,17 +50,17 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'code', label: '规则编码' },
-  { key: 'type', label: '条码类型' },
-  { key: 'pattern', label: '规则' },
-  { key: 'template', label: '模板' },
-  { key: 'status', label: '状态' }
+  { key: 'code', label: t('tableColumns.ruleCode') },
+  { key: 'type', label: t('tableColumns.barcodeType') },
+  { key: 'pattern', label: t('tableColumns.rule') },
+  { key: 'template', label: t('tableColumns.template') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
-  { label: '编辑', action: 'edit' },
-  { label: '打印', action: 'print' },
-  { label: '关闭', action: 'close' },
-  { label: '审计', action: 'audit' }
+  { label: t('common.actions.edit'), action: 'edit' },
+  { label: t('tableColumns.print'), action: 'print' },
+  { label: t('common.actions.close'), action: 'close' },
+  { label: t('statusFlow.actions.audit'), action: 'audit' }
 ]
 
 onMounted(loadRows)

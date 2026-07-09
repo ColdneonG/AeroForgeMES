@@ -15,6 +15,11 @@ public record ShopTask(
         BigDecimal planQty,
         LocalDateTime startedAt,
         LocalDateTime endedAt,
-        String status
+        String status,
+        // display names populated by joined list queries (null otherwise)
+        String workOrderNo,
+        String productName,
+        String routeName,
+        String lineName
 ) {
 }

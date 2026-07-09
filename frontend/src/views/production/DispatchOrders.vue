@@ -25,6 +25,7 @@ import {
   confirmDispatchIssue,
   getDispatchOrders,
   releaseDispatchOrder,
+  startDispatchOrder,
   voidDispatchOrder
 } from '../../api/production'
 import { authState } from '../../stores/auth'
@@ -35,25 +36,28 @@ const loading = ref(false)
 const error = ref('')
 
 const statusTextMap = {
-  DRAFT: '草稿',
-  ENABLED: '启用',
-  DISABLED: '停用',
-  WAIT_ISSUE: '待下发',
-  WAIT_RELEASE: '待下发',
-  TO_RELEASE: '待下发',
-  PENDING: '待下发',
-  PENDING_DISPATCH: '待下发',
-  ISSUED: '已下发',
-  RELEASED: '已下发',
-  RUNNING: '生产中',
-  PAUSED: '暂停',
-  COMPLETED: '已完成',
-  CLOSED: '已关闭',
-  VOIDED: '作废',
-  CANCELLED: '作废'
+  DRAFT: () => t('status.draft'),
+  ENABLED: () => t('status.enabled'),
+  DISABLED: () => t('status.disabled'),
+  WAIT_ISSUE: () => t('status.pending'),
+  WAIT_RELEASE: () => t('status.pending'),
+  TO_RELEASE: () => t('status.pending'),
+  PENDING: () => t('status.pending'),
+  PENDING_DISPATCH: () => t('status.pending'),
+  ISSUED: () => t('status.released'),
+  RELEASED: () => t('status.released'),
+  RUNNING: () => t('status.running'),
+  PAUSED: () => t('status.paused'),
+  COMPLETED: () => t('status.completed'),
+  CLOSED: () => t('status.closed'),
+  VOIDED: () => t('status.voided'),
+  CANCELLED: () => t('status.voided')
 }
 
-const normalizeStatus = (status) => statusTextMap[String(status || '').trim().toUpperCase()] || status || '-'
+const normalizeStatus = (status) => {
+  const fn = statusTextMap[String(status || '').trim().toUpperCase()]
+  return fn ? fn() : status || '-'
+}
 const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
 
 const mapDispatch = (row) => ({
@@ -94,6 +98,7 @@ const columns = [
 const rowActions = [
   { label: t('common.actions.edit'), action: 'edit' },
   { label: t('common.actions.release'), action: 'release' },
+  { label: t('common.actions.start'), action: 'start' },
   { label: t('common.actions.close'), action: 'close' },
   { label: t('common.actions.void'), action: 'void' },
   { label: t('common.actions.audit'), action: 'audit' }
@@ -110,6 +115,7 @@ const rowActionHandlers = {
     row.status === '待下发'
       ? confirmDispatchIssue(getApiId(row), actionPayload('frontend dispatch confirm issue'))
       : releaseDispatchOrder(getApiId(row), actionPayload('frontend dispatch issue')),
+  start: (row) => startDispatchOrder(getApiId(row), actionPayload('frontend dispatch start')),
   close: (row) => closeDispatchOrder(getApiId(row), actionPayload('frontend dispatch close')),
   void: (row) => voidDispatchOrder(getApiId(row), actionPayload('frontend dispatch void'))
 }

@@ -2,30 +2,30 @@
   <section class="siemens-page work-order-monitoring">
     <header class="siemens-page-header">
       <div>
-        <h1>Work Order Monitoring</h1>
-        <p>Order execution, routing progress, current operation and shop-floor records</p>
+        <h1>{{ $t('production.workOrderExecution.pageTitle') }}</h1>
+        <p>{{ $t('production.workOrderExecution.pageDesc') }}</p>
       </div>
       <div class="siemens-actions">
-        <button class="siemens-btn">Split Order</button>
-        <button class="siemens-btn">Hold / Change</button>
-        <button class="siemens-btn primary">Release</button>
+        <button class="siemens-btn">{{ $t('production.workOrderExecution.splitOrder') }}</button>
+        <button class="siemens-btn">{{ $t('production.workOrderExecution.holdChange') }}</button>
+        <button class="siemens-btn primary">{{ $t('production.workOrderExecution.release') }}</button>
       </div>
     </header>
 
-    <p v-if="loading" class="api-state">Loading work orders...</p>
+    <p v-if="loading" class="api-state">{{ $t('production.workOrderExecution.loading') }}</p>
     <p v-if="error" class="api-state error">{{ error }}</p>
 
     <div class="siemens-content work-order-layout">
       <div class="siemens-toolbar">
-        <input v-model="keyword" placeholder="Work order keyword" />
-        <button class="siemens-btn primary" @click="loadRows">Search</button>
-        <span class="siemens-muted">Mock execution data disabled</span>
+        <input v-model="keyword" :placeholder="$t('production.workOrderExecution.searchPlaceholder')" />
+        <button class="siemens-btn primary" @click="loadRows">{{ $t('production.workOrderExecution.search') }}</button>
+        <span class="siemens-muted">{{ $t('production.workOrderExecution.mockDisabled') }}</span>
       </div>
 
       <section class="siemens-grid work-order-main">
         <aside class="siemens-panel">
           <header>
-            <h2>Work Orders</h2>
+            <h2>{{ $t('production.workOrderExecution.workOrders') }}</h2>
             <span class="siemens-muted">{{ orderRows.length }} items</span>
           </header>
           <div class="siemens-panel-body siemens-scroll order-card-list">
@@ -46,30 +46,30 @@
               </div>
               <div class="siemens-progress"><span :style="{ width: order.progress + '%' }"></span></div>
             </article>
-            <p v-if="!loading && orderRows.length === 0" class="api-state">No work order data.</p>
+            <p v-if="!loading && orderRows.length === 0" class="api-state">{{ $t('production.workOrderExecution.noWorkOrderData') }}</p>
           </div>
         </aside>
 
         <main class="siemens-panel">
           <header>
-            <h2>Routing / Current Operation</h2>
-            <span :class="['siemens-status', selectedOrder?.tone]">{{ selectedOrder?.status || 'No data' }}</span>
+            <h2>{{ $t('production.workOrderExecution.routingOperation') }}</h2>
+            <span :class="['siemens-status', selectedOrder?.tone]">{{ selectedOrder?.status || $t('production.workOrderExecution.noData') }}</span>
           </header>
           <div class="siemens-panel-body selected-order">
             <section>
               <h3><span class="mono">{{ selectedOrder?.id || '-' }}</span> / {{ selectedOrder?.product || '-' }}</h3>
               <div class="siemens-kv">
-                <div><span>Responsible Team</span><strong>-</strong></div>
-                <div><span>Target Completion</span><strong>-</strong></div>
-                <div><span>Station</span><strong>-</strong></div>
-                <div><span>Current Process</span><strong>{{ selectedOrder?.process || '-' }}</strong></div>
+                <div><span>{{ $t('production.workOrderExecution.responsibleTeam') }}</span><strong>-</strong></div>
+                <div><span>{{ $t('production.workOrderExecution.targetCompletion') }}</span><strong>-</strong></div>
+                <div><span>{{ $t('production.workOrderExecution.station') }}</span><strong>-</strong></div>
+                <div><span>{{ $t('production.workOrderExecution.currentProcess') }}</span><strong>{{ selectedOrder?.process || '-' }}</strong></div>
               </div>
             </section>
             <section class="route-visual">
               <div class="route-node active">{{ selectedOrder?.process || '-' }}</div>
               <div class="route-meta">
-                <strong>{{ selectedOrder?.id || 'No operation selected' }}</strong>
-                <span>Waiting for backend routing and operation task data.</span>
+                <strong>{{ selectedOrder?.id || $t('production.workOrderExecution.noOperationSelected') }}</strong>
+                <span>{{ $t('production.workOrderExecution.waitingBackend') }}</span>
               </div>
             </section>
           </div>
@@ -77,14 +77,14 @@
 
         <aside class="siemens-panel">
           <header>
-            <h2>Execution State</h2>
+            <h2>{{ $t('production.workOrderExecution.executionState') }}</h2>
           </header>
           <div class="siemens-panel-body execution-side">
             <div class="siemens-kv">
-              <div><span>Plan Qty.</span><strong>{{ selectedOrder?.plan || '-' }}</strong></div>
-              <div><span>Finished</span><strong>{{ selectedOrder?.done || '-' }}</strong></div>
-              <div><span>Progress</span><strong>{{ selectedOrder?.progress ?? '-' }}%</strong></div>
-              <div><span>Status</span><strong>{{ selectedOrder?.status || '-' }}</strong></div>
+              <div><span>{{ $t('production.workOrderExecution.planQty') }}</span><strong>{{ selectedOrder?.plan || '-' }}</strong></div>
+              <div><span>{{ $t('production.workOrderExecution.finished') }}</span><strong>{{ selectedOrder?.done || '-' }}</strong></div>
+              <div><span>{{ $t('production.workOrderExecution.progress') }}</span><strong>{{ selectedOrder?.progress ?? '-' }}%</strong></div>
+              <div><span>{{ $t('production.workOrderExecution.status') }}</span><strong>{{ selectedOrder?.status || '-' }}</strong></div>
             </div>
           </div>
         </aside>
@@ -92,14 +92,14 @@
 
       <section class="siemens-panel">
         <header>
-          <h2>Production Records</h2>
-          <span class="siemens-muted">Recent execution details</span>
+          <h2>{{ $t('production.workOrderExecution.productionRecords') }}</h2>
+          <span class="siemens-muted">{{ $t('production.workOrderExecution.recordsDesc') }}</span>
         </header>
         <div class="siemens-panel-body siemens-scroll">
           <table class="siemens-table">
             <thead>
               <tr>
-                <th>Work Order</th><th>Product</th><th>Line</th><th>Process</th><th>Priority</th><th>Status</th><th>Plan</th><th>Done</th><th>Progress</th>
+                <th>{{ $t('production.workOrderExecution.workOrder') }}</th><th>{{ $t('production.workOrderExecution.product') }}</th><th>{{ $t('production.workOrderExecution.line') }}</th><th>{{ $t('production.workOrderExecution.process') }}</th><th>{{ $t('production.workOrderExecution.priority') }}</th><th>{{ $t('production.workOrderExecution.status') }}</th><th>{{ $t('production.workOrderExecution.plan') }}</th><th>{{ $t('production.workOrderExecution.done') }}</th><th>{{ $t('production.workOrderExecution.progress') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -115,7 +115,7 @@
                 <td><div class="siemens-progress"><span :style="{ width: order.progress + '%' }"></span></div></td>
               </tr>
               <tr v-if="!loading && orderRows.length === 0">
-                <td colspan="9">No production records.</td>
+                <td colspan="9">{{ $t('production.workOrderExecution.noRecords') }}</td>
               </tr>
             </tbody>
           </table>
@@ -127,7 +127,10 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getWorkOrders } from '../../api/production'
+
+const { t } = useI18n()
 
 const keyword = ref('')
 const orderRows = ref([])
@@ -174,7 +177,7 @@ const loadRows = async () => {
     orderRows.value = recordsOf(await getWorkOrders({ keyword: keyword.value || undefined })).map(mapOrder)
   } catch (e) {
     orderRows.value = []
-    error.value = e?.message || 'Work order API failed.'
+    error.value = e?.message || t('production.workOrderExecution.apiError')
   } finally {
     loading.value = false
   }

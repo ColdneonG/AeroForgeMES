@@ -21,7 +21,7 @@
       <table class="feature-table">
         <thead>
           <tr>
-            <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
+            <th v-for="column in columns" :key="column.key">{{ t(column.label) }}</th>
           </tr>
         </thead>
         <tbody>
@@ -43,7 +43,7 @@ import { emptyFeatureConfig } from '../../config/featurePageConfigs'
 
 const { t } = useI18n()
 const route = useRoute()
-const title = computed(() => route.meta.title || '功能页')
+const title = computed(() => route.meta.title || t('featurePage.defaultTitle'))
 const group = computed(() => route.meta.group || 'MES')
 const columns = emptyFeatureConfig.columns
 </script>

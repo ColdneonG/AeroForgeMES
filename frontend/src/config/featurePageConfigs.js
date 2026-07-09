@@ -13,13 +13,13 @@ export const emptyFeatureConfig = {
   kpis: [],
   trend: [],
   columns: [
-    { key: 'id', label: 'ID' },
-    { key: 'object', label: 'Business Object' },
-    { key: 'line', label: 'Scope / Line' },
-    { key: 'owner', label: 'Owner' },
-    { key: 'progress', label: 'Progress' },
-    { key: 'status', label: 'Status' },
-    { key: 'updatedAt', label: 'Updated' }
+    { key: 'id', label: 'tableColumns.id' },
+    { key: 'object', label: 'tableColumns.object' },
+    { key: 'line', label: 'tableColumns.scope' },
+    { key: 'owner', label: 'tableColumns.owner' },
+    { key: 'progress', label: 'tableColumns.progress' },
+    { key: 'status', label: 'tableColumns.status' },
+    { key: 'updatedAt', label: 'tableColumns.updatedAt' }
   ],
   statusTone
 }

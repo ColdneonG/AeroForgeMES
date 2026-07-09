@@ -2,15 +2,15 @@
   <section class="control-center-page">
     <div class="control-header">
       <div>
-        <p>电子看板</p>
-        <h1>中控看板</h1>
+        <p>{{ $t('boards.controlCenter.eyebrow') }}</p>
+        <h1>{{ $t('boards.controlCenter.title') }}</h1>
       </div>
       <strong>{{ now }}</strong>
     </div>
 
-    <p v-if="loading" class="board-state">Loading control-center data...</p>
+    <p v-if="loading" class="board-state">{{ $t('boards.controlCenter.loading') }}</p>
     <p v-if="error" class="board-state error">{{ error }}</p>
-    <p v-if="!loading && !error && isEmpty" class="board-state">No board data.</p>
+    <p v-if="!loading && !error && isEmpty" class="board-state">{{ $t('boards.controlCenter.noData') }}</p>
 
     <div class="control-kpi-strip">
       <article v-for="item in kpis" :key="item.label" :class="item.tone">
@@ -22,7 +22,7 @@
 
     <div class="control-grid">
       <section class="control-panel production-radar">
-        <div class="control-panel-title">实时产量</div>
+        <div class="control-panel-title">{{ $t('boards.controlCenter.realtimeOutput') }}</div>
         <div class="control-big-number">{{ outputTotal }}</div>
         <div class="control-bars">
           <i v-for="(value, index) in trend" :key="index" :style="{ height: `${value}%` }"></i>
@@ -30,7 +30,7 @@
       </section>
 
       <section class="control-panel">
-        <div class="control-panel-title">产线运行状态</div>
+        <div class="control-panel-title">{{ $t('boards.controlCenter.lineStatus') }}</div>
         <div class="control-line-list">
           <article v-for="line in lines" :key="line.name">
             <span>{{ line.name }}</span>
@@ -41,7 +41,7 @@
       </section>
 
       <section class="control-panel alert-panel">
-        <div class="control-panel-title">报警与异常</div>
+        <div class="control-panel-title">{{ $t('boards.controlCenter.alarmAbnormal') }}</div>
         <article v-for="alert in alerts" :key="alert.code" :class="alert.tone">
           <strong>{{ alert.code }}</strong>
           <span>{{ alert.text }}</span>
@@ -49,7 +49,7 @@
       </section>
 
       <section class="control-panel">
-        <div class="control-panel-title">工单进度 / 库存预警</div>
+        <div class="control-panel-title">{{ $t('boards.controlCenter.orderProgress') }}</div>
         <div class="control-work-list">
           <article v-for="work in workOrders" :key="work.id">
             <span>{{ work.id }}</span>
@@ -65,7 +65,10 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getControlCenterBoard } from '../../api/dashboard'
+
+const { t } = useI18n()
 
 const now = new Date().toLocaleString('zh-CN', { hour12: false })
 const kpis = ref([])
@@ -137,7 +140,7 @@ const loadBoard = async () => {
     lines.value = []
     alerts.value = []
     workOrders.value = []
-    error.value = e?.message || 'Control-center board API is not connected yet.'
+    error.value = e?.message || t('boards.controlCenter.apiError')
   } finally {
     loading.value = false
   }

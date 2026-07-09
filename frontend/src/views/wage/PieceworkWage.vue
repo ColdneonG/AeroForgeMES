@@ -51,13 +51,13 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'id', label: 'Settlement#' },
-  { key: 'operator', label: 'Operator' },
-  { key: 'process', label: 'Process' },
-  { key: 'good', label: 'Good' },
-  { key: 'bad', label: 'Bad' },
-  { key: 'amount', label: 'Amount' },
-  { key: 'status', label: 'Status' }
+  { key: 'id', label: t('tableColumns.settlementNo') },
+  { key: 'operator', label: t('tableColumns.operator') },
+  { key: 'process', label: t('tableColumns.process') },
+  { key: 'good', label: t('tableColumns.good') },
+  { key: 'bad', label: t('tableColumns.bad') },
+  { key: 'amount', label: t('tableColumns.amount') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 
 onMounted(loadRows)

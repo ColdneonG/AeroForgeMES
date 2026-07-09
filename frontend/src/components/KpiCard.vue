@@ -9,7 +9,7 @@
       <span>{{ caption }}</span>
       <b>{{ trend }}</b>
     </div>
-    <div class="kpi-time">更新时间 14:30</div>
+    <div v-if="updatedAt" class="kpi-time">{{ $t('tableColumns.updatedAt') }} {{ updatedAt }}</div>
   </article>
 </template>
 
@@ -22,7 +22,8 @@ const props = defineProps({
   unit: { type: String, default: '' },
   caption: { type: String, default: '' },
   trend: { type: String, default: '' },
-  tone: { type: String, default: 'info' }
+  tone: { type: String, default: 'info' },
+  updatedAt: { type: String, default: '' }
 })
 
 const toneClass = computed(() => `kpi-${props.tone}`)

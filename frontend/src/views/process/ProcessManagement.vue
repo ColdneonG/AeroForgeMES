@@ -50,12 +50,12 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'code', label: 'Code' },
-  { key: 'name', label: 'Name' },
-  { key: 'type', label: 'Type' },
-  { key: 'sop', label: 'SOP' },
-  { key: 'defects', label: 'Defects' },
-  { key: 'status', label: 'Status' }
+  { key: 'code', label: t('tableColumns.code') },
+  { key: 'name', label: t('tableColumns.name') },
+  { key: 'type', label: t('tableColumns.type') },
+  { key: 'sop', label: t('tableColumns.sop') },
+  { key: 'defects', label: t('tableColumns.defects') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
   { label: t('common.actions.edit'), action: 'edit' },

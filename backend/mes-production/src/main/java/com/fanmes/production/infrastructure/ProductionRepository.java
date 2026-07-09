@@ -13,9 +13,11 @@ import org.springframework.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public class ProductionRepository {
@@ -365,20 +367,62 @@ public class ProductionRepository {
             Long teamId
     ) {
         StringBuilder sql = new StringBuilder("""
-                select id, task_no, work_order_id, dispatch_id, product_id, route_id,
-                       line_id, team_id, plan_qty, started_at, ended_at, status
-                from shop_task
+                select st.id, st.task_no, st.work_order_id, st.dispatch_id, st.product_id, st.route_id,
+                       st.line_id, st.team_id, st.plan_qty, st.started_at, st.ended_at, st.status,
+                       wo.work_order_no,
+                       rh.route_name
+                from shop_task st
+                left join prod_work_order wo on wo.id = st.work_order_id
+                left join route_header rh on rh.id = st.route_id
                 where 1 = 1
                 """);
         MapSqlParameterSource params = new MapSqlParameterSource();
-        appendKeyword(sql, params, keyword, "task_no");
-        appendEquals(sql, params, "status", status);
-        appendEquals(sql, params, "work_order_id", workOrderId);
-        appendEquals(sql, params, "dispatch_id", dispatchId);
-        appendEquals(sql, params, "line_id", lineId);
-        appendEquals(sql, params, "team_id", teamId);
-        sql.append(" order by id desc");
-        return jdbc.query(sql.toString(), params, shopTaskMapper());
+        appendKeyword(sql, params, keyword, "st.task_no", "wo.work_order_no");
+        appendEquals(sql, params, "st.status", status);
+        appendEquals(sql, params, "st.work_order_id", workOrderId);
+        appendEquals(sql, params, "st.dispatch_id", dispatchId);
+        appendEquals(sql, params, "st.line_id", lineId);
+        appendEquals(sql, params, "st.team_id", teamId);
+        sql.append(" order by st.id desc");
+        return jdbc.query(sql.toString(), params, shopTaskWithNamesMapper());
+    }
+
+    public Map<Long, String> findItemNames(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) return Map.of();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ids", ids);
+        List<Map<String, Object>> rows = jdbc.query(
+                "select id, item_name from mes_system.md_item where id in (:ids)",
+                params,
+                (rs, rowNum) -> Map.of(
+                        "id", rs.getLong("id"),
+                        "name", rs.getString("item_name")
+                )
+        );
+        Map<Long, String> result = new java.util.HashMap<>();
+        for (Map<String, Object> row : rows) {
+            result.put((Long) row.get("id"), (String) row.get("name"));
+        }
+        return result;
+    }
+
+    public Map<Long, String> findLineNames(Set<Long> ids) {
+        if (ids == null || ids.isEmpty()) return Map.of();
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("ids", ids);
+        List<Map<String, Object>> rows = jdbc.query(
+                "select id, line_name from mes_system.md_production_line where id in (:ids)",
+                params,
+                (rs, rowNum) -> Map.of(
+                        "id", rs.getLong("id"),
+                        "name", rs.getString("line_name")
+                )
+        );
+        Map<Long, String> result = new java.util.HashMap<>();
+        for (Map<String, Object> row : rows) {
+            result.put((Long) row.get("id"), (String) row.get("name"));
+        }
+        return result;
     }
 
     public Optional<ShopTask> findShopTaskById(Long id) {
@@ -611,7 +655,29 @@ public class ProductionRepository {
                 rs.getBigDecimal("plan_qty"),
                 rs.getTimestamp("started_at") == null ? null : rs.getTimestamp("started_at").toLocalDateTime(),
                 rs.getTimestamp("ended_at") == null ? null : rs.getTimestamp("ended_at").toLocalDateTime(),
-                rs.getString("status")
+                rs.getString("status"),
+                null, null, null, null
+        );
+    }
+
+    private RowMapper<ShopTask> shopTaskWithNamesMapper() {
+        return (rs, rowNum) -> new ShopTask(
+                rs.getLong("id"),
+                rs.getString("task_no"),
+                getLong(rs, "work_order_id"),
+                getLong(rs, "dispatch_id"),
+                getLong(rs, "product_id"),
+                getLong(rs, "route_id"),
+                getLong(rs, "line_id"),
+                getLong(rs, "team_id"),
+                rs.getBigDecimal("plan_qty"),
+                rs.getTimestamp("started_at") == null ? null : rs.getTimestamp("started_at").toLocalDateTime(),
+                rs.getTimestamp("ended_at") == null ? null : rs.getTimestamp("ended_at").toLocalDateTime(),
+                rs.getString("status"),
+                rs.getString("work_order_no"),
+                null, // productName — filled by service layer
+                rs.getString("route_name"),
+                null  // lineName — filled by service layer
         );
     }
 

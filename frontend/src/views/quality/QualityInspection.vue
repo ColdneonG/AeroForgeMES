@@ -2,12 +2,12 @@
   <section class="siemens-page quality-monitoring">
     <header class="siemens-page-header">
       <div>
-        <h1>Quality Monitoring</h1>
-        <p>Inspection tasks, defect categories, quality trend and nonconformance closure</p>
+        <h1>{{ $t('quality.pageTitle') }}</h1>
+        <p>{{ $t('quality.pageDesc') }}</p>
       </div>
       <div class="siemens-actions">
-        <button class="siemens-btn">Failure Catalog</button>
-        <button class="siemens-btn primary">New Inspection</button>
+        <button class="siemens-btn">{{ $t('quality.failureCatalog') }}</button>
+        <button class="siemens-btn primary">{{ $t('quality.newInspection') }}</button>
       </div>
     </header>
 
@@ -15,8 +15,8 @@
       <section class="siemens-grid quality-top">
         <aside class="siemens-panel">
           <header>
-            <h2>Defect Types</h2>
-            <span class="siemens-muted">Today</span>
+            <h2>{{ $t('quality.defectTypes') }}</h2>
+            <span class="siemens-muted">{{ $t('quality.today') }}</span>
           </header>
           <div class="siemens-panel-body defect-list">
             <div v-for="defect in defectTypes" :key="defect.name" class="defect-row">
@@ -26,19 +26,19 @@
               </div>
               <div class="siemens-progress"><span :style="{ width: Math.min(defect.count * 6, 100) + '%' }"></span></div>
             </div>
-            <p v-if="!loading && defectTypes.length === 0" class="api-state">No defect data.</p>
+            <p v-if="!loading && defectTypes.length === 0" class="api-state">{{ $t('quality.noDefectData') }}</p>
           </div>
         </aside>
 
         <main class="siemens-panel">
           <header>
-            <h2>Inspection Tasks</h2>
-            <span class="siemens-muted">IQC / PQC / FQC</span>
+            <h2>{{ $t('quality.inspectionTasks') }}</h2>
+            <span class="siemens-muted">{{ $t('quality.inspectionTypes') }}</span>
           </header>
           <div class="siemens-panel-body siemens-scroll">
             <table class="siemens-table">
               <thead>
-                <tr><th>Task</th><th>Product</th><th>Type</th><th>Result</th><th>Pass Rate</th></tr>
+                <tr><th>{{ $t('quality.task') }}</th><th>{{ $t('quality.product') }}</th><th>{{ $t('quality.type') }}</th><th>{{ $t('quality.result') }}</th><th>{{ $t('quality.passRate') }}</th></tr>
               </thead>
               <tbody>
                 <tr v-for="task in qualityRows" :key="task.rowKey">
@@ -49,7 +49,7 @@
                   <td>{{ task.passRate }}%</td>
                 </tr>
                 <tr v-if="!loading && qualityRows.length === 0">
-                  <td colspan="5">No inspection data.</td>
+                  <td colspan="5">{{ $t('quality.noInspectionData') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -58,8 +58,8 @@
 
         <aside class="siemens-panel">
           <header>
-            <h2>Nonconformance Closure</h2>
-            <span class="siemens-status danger">{{ qualityAlerts.length }} open</span>
+            <h2>{{ $t('quality.nonconformanceClosure') }}</h2>
+            <span class="siemens-status danger">{{ $t('quality.openCount', { count: qualityAlerts.length }) }}</span>
           </header>
           <div class="siemens-panel-body alert-column siemens-scroll">
             <article v-for="alert in qualityAlerts" :key="alert.code" class="siemens-work-card danger">
@@ -70,19 +70,19 @@
                 <span class="siemens-muted">{{ alert.owner }}</span>
               </div>
             </article>
-            <p v-if="!loading && qualityAlerts.length === 0" class="api-state">No open nonconformance data.</p>
+            <p v-if="!loading && qualityAlerts.length === 0" class="api-state">{{ $t('quality.noNonconformanceData') }}</p>
           </div>
         </aside>
       </section>
 
-      <p v-if="loading" class="api-state">Loading quality data...</p>
+      <p v-if="loading" class="api-state">{{ $t('quality.loading') }}</p>
       <p v-if="error" class="api-state error">{{ error }}</p>
 
       <section class="siemens-grid quality-bottom">
         <article class="siemens-panel">
           <header>
-            <h2>Pass Rate Trend</h2>
-            <span class="siemens-muted">Shift A / %</span>
+            <h2>{{ $t('quality.passRateTrend') }}</h2>
+            <span class="siemens-muted">{{ $t('quality.shiftA') }}</span>
           </header>
           <div class="siemens-panel-body">
             <div class="siemens-mini-chart">
@@ -93,24 +93,24 @@
 
         <article class="siemens-panel">
           <header>
-            <h2>Disposition Flow</h2>
+            <h2>{{ $t('quality.dispositionFlow') }}</h2>
           </header>
           <div class="siemens-panel-body disposition-panel">
             <div class="siemens-step-line">
-              <span class="siemens-step done">Detected</span>
+              <span class="siemens-step done">{{ $t('quality.detected') }}</span>
               <span class="siemens-step-join"></span>
-              <span class="siemens-step active">Judgement</span>
+              <span class="siemens-step active">{{ $t('quality.judgement') }}</span>
               <span class="siemens-step-join"></span>
-              <span class="siemens-step warn">Rework</span>
+              <span class="siemens-step warn">{{ $t('quality.rework') }}</span>
               <span class="siemens-step-join"></span>
-              <span class="siemens-step">Recheck</span>
+              <span class="siemens-step">{{ $t('quality.recheck') }}</span>
               <span class="siemens-step-join"></span>
-              <span class="siemens-step">Closed</span>
+              <span class="siemens-step">{{ $t('quality.closed') }}</span>
             </div>
             <div class="disposition-table-wrap">
               <table class="siemens-table">
                 <thead>
-                  <tr><th>Node</th><th>Owner</th><th>Time</th><th>Status</th></tr>
+                  <tr><th>{{ $t('quality.node') }}</th><th>{{ $t('quality.owner') }}</th><th>{{ $t('quality.time') }}</th><th>{{ $t('quality.status') }}</th></tr>
                 </thead>
                 <tbody>
               <tr v-for="item in dispositionRows" :key="item.node">
@@ -120,7 +120,7 @@
                 <td><span :class="['siemens-status', statusTone(item.status)]">{{ item.status }}</span></td>
               </tr>
               <tr v-if="!loading && dispositionRows.length === 0">
-                <td colspan="4">No disposition flow data.</td>
+                <td colspan="4">{{ $t('quality.noDispositionData') }}</td>
               </tr>
                 </tbody>
               </table>
@@ -134,7 +134,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getDefectRecords, getInspectionResults, getQualityInspections } from '../../api/quality'
+
+const { t } = useI18n()
 
 const qualityRows = ref([])
 const defectTypes = ref([])
@@ -204,7 +207,7 @@ const loadRows = async () => {
     defectTypes.value = []
     dispositionRows.value = []
     passRateTrend.value = []
-    error.value = e?.message || 'Data loading failed. Please check backend API or gateway configuration.'
+    error.value = e?.message || t('quality.apiError')
   } finally {
     loading.value = false
   }

@@ -2,16 +2,16 @@
   <section class="siemens-page equipment-monitoring">
     <header class="siemens-page-header">
       <div>
-        <h1>Equipment Monitoring</h1>
-        <p>Machine status, OEE, downtime distribution and maintenance reminders</p>
+        <h1>{{ $t('equipment.monitoring.pageTitle') }}</h1>
+        <p>{{ $t('equipment.monitoring.pageDesc') }}</p>
       </div>
       <div class="siemens-actions">
-        <button class="siemens-btn">Inspection Records</button>
-        <button class="siemens-btn primary">Create Work Order</button>
+        <button class="siemens-btn">{{ $t('equipment.monitoring.inspectionRecords') }}</button>
+        <button class="siemens-btn primary">{{ $t('equipment.monitoring.createWorkOrder') }}</button>
       </div>
     </header>
 
-    <p v-if="loading" class="api-state">Loading equipment monitoring data...</p>
+    <p v-if="loading" class="api-state">{{ $t('equipment.monitoring.loading') }}</p>
     <p v-if="error" class="api-state error">{{ error }}</p>
 
     <div class="siemens-content equipment-layout">
@@ -28,7 +28,7 @@
           </div>
           <p><span class="mono">{{ item.id }}</span> / {{ item.area }}</p>
           <div class="equipment-oee">
-            <span>OEE</span>
+            <span>{{ $t('equipment.monitoring.oee') }}</span>
             <strong>{{ item.oee }}%</strong>
           </div>
           <div class="siemens-progress"><span :style="{ width: item.oee + '%' }"></span></div>
@@ -38,8 +38,8 @@
       <section class="siemens-grid equipment-main">
         <article class="siemens-panel">
           <header>
-            <h2>Industrial Metrics</h2>
-            <span class="siemens-muted">OEE / Availability / Performance</span>
+            <h2>{{ $t('equipment.monitoring.industrialMetrics') }}</h2>
+            <span class="siemens-muted">{{ $t('equipment.monitoring.metricsDesc') }}</span>
           </header>
           <div class="siemens-panel-body metric-board">
             <div v-for="metric in metrics" :key="metric.label" class="metric-tile">
@@ -47,13 +47,13 @@
               <strong>{{ metric.value }}</strong>
               <div class="siemens-progress"><span :style="{ width: metric.bar }"></span></div>
             </div>
-            <p v-if="!loading && metrics.length === 0" class="api-state">No metric data.</p>
+            <p v-if="!loading && metrics.length === 0" class="api-state">{{ $t('equipment.monitoring.noMetricData') }}</p>
           </div>
         </article>
 
         <aside class="siemens-panel">
           <header>
-            <h2>Downtime Reasons</h2>
+            <h2>{{ $t('equipment.monitoring.downtimeReasons') }}</h2>
           </header>
           <div class="siemens-panel-body downtime-list">
             <div v-for="item in downtimeReasons" :key="item.reason" class="downtime-row">
@@ -63,18 +63,18 @@
               </div>
               <div class="siemens-progress"><span :style="{ width: item.minutes * 1.4 + '%' }"></span></div>
             </div>
-            <p v-if="!loading && downtimeReasons.length === 0" class="api-state">No downtime data.</p>
+            <p v-if="!loading && downtimeReasons.length === 0" class="api-state">{{ $t('equipment.monitoring.noDowntimeData') }}</p>
           </div>
         </aside>
 
         <aside class="siemens-panel">
           <header>
-            <h2>Maintenance / Events</h2>
+            <h2>{{ $t('equipment.monitoring.maintenanceEvents') }}</h2>
           </header>
           <div class="siemens-panel-body siemens-scroll">
             <table class="siemens-table">
               <thead>
-                <tr><th>Machine</th><th>ID</th><th>Reminder</th><th>Status</th></tr>
+                <tr><th>{{ $t('equipment.monitoring.machine') }}</th><th>{{ $t('equipment.monitoring.id') }}</th><th>{{ $t('equipment.monitoring.reminder') }}</th><th>{{ $t('equipment.monitoring.status') }}</th></tr>
               </thead>
               <tbody>
                 <tr v-for="item in eventRows" :key="item.rowKey">
@@ -84,7 +84,7 @@
                   <td><span :class="['siemens-status', item.tone]">{{ item.status }}</span></td>
                 </tr>
                 <tr v-if="!loading && eventRows.length === 0">
-                  <td colspan="4">No event data.</td>
+                  <td colspan="4">{{ $t('equipment.monitoring.noEventData') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -97,7 +97,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getEquipmentLedgers, getFaultReasons, getMaintenanceOrders, getOeeSnapshots } from '../../api/equipment'
+
+const { t } = useI18n()
 
 const equipments = ref([])
 const metrics = ref([])
@@ -162,7 +165,7 @@ const loadRows = async () => {
     metrics.value = []
     downtimeReasons.value = []
     eventRows.value = []
-    error.value = e?.message || 'Equipment monitoring API failed.'
+    error.value = e?.message || t('equipment.monitoring.apiError')
   } finally {
     loading.value = false
   }

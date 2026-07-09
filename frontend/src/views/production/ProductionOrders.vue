@@ -44,8 +44,8 @@ const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.reco
 const mapWorkOrder = (row) => ({
   id: row.workOrderNo || row.work_order_no || row.id,
   apiId: row.id,
-  product: row.productName || row.product_name || (row.productId ? `Product ${row.productId}` : '-'),
-  line: row.lineName || row.line_name || (row.lineId ? `Line ${row.lineId}` : '-'),
+  product: row.productName || row.product_name || (row.productId ? `${t('tableColumns.product')} ${row.productId}` : '-'),
+  line: row.lineName || row.line_name || (row.lineId ? `${t('tableColumns.line')} ${row.lineId}` : '-'),
   plan: displayQty(row.planQty ?? row.plan_qty),
   done: displayQty(row.completedQty ?? row.completed_qty),
   status: row.status || '-',

@@ -2,16 +2,16 @@
   <section class="board-page line-board-page">
     <div class="board-header">
       <div>
-        <p>电子看板</p>
-        <h1>产线看板</h1>
-        <span>演示数据已关闭，数据只从真实接口加载。</span>
+        <p>{{ $t('boards.line.eyebrow') }}</p>
+        <h1>{{ $t('boards.line.title') }}</h1>
+        <span>{{ $t('boards.line.demoDisabled') }}</span>
       </div>
-      <div class="board-time">实时刷新 · {{ now }}</div>
+      <div class="board-time">{{ $t('boards.line.realtimeRefresh') }}{{ now }}</div>
     </div>
 
-    <p v-if="loading" class="board-state">Loading line board...</p>
+    <p v-if="loading" class="board-state">{{ $t('boards.line.loading') }}</p>
     <p v-if="error" class="board-state error">{{ error }}</p>
-    <p v-if="!loading && !error && lines.length === 0" class="board-state">暂无产线看板数据</p>
+    <p v-if="!loading && !error && lines.length === 0" class="board-state">{{ $t('boards.line.noData') }}</p>
 
     <div class="line-board-grid">
       <article v-for="line in lines" :key="line.name" class="line-board-card" :class="line.tone">
@@ -23,19 +23,19 @@
           <i>{{ line.status }}</i>
         </div>
         <div class="line-card-order">
-          <span>当前工单</span>
+          <span>{{ $t('boards.line.currentOrder') }}</span>
           <strong>{{ line.order }}</strong>
         </div>
         <div class="line-card-metrics">
-          <div><span>计划</span><strong>{{ line.plan }}</strong></div>
-          <div><span>完成</span><strong>{{ line.done }}</strong></div>
-          <div><span>完成率</span><strong>{{ line.rate }}%</strong></div>
+          <div><span>{{ $t('boards.line.plan') }}</span><strong>{{ line.plan }}</strong></div>
+          <div><span>{{ $t('boards.line.done') }}</span><strong>{{ line.done }}</strong></div>
+          <div><span>{{ $t('boards.line.completionRate') }}</span><strong>{{ line.rate }}%</strong></div>
         </div>
         <div class="line-progress"><span :style="{ width: `${line.rate}%` }"></span></div>
         <div class="line-card-foot">
-          <span>设备：{{ line.equipment }}</span>
-          <span>异常：{{ line.exception }}</span>
-          <span>预计：{{ line.eta }}</span>
+          <span>{{ $t('boards.line.equipment') }}{{ line.equipment }}</span>
+          <span>{{ $t('boards.line.abnormal') }}{{ line.exception }}</span>
+          <span>{{ $t('boards.line.estimated') }}{{ line.eta }}</span>
         </div>
       </article>
     </div>
@@ -44,7 +44,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getLineBoard } from '../../api/dashboard'
+
+const { t } = useI18n()
 
 const now = new Date().toLocaleString('zh-CN', { hour12: false })
 const lines = ref([])
@@ -84,7 +87,7 @@ const loadRows = async () => {
     lines.value = recordsOf(await getLineBoard()).map(mapLine)
   } catch (e) {
     lines.value = []
-    error.value = e?.message || 'Line board API is not connected yet.'
+    error.value = e?.message || t('boards.line.apiError')
   } finally {
     loading.value = false
   }

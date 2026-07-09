@@ -18,7 +18,7 @@
       </button>
 
       <div class="rail-spacer"></div>
-      <button class="rail-avatar" :title="authState.user?.displayName || 'User'"></button>
+      <button class="rail-avatar" :title="authState.user?.displayName || t('common.feature.unknownUser')"></button>
     </aside>
 
     <Transition name="module-drawer">

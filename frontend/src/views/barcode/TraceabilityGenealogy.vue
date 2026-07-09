@@ -2,31 +2,31 @@
   <section class="siemens-page traceability-page">
     <header class="siemens-page-header">
       <div>
-        <h1>Traceability / Genealogy</h1>
-        <p>Material, process, equipment, operator and quality records from serial number genealogy</p>
+        <h1>{{ $t('barcode.traceability.pageTitle') }}</h1>
+        <p>{{ $t('barcode.traceability.pageDesc') }}</p>
       </div>
       <div class="siemens-actions">
-        <button class="siemens-btn">Export Report</button>
-        <button class="siemens-btn primary" @click="loadTrace">Refresh Query</button>
+        <button class="siemens-btn">{{ $t('barcode.traceability.exportReport') }}</button>
+        <button class="siemens-btn primary" @click="loadTrace">{{ $t('barcode.traceability.refreshQuery') }}</button>
       </div>
     </header>
 
-    <p v-if="loading" class="api-state">Loading traceability data...</p>
+    <p v-if="loading" class="api-state">{{ $t('barcode.traceability.loading') }}</p>
     <p v-if="error" class="api-state error">{{ error }}</p>
 
     <div class="siemens-content trace-layout">
       <div class="siemens-toolbar">
-        <input v-model="keyword" placeholder="Scan or enter barcode" />
-        <select><option>By SN</option><option>By work order</option><option>By batch</option></select>
-        <button class="siemens-btn primary" @click="loadTrace">Search</button>
-        <span class="siemens-muted">Mock data disabled</span>
+        <input v-model="keyword" :placeholder="$t('barcode.traceability.searchPlaceholder')" />
+        <select><option>{{ $t('barcode.traceability.bySN') }}</option><option>{{ $t('barcode.traceability.byWorkOrder') }}</option><option>{{ $t('barcode.traceability.byBatch') }}</option></select>
+        <button class="siemens-btn primary" @click="loadTrace">{{ $t('barcode.traceability.search') }}</button>
+        <span class="siemens-muted">{{ $t('barcode.traceability.mockDisabled') }}</span>
       </div>
 
       <section class="siemens-grid trace-main">
         <article class="siemens-panel">
           <header>
-            <h2>Genealogy Chain / Timeline</h2>
-            <span class="siemens-status">{{ traceRoot || 'No data' }}</span>
+            <h2>{{ $t('barcode.traceability.genealogyChain') }}</h2>
+            <span class="siemens-status">{{ traceRoot || $t('barcode.traceability.noData') }}</span>
           </header>
           <div class="siemens-panel-body siemens-scroll trace-tree-panel">
             <h3><span class="mono">{{ traceRoot || '-' }}</span></h3>
@@ -35,13 +35,13 @@
                 {{ node.title || node.name || node.id }}
               </li>
             </ul>
-            <p v-if="!loading && traceNodes.length === 0" class="api-state">No genealogy data.</p>
+            <p v-if="!loading && traceNodes.length === 0" class="api-state">{{ $t('barcode.traceability.noGenealogyData') }}</p>
           </div>
         </article>
 
         <aside class="siemens-panel">
           <header>
-            <h2>Object Details</h2>
+            <h2>{{ $t('barcode.traceability.objectDetails') }}</h2>
           </header>
           <div class="siemens-panel-body object-panel">
             <table class="siemens-table">
@@ -51,7 +51,7 @@
                   <td><strong>{{ row[1] }}</strong></td>
                 </tr>
                 <tr v-if="!loading && details.length === 0">
-                  <td colspan="2">No detail data.</td>
+                  <td colspan="2">{{ $t('barcode.traceability.noDetailData') }}</td>
                 </tr>
               </tbody>
             </table>
@@ -61,13 +61,13 @@
 
       <section class="siemens-panel">
         <header>
-          <h2>Traceability Event Details</h2>
-          <span class="siemens-muted">Acquisition records / quality result / equipment and operator binding</span>
+          <h2>{{ $t('barcode.traceability.eventDetails') }}</h2>
+          <span class="siemens-muted">{{ $t('barcode.traceability.eventDesc') }}</span>
         </header>
         <div class="siemens-panel-body siemens-scroll">
           <table class="siemens-table">
             <thead>
-              <tr><th>Time</th><th>Object</th><th>Action</th><th>Equipment</th><th>Operator</th><th>Result</th></tr>
+              <tr><th>{{ $t('tableColumns.time') }}</th><th>{{ $t('tableColumns.objectName') }}</th><th>{{ $t('tableColumns.action') }}</th><th>{{ $t('tableColumns.equipment') }}</th><th>{{ $t('tableColumns.operator') }}</th><th>{{ $t('tableColumns.result') }}</th></tr>
             </thead>
             <tbody>
               <tr v-for="event in events" :key="event.time + event.action">
@@ -79,7 +79,7 @@
                 <td><span :class="['siemens-status', statusTone(event.status)]">{{ event.status }}</span></td>
               </tr>
               <tr v-if="!loading && events.length === 0">
-                <td colspan="6">No event data.</td>
+                <td colspan="6">{{ $t('barcode.traceability.noEventData') }}</td>
               </tr>
             </tbody>
           </table>
@@ -91,7 +91,10 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { traceBarcode } from '../../api/barcode'
+
+const { t } = useI18n()
 
 const keyword = ref('')
 const traceRoot = ref('')
@@ -124,7 +127,7 @@ const loadTrace = async () => {
     traceNodes.value = []
     details.value = []
     events.value = []
-    error.value = e?.message || 'Traceability API is not connected yet.'
+    error.value = e?.message || t('barcode.traceability.apiError')
   } finally {
     loading.value = false
   }

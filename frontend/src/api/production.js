@@ -84,6 +84,10 @@ export function getKittingMissingBoard() {
   return request.get('/production/kitting-missing-board')
 }
 
+export function getKittingMissingItems(params) {
+  return request.get('/production/kitting-missing-items', { params })
+}
+
 export function createTaskFromDispatch(id, data = {}) {
   return request.post(`/production/dispatch-orders/${id}/tasks`, data)
 }

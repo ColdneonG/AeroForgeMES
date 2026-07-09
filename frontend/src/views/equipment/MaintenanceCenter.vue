@@ -56,12 +56,12 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'id', label: 'Task#' },
-  { key: 'equipment', label: 'Equipment' },
-  { key: 'type', label: 'Type' },
-  { key: 'owner', label: 'Assignee' },
-  { key: 'due', label: 'Due' },
-  { key: 'status', label: 'Status' }
+  { key: 'id', label: t('tableColumns.taskNoShort') },
+  { key: 'equipment', label: t('tableColumns.equipment') },
+  { key: 'type', label: t('tableColumns.type') },
+  { key: 'owner', label: t('tableColumns.assignee') },
+  { key: 'due', label: t('tableColumns.due') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
   { label: t('statusFlow.actions.acceptRepair'), action: 'acceptRepair' },

@@ -2,16 +2,16 @@
   <section class="board-page workshop-board-page">
     <div class="board-header">
       <div>
-        <p>电子看板</p>
-        <h1>车间看板</h1>
-        <span>演示数据已关闭，区域数据只从真实接口加载。</span>
+        <p>{{ $t('boards.workshop.eyebrow') }}</p>
+        <h1>{{ $t('boards.workshop.title') }}</h1>
+        <span>{{ $t('boards.workshop.demoDisabled') }}</span>
       </div>
-      <div class="board-time">车间总览 · {{ activeAreas }}/{{ areas.length }} 区域正常</div>
+      <div class="board-time">{{ $t('boards.workshop.overview', { active: activeAreas, total: areas.length }) }}</div>
     </div>
 
-    <p v-if="loading" class="board-state">Loading workshop board...</p>
+    <p v-if="loading" class="board-state">{{ $t('boards.workshop.loading') }}</p>
     <p v-if="error" class="board-state error">{{ error }}</p>
-    <p v-if="!loading && !error && areas.length === 0" class="board-state">暂无车间看板数据</p>
+    <p v-if="!loading && !error && areas.length === 0" class="board-state">{{ $t('boards.workshop.noData') }}</p>
 
     <div class="workshop-layout">
       <article v-for="area in areas" :key="area.name" class="workshop-area-card" :class="area.tone">
@@ -23,9 +23,9 @@
           </div>
           <p>{{ area.description }}</p>
           <div class="area-stats">
-            <span>工单 {{ area.orders }}</span>
-            <span>设备 {{ area.equipment }}</span>
-            <span>异常 {{ area.exceptions }}</span>
+            <span>{{ $t('boards.workshop.orderLabel') }}{{ area.orders }}</span>
+            <span>{{ $t('boards.workshop.equipmentLabel') }}{{ area.equipment }}</span>
+            <span>{{ $t('boards.workshop.abnormalLabel') }}{{ area.exceptions }}</span>
           </div>
         </div>
       </article>
@@ -35,7 +35,10 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getWorkshopBoard } from '../../api/dashboard'
+
+const { t } = useI18n()
 
 const areas = ref([])
 const loading = ref(false)
@@ -67,7 +70,7 @@ const loadRows = async () => {
     areas.value = recordsOf(await getWorkshopBoard()).map(mapArea)
   } catch (e) {
     areas.value = []
-    error.value = e?.message || 'Workshop board API is not connected yet.'
+    error.value = e?.message || t('boards.workshop.apiError')
   } finally {
     loading.value = false
   }

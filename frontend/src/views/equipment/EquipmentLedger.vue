@@ -52,12 +52,12 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'id', label: 'SN' },
-  { key: 'type', label: 'Type' },
-  { key: 'maker', label: 'Maker' },
-  { key: 'dept', label: 'Department' },
-  { key: 'manager', label: 'Manager' },
-  { key: 'status', label: 'Status' }
+  { key: 'id', label: t('tableColumns.sn') },
+  { key: 'type', label: t('tableColumns.type') },
+  { key: 'maker', label: t('tableColumns.maker') },
+  { key: 'dept', label: t('tableColumns.department') },
+  { key: 'manager', label: t('tableColumns.manager') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
   { label: t('statusFlow.actions.edit'), action: 'edit' },

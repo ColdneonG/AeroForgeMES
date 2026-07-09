@@ -52,12 +52,12 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'id', label: 'Exception#' },
-  { key: 'type', label: 'Type' },
-  { key: 'line', label: 'Line' },
-  { key: 'reason', label: 'Reason' },
-  { key: 'owner', label: 'Handler' },
-  { key: 'status', label: 'Status' }
+  { key: 'id', label: t('tableColumns.exceptionNo') },
+  { key: 'type', label: t('tableColumns.type') },
+  { key: 'line', label: t('tableColumns.line') },
+  { key: 'reason', label: t('tableColumns.reason') },
+  { key: 'owner', label: t('tableColumns.handler') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const primaryActions = [
   { label: t('common.actions.create'), action: 'create' },

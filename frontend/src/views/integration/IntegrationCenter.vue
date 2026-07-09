@@ -3,7 +3,7 @@
     :eyebrow="eyebrow"
     :title="title"
     :description="description"
-    list-title="Sync Records"
+    :list-title="t('integration.center.listTitle')"
     :rows="rows"
     :columns="columns"
     row-key="id"
@@ -58,12 +58,12 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'id', label: 'Log#' },
-  { key: 'module', label: 'API' },
-  { key: 'direction', label: 'Direction' },
-  { key: 'externalNo', label: 'External ID' },
-  { key: 'result', label: 'Result' },
-  { key: 'status', label: 'Status' }
+  { key: 'id', label: t('tableColumns.logNo') },
+  { key: 'module', label: t('tableColumns.api') },
+  { key: 'direction', label: t('tableColumns.direction') },
+  { key: 'externalNo', label: t('tableColumns.externalId') },
+  { key: 'result', label: t('tableColumns.result') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
   { label: t('statusFlow.actions.retry'), action: 'retry' },

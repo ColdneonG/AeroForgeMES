@@ -14,7 +14,7 @@
       <section class="mes-panel sop-preview">
         <div class="mes-panel-title">
           <strong>{{ t('common.feature.noData') }}</strong>
-          <span>disabled</span>
+          <span>{{ t('shopfloor.sop.disabled') }}</span>
         </div>
         <div class="sop-canvas">
           <h2>{{ t('common.feature.demoDisabled') }}</h2>
@@ -30,7 +30,7 @@
           <li>{{ t('tableColumns.id') }}：-</li>
           <li>{{ t('tableColumns.line') }}：-</li>
           <li>{{ t('tableColumns.owner') }}：-</li>
-          <li>{{ t('common.filter.status') }}：{{ confirmed ? 'confirmed' : 'pending' }}</li>
+          <li>{{ t('common.filter.status') }}：{{ confirmed ? t('shopfloor.sop.confirmed') : t('shopfloor.sop.pending') }}</li>
         </ul>
       </section>
     </div>

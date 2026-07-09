@@ -1,5 +1,5 @@
 <template>
-  <section class="mes-workspace" @click="selected = null">
+  <section class="mes-workspace">
     <div class="mes-page-heading">
       <div>
         <p>{{ eyebrow }}</p>
@@ -54,7 +54,7 @@
               v-for="row in filteredRows"
               :key="row[rowKey]"
               :class="{ selected: selected?.[rowKey] === row[rowKey] }"
-              @click.stop="selected = row"
+              @click.stop="selectRow(row)"
             >
               <td v-for="column in columns" :key="column.key">
                 <span v-if="column.key === 'status'" class="status-pill">{{ row[column.key] }}</span>
@@ -86,13 +86,15 @@
           <strong>{{ t('common.detail.title') }}</strong>
           <span>{{ selected?.[rowKey] || t('common.detail.unselected') }}</span>
         </div>
-        <dl v-if="selected" class="detail-list">
-          <template v-for="column in columns" :key="column.key">
-            <dt>{{ column.label }}</dt>
-            <dd>{{ selected[column.key] }}</dd>
-          </template>
-        </dl>
-        <div v-else class="empty-detail">{{ t('common.detail.emptyHint') }}</div>
+        <slot name="detail" :selected="selected" :columns="columns">
+          <dl v-if="selected" class="detail-list">
+            <template v-for="column in columns" :key="column.key">
+              <dt>{{ column.label }}</dt>
+              <dd>{{ selected[column.key] }}</dd>
+            </template>
+          </dl>
+          <div v-else class="empty-detail">{{ t('common.detail.emptyHint') }}</div>
+        </slot>
       </aside>
     </div>
 
@@ -130,7 +132,7 @@ const props = defineProps({
   handleActionsExternally: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['primary-action', 'row-action'])
+const emit = defineEmits(['primary-action', 'row-action', 'select'])
 
 const keyword = ref('')
 const status = ref('')
@@ -162,20 +164,45 @@ const filteredRows = computed(() => {
 })
 
 const nextStatusByAction = {
-  release: '已下发',
-  dispatch: '已下发',
-  start: '生产中',
-  pause: '暂停',
-  resume: '生产中',
-  complete: '已完成',
-  close: '已关闭',
-  void: '作废',
-  handle: '已处理',
-  accept: '处理中',
-  retry: '待同步',
-  finishRepair: '正常',
-  repair: '待维修'
+  release: () => t('status.released'),
+  dispatch: () => t('status.released'),
+  start: () => t('status.running'),
+  pause: () => t('status.paused'),
+  resume: () => t('status.running'),
+  complete: () => t('status.completed'),
+  close: () => t('status.closed'),
+  void: () => t('status.voided'),
+  handle: () => t('status.handled'),
+  accept: () => t('status.handling'),
+  retry: () => t('status.syncPending'),
+  finishRepair: () => t('status.normal'),
+  repair: () => t('status.repairPending')
 }
+
+const getNextStatus = (action) => {
+  const fn = nextStatusByAction[action]
+  return fn ? fn() : null
+}
+
+const selectRow = (row) => {
+  selected.value = row
+  emit('select', row)
+}
+
+const addAuditEntry = ({ action, from, to, remark }) => {
+  localLogs.value = [
+    buildAuditEntry({
+      action,
+      operator: authState.user?.displayName,
+      from,
+      to: to || from,
+      remark: remark || `${t('common.auditLog.defaultRemark')}`
+    }),
+    ...localLogs.value
+  ]
+}
+
+defineExpose({ addAuditEntry })
 
 const runAction = (button, target = selected.value, source = 'primary') => {
   if (!target) return
@@ -184,7 +211,7 @@ const runAction = (button, target = selected.value, source = 'primary') => {
   if (props.handleActionsExternally) return
 
   const oldStatus = target.status
-  const nextStatus = nextStatusByAction[button.action] || oldStatus
+  const nextStatus = getNextStatus(button.action) || oldStatus
   target.status = nextStatus
   selected.value = target
   localLogs.value = [

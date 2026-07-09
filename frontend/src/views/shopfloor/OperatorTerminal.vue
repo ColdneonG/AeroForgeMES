@@ -2,39 +2,39 @@
   <section class="siemens-page operator-station">
     <header class="siemens-page-header">
       <div>
-        <h1>Operator Station</h1>
-        <p>Station work guidance, material verification, operation execution and completion reporting</p>
+        <h1>{{ $t('shopfloor.operatorTerminal.pageTitle') }}</h1>
+        <p>{{ $t('shopfloor.operatorTerminal.pageDesc') }}</p>
       </div>
       <div class="siemens-actions">
-        <button class="siemens-btn danger">Report Issue</button>
-        <button class="siemens-btn primary">Call Leader</button>
+        <button class="siemens-btn danger">{{ $t('shopfloor.operatorTerminal.reportIssue') }}</button>
+        <button class="siemens-btn primary">{{ $t('shopfloor.operatorTerminal.callLeader') }}</button>
       </div>
     </header>
 
-    <p v-if="loading" class="api-state">Loading operator tasks...</p>
+    <p v-if="loading" class="api-state">{{ $t('shopfloor.operatorTerminal.loading') }}</p>
     <p v-if="error" class="api-state error">{{ error }}</p>
 
     <div class="siemens-content operator-layout">
       <section class="station-strip">
-        <div><span>Machine</span><strong>{{ station.machine }}</strong></div>
-        <div><span>Machine Status</span><strong>{{ station.machineStatus }}</strong></div>
-        <div><span>Work Order</span><strong>{{ station.workOrder }}</strong></div>
-        <div><span>Serial Number</span><strong>{{ station.serialNo }}</strong></div>
-        <div><span>Active User</span><strong>{{ station.activeUser }}</strong></div>
-        <div><span>Remaining Time</span><strong>{{ station.remainingTime }}</strong></div>
+        <div><span>{{ $t('shopfloor.operatorTerminal.machine') }}</span><strong>{{ station.machine }}</strong></div>
+        <div><span>{{ $t('shopfloor.operatorTerminal.machineStatus') }}</span><strong>{{ station.machineStatus }}</strong></div>
+        <div><span>{{ $t('shopfloor.operatorTerminal.workOrder') }}</span><strong>{{ station.workOrder }}</strong></div>
+        <div><span>{{ $t('shopfloor.operatorTerminal.serialNumber') }}</span><strong>{{ station.serialNo }}</strong></div>
+        <div><span>{{ $t('shopfloor.operatorTerminal.activeUser') }}</span><strong>{{ station.activeUser }}</strong></div>
+        <div><span>{{ $t('shopfloor.operatorTerminal.remainingTime') }}</span><strong>{{ station.remainingTime }}</strong></div>
       </section>
 
       <section class="siemens-grid operator-main">
         <aside class="siemens-panel">
           <header>
-            <h2>Current Order / Steps</h2>
-            <span class="siemens-status">{{ selectedTask?.status || 'No data' }}</span>
+            <h2>{{ $t('shopfloor.operatorTerminal.currentOrderSteps') }}</h2>
+            <span class="siemens-status">{{ selectedTask?.status || $t('shopfloor.operatorTerminal.noData') }}</span>
           </header>
           <div class="siemens-panel-body step-list">
             <article class="siemens-work-card active">
               <h3>{{ selectedTask?.id || '-' }}</h3>
               <p>{{ selectedTask?.product || '-' }} / {{ selectedTask?.line || '-' }} / {{ selectedTask?.process || '-' }}</p>
-              <input class="station-input" placeholder="Scan serial number" />
+              <input class="station-input" :placeholder="$t('shopfloor.operatorTerminal.scanPlaceholder')" />
             </article>
 
             <div class="siemens-scroll task-list">
@@ -50,21 +50,21 @@
                 </div>
                 <p>{{ task.id }} / {{ task.product }}</p>
               </article>
-              <p v-if="!loading && tasks.length === 0" class="api-state">No operator task data.</p>
+              <p v-if="!loading && tasks.length === 0" class="api-state">{{ $t('shopfloor.operatorTerminal.noTaskData') }}</p>
             </div>
           </div>
         </aside>
 
         <main class="siemens-panel">
           <header>
-            <h2>Work Instruction / Assembly Operation</h2>
-            <span class="siemens-muted">Mock instruction disabled</span>
+            <h2>{{ $t('shopfloor.operatorTerminal.workInstruction') }}</h2>
+            <span class="siemens-muted">{{ $t('shopfloor.operatorTerminal.mockDisabled') }}</span>
           </header>
           <div class="siemens-panel-body instruction-panel">
             <div class="instruction-visual">
               <div>
-                <strong>{{ selectedTask?.process || 'No operation selected' }}</strong>
-                <span>{{ selectedTask?.id || 'Waiting for backend task data' }}</span>
+                <strong>{{ selectedTask?.process || $t('shopfloor.operatorTerminal.noOperationSelected') }}</strong>
+                <span>{{ selectedTask?.id || $t('shopfloor.operatorTerminal.waitingBackend') }}</span>
               </div>
             </div>
           </div>
@@ -72,24 +72,24 @@
 
         <aside class="siemens-panel">
           <header>
-            <h2>Product / Material / Actions</h2>
+            <h2>{{ $t('shopfloor.operatorTerminal.productMaterialActions') }}</h2>
           </header>
           <div class="siemens-panel-body action-panel">
             <table class="siemens-table">
               <tbody>
-                <tr><td>Product</td><td><strong>{{ selectedTask?.product || '-' }}</strong></td></tr>
-                <tr><td>Serial No.</td><td><span class="mono">-</span></td></tr>
-                <tr><td>Batch</td><td><span class="mono">-</span></td></tr>
-                <tr><td>Operation</td><td>{{ selectedTask?.process || '-' }}</td></tr>
-                <tr><td>Status</td><td>{{ selectedTask?.status || '-' }}</td></tr>
+                <tr><td>{{ $t('shopfloor.operatorTerminal.product') }}</td><td><strong>{{ selectedTask?.product || '-' }}</strong></td></tr>
+                <tr><td>{{ $t('shopfloor.operatorTerminal.serialNo') }}</td><td><span class="mono">-</span></td></tr>
+                <tr><td>{{ $t('shopfloor.operatorTerminal.batch') }}</td><td><span class="mono">-</span></td></tr>
+                <tr><td>{{ $t('shopfloor.operatorTerminal.operation') }}</td><td>{{ selectedTask?.process || '-' }}</td></tr>
+                <tr><td>{{ $t('shopfloor.operatorTerminal.status') }}</td><td>{{ selectedTask?.status || '-' }}</td></tr>
               </tbody>
             </table>
 
             <div class="operator-actions">
-              <button class="siemens-btn primary">Start</button>
-              <button class="siemens-btn">Pause</button>
-              <button class="siemens-btn primary wide">Complete</button>
-              <button class="siemens-btn danger">Defect</button>
+              <button class="siemens-btn primary">{{ $t('shopfloor.operatorTerminal.start') }}</button>
+              <button class="siemens-btn">{{ $t('shopfloor.operatorTerminal.pause') }}</button>
+              <button class="siemens-btn primary wide">{{ $t('shopfloor.operatorTerminal.complete') }}</button>
+              <button class="siemens-btn danger">{{ $t('shopfloor.operatorTerminal.defect') }}</button>
             </div>
           </div>
         </aside>
@@ -100,8 +100,11 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getShopTasks } from '../../api/production'
 import { authState } from '../../stores/auth'
+
+const { t } = useI18n()
 
 const tasks = ref([])
 const loading = ref(false)
@@ -133,7 +136,7 @@ const loadRows = async () => {
     tasks.value = recordsOf(await getShopTasks()).map(mapTask)
   } catch (e) {
     tasks.value = []
-    error.value = e?.message || 'Operator task API is not connected yet.'
+    error.value = e?.message || t('shopfloor.operatorTerminal.apiError')
   } finally {
     loading.value = false
   }

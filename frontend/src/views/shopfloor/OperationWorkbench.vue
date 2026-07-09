@@ -69,7 +69,6 @@ const columns = [
 ]
 const rowActions = [
   { label: t('statusFlow.actions.report'), action: 'report' },
-  { label: t('statusFlow.actions.report'), action: 'report' },
   { label: t('statusFlow.actions.complete'), action: 'complete' },
   { label: t('statusFlow.actions.andon'), action: 'andon' }
 ]

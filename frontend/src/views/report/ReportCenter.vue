@@ -58,10 +58,10 @@ const loadRows = async () => {
 }
 
 const columns = [
-  { key: 'report', label: 'Report' },
-  { key: 'dimension', label: 'Dimension' },
-  { key: 'api', label: 'API Path' },
-  { key: 'status', label: 'Status' }
+  { key: 'report', label: t('tableColumns.report') },
+  { key: 'dimension', label: t('tableColumns.dimension') },
+  { key: 'api', label: t('tableColumns.apiPath') },
+  { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [
   { label: t('common.actions.audit'), action: 'audit' },

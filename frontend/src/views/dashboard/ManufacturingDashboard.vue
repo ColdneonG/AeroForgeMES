@@ -1,10 +1,10 @@
 <template>
   <div class="plant-dashboard">
     <section class="line-panel">
-      <h1>Packaging Lines</h1>
-      <p v-if="loading" class="dashboard-state">Loading dashboard data...</p>
+      <h1>{{ $t('dashboard.packagingLines') }}</h1>
+      <p v-if="loading" class="dashboard-state">{{ $t('dashboard.loading') }}</p>
       <p v-if="error" class="dashboard-state error">{{ error }}</p>
-      <p v-if="!loading && !error && lines.length === 0" class="dashboard-state">No dashboard data.</p>
+      <p v-if="!loading && !error && lines.length === 0" class="dashboard-state">{{ $t('dashboard.noData') }}</p>
 
       <div class="line-grid">
         <article
@@ -32,13 +32,13 @@
 
             <div class="card-body">
               <div class="line-copy">
-                <span>Lot</span>
+                <span>{{ $t('dashboard.lot') }}</span>
                 <strong>{{ line.lot }}</strong>
-                <span>Work Order</span>
+                <span>{{ $t('dashboard.workOrder') }}</span>
                 <strong>{{ line.workOrder }}</strong>
-                <span>Product</span>
+                <span>{{ $t('dashboard.product') }}</span>
                 <strong>{{ line.product }}</strong>
-                <span>Items Produced / To Be Produced</span>
+                <span>{{ $t('dashboard.itemsProduced') }}</span>
                 <strong>{{ line.produced }}</strong>
               </div>
 
@@ -52,11 +52,11 @@
                 <div class="tiny-bars">
                   <i v-for="(height, index) in line.forecast" :key="index" :style="{ height: height + '%' }"></i>
                 </div>
-                <span>Output Performance</span>
+                <span>{{ $t('dashboard.outputPerformance') }}</span>
                 <strong>{{ line.performance }}%</strong>
               </div>
               <div class="forecast">
-                <span>Year Forecast</span>
+                <span>{{ $t('dashboard.yearForecast') }}</span>
                 <strong>{{ line.forecastText }}</strong>
               </div>
             </div>
@@ -108,8 +108,8 @@
         <header>
           <span class="stock-icon">▥</span>
           <div>
-            <h2>Stock Level</h2>
-            <p>Stock picture on the dock level of packaging materials</p>
+            <h2>{{ $t('dashboard.stockLevel') }}</h2>
+            <p>{{ $t('dashboard.stockDesc') }}</p>
           </div>
           <button aria-label="collapse stock">⌃</button>
         </header>
@@ -119,9 +119,9 @@
             <thead>
               <tr>
                 <th></th>
-                <th>Material</th>
-                <th>Required Qty.</th>
-                <th>Actual Qty.</th>
+                <th>{{ $t('dashboard.material') }}</th>
+                <th>{{ $t('dashboard.requiredQty') }}</th>
+                <th>{{ $t('dashboard.actualQty') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -144,7 +144,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { getManufacturingDashboard } from '../../api/dashboard'
+
+const { t } = useI18n()
 
 const lines = ref([])
 const gauges = ref([])
@@ -199,7 +202,7 @@ const loadDashboard = async () => {
     lines.value = []
     gauges.value = []
     stock.value = []
-    error.value = e?.message || 'Dashboard API is not connected yet.'
+    error.value = e?.message || t('dashboard.apiError')
   } finally {
     loading.value = false
   }
