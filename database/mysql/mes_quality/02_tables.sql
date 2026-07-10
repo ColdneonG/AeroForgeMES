@@ -66,6 +66,8 @@ CREATE TABLE IF NOT EXISTS `qc_inspection_order` (
   `task_id` BIGINT DEFAULT NULL COMMENT '任务单',
   `operation_task_id` BIGINT DEFAULT NULL COMMENT '工序作业',
   `product_id` BIGINT DEFAULT NULL COMMENT '产品',
+  `product_name` VARCHAR(128) DEFAULT NULL COMMENT '产品名称(冗余)',
+  `work_order_no` VARCHAR(64) DEFAULT NULL COMMENT '工单号(冗余)',
   `barcode_id` BIGINT DEFAULT NULL COMMENT '产品码或批次码',
   `inspector_id` BIGINT DEFAULT NULL COMMENT '质检员',
   `inspection_at` DATETIME DEFAULT NULL COMMENT '检验时间',
@@ -102,6 +104,7 @@ CREATE TABLE IF NOT EXISTS `qc_defect_record` (
   `barcode_id` BIGINT DEFAULT NULL COMMENT '产品码',
   `process_id` BIGINT DEFAULT NULL COMMENT '工序',
   `defect_reason_id` BIGINT DEFAULT NULL COMMENT '不良原因',
+  `defect_reason_name` VARCHAR(128) DEFAULT NULL COMMENT '不良原因名称(冗余)',
   `defect_qty` DECIMAL(18,6) DEFAULT NULL COMMENT '不良数量',
   `handle_method` VARCHAR(32) DEFAULT NULL COMMENT '返修、报废、让步接收',
   `rework_order_id` BIGINT DEFAULT NULL COMMENT '返修工单',
@@ -131,3 +134,11 @@ CREATE TABLE IF NOT EXISTS `mes_operation_log` (
   KEY `idx_mes_operation_log_operator` (`operator_id`),
   KEY `idx_mes_operation_log_time` (`operated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='operation log';
+
+-- 兼容已有库：添加去正则化冗余列
+ALTER TABLE `qc_inspection_order`
+  ADD COLUMN IF NOT EXISTS `product_name` VARCHAR(128) DEFAULT NULL COMMENT '产品名称(冗余)',
+  ADD COLUMN IF NOT EXISTS `work_order_no` VARCHAR(64) DEFAULT NULL COMMENT '工单号(冗余)';
+
+ALTER TABLE `qc_defect_record`
+  ADD COLUMN IF NOT EXISTS `defect_reason_name` VARCHAR(128) DEFAULT NULL COMMENT '不良原因名称(冗余)';

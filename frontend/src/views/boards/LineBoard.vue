@@ -4,7 +4,6 @@
       <div>
         <p>{{ $t('boards.line.eyebrow') }}</p>
         <h1>{{ $t('boards.line.title') }}</h1>
-        <span>{{ $t('boards.line.demoDisabled') }}</span>
       </div>
       <div class="board-time">{{ $t('boards.line.realtimeRefresh') }}{{ now }}</div>
     </div>

@@ -18,19 +18,28 @@ public class GenericRecordService {
     public GenericRecordService(JdbcExecutor jdbc) {
         this.jdbc = jdbc;
     }
+    private String selectExpr(TableSpec spec) {
+        return spec.selectExpression() != null ? spec.selectExpression() : "*";
+    }
+
+    private String from(TableSpec spec) {
+        return spec.fromClause() != null ? spec.fromClause() : "from " + quote(spec.table());
+    }
+
     public Map<String, Object> list(TableSpec spec, Map<String, String> params) {
         int page = parseInt(params.get("page"), 1);
         int size = Math.min(parseInt(params.get("size"), 20), 200);
         List<Object> args = new ArrayList<>();
         String where = whereClause(spec, params, args);
-        String sql = "select * from " + quote(spec.table()) + where + " order by id desc limit ? offset ?";
+        String prefix = spec.columnPrefix() != null ? spec.columnPrefix() : "";
+        String sql = "select " + selectExpr(spec) + " " + from(spec) + where + " order by " + prefix + "id desc limit ? offset ?";
         args.add(size);
         args.add((page - 1) * size);
 
         List<Map<String, Object>> rows = jdbc.query(sql, args);
         List<Object> countArgs = new ArrayList<>();
         String countWhere = whereClause(spec, params, countArgs);
-        Number total = (Number) jdbc.query("select count(1) total from " + quote(spec.table()) + countWhere, countArgs)
+        Number total = (Number) jdbc.query("select count(1) total " + from(spec) + countWhere, countArgs)
                 .get(0)
                 .get("total");
 
@@ -43,8 +52,9 @@ public class GenericRecordService {
     }
 
     public Map<String, Object> get(TableSpec spec, long id) {
+        String prefix = spec.columnPrefix() != null ? spec.columnPrefix() : "";
         List<Map<String, Object>> rows = jdbc.query(
-                "select * from " + quote(spec.table()) + " where id = ?",
+                "select " + selectExpr(spec) + " " + from(spec) + " where " + prefix + "id = ?",
                 List.of(id)
         );
         if (rows.isEmpty()) {
@@ -112,9 +122,10 @@ public class GenericRecordService {
     private String whereClause(TableSpec spec, Map<String, String> params, List<Object> args) {
         Set<String> allowed = spec.filterSet();
         List<String> parts = new ArrayList<>();
+        String prefix = spec.columnPrefix() != null ? spec.columnPrefix() : "";
         for (Map.Entry<String, String> entry : params.entrySet()) {
             if (allowed.contains(entry.getKey()) && StringUtils.hasText(entry.getValue())) {
-                parts.add(quote(entry.getKey()) + " = ?");
+                parts.add(prefix + quote(entry.getKey()) + " = ?");
                 args.add(entry.getValue());
             }
         }

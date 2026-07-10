@@ -45,7 +45,12 @@ public class IntegrationController {
         return ApiResponse.ok(records.list(spec(resource), params));
     }
 
-    @GetMapping("/api/integration/{resource}/{id}")
+    @GetMapping("/api/integration/erp/sync-logs")
+    public ApiResponse<Map<String, Object>> listErpSyncLogs(@RequestParam Map<String, String> params) {
+        return ApiResponse.ok(records.listByPrefixes(spec("sync-logs"), "interface_code", List.of("ERP_", "OPENAPI_"), params));
+    }
+
+    @GetMapping("/api/integration/{resource}/{id:\\d+}")
     public ApiResponse<Map<String, Object>> get(@PathVariable String resource, @PathVariable long id) {
         return ApiResponse.ok(records.get(spec(resource), id));
     }

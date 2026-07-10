@@ -114,6 +114,12 @@ const numberOrZero = (value) => {
   const number = Number(value)
   return Number.isFinite(number) ? number : 0
 }
+const statusLabel = (status) => {
+  if (!status) return '-'
+  const key = String(status).toLowerCase()
+  const translated = t(`status.${key}`)
+  return translated === `status.${key}` ? status : translated
+}
 const toneOf = (status) => {
   const text = String(status || '').toUpperCase()
   if (['FAULT', 'ERROR', 'FAILED', 'DANGER'].includes(text)) return 'danger'
@@ -125,15 +131,15 @@ const mapEquipment = (row) => ({
   id: row.equipmentCode || row.equipment_code || row.id,
   name: row.equipmentName || row.equipment_name || row.name || '-',
   area: row.lineName || row.line_name || row.lineId || row.line_id || '-',
-  status: row.equipmentStatus || row.equipment_status || row.status || '-',
+  status: statusLabel(row.equipmentStatus || row.equipment_status || row.status),
   oee: numberOrZero(row.oee),
   tone: toneOf(row.equipmentStatus || row.equipment_status || row.status)
 })
 
 const mapMetric = (row) => ({
   label: row.metricName || row.metric_name || row.pointName || row.point_name || row.statDate || row.stat_date || row.id,
-  value: `${numberOrZero(row.oee ?? row.availability ?? row.performance ?? row.quality_rate)}%`,
-  bar: `${numberOrZero(row.oee ?? row.availability ?? row.performance ?? row.quality_rate)}%`
+  value: `${numberOrZero(row.oee ?? row.availability ?? row.performance ?? row.quality_rate).toFixed(2)}%`,
+  bar: `${numberOrZero(row.oee ?? row.availability ?? row.performance ?? row.quality_rate).toFixed(2)}%`
 })
 
 const loadRows = async () => {
@@ -157,7 +163,7 @@ const loadRows = async () => {
       id: row.maintenanceNo || row.maintenance_no || row.id,
       name: row.equipmentName || row.equipment_name || row.equipmentId || row.equipment_id || '-',
       next: row.planAt || row.plan_at || row.completedAt || row.completed_at || '-',
-      status: row.status || '-',
+      status: statusLabel(row.status),
       tone: toneOf(row.status)
     }))
   } catch (e) {

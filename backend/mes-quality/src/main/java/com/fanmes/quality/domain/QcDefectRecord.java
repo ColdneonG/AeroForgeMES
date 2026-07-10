@@ -10,6 +10,7 @@ public record QcDefectRecord(
         Long barcodeId,
         Long processId,
         Long defectReasonId,
+        String defectReasonName,
         BigDecimal defectQty,
         String handleMethod,
         Long reworkOrderId,

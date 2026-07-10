@@ -4,6 +4,14 @@ export function getProductionReport(params) {
   return request.get('/report/production-output', { params })
 }
 
+export function getDailyOutputReport(params) {
+  return request.get('/report/production-output/daily', { params })
+}
+
+export function getMetricData(metricCode, params) {
+  return request.get(`/report/metric-data/${metricCode}`, { params })
+}
+
 export function getQualityReport(params) {
   // TODO backend: provide quality report aggregate through mes-gateway.
   return request.get('/report/quality', { params })

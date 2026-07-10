@@ -286,8 +286,9 @@ public class QualityRepository {
             Long barcodeId
     ) {
         StringBuilder sql = new StringBuilder("""
-                select id, inspection_no, inspection_type, plan_id, work_order_id, task_id,
-                       operation_task_id, product_id, barcode_id, inspector_id,
+                select id, inspection_no, inspection_type, plan_id, work_order_id,
+                       work_order_no, task_id, operation_task_id, product_id,
+                       product_name, barcode_id, inspector_id,
                        inspection_at, final_result, status
                 from qc_inspection_order
                 where 1 = 1
@@ -306,8 +307,9 @@ public class QualityRepository {
 
     public Optional<QcInspectionOrder> findInspectionOrderById(Long id) {
         return findOne("""
-                select id, inspection_no, inspection_type, plan_id, work_order_id, task_id,
-                       operation_task_id, product_id, barcode_id, inspector_id,
+                select id, inspection_no, inspection_type, plan_id, work_order_id,
+                       work_order_no, task_id, operation_task_id, product_id,
+                       product_name, barcode_id, inspector_id,
                        inspection_at, final_result, status
                 from qc_inspection_order
                 where id = :id
@@ -318,12 +320,12 @@ public class QualityRepository {
         jdbc.update("""
                 insert into qc_inspection_order (
                     id, inspection_no, inspection_type, plan_id, work_order_id, task_id,
-                    operation_task_id, product_id, barcode_id, inspector_id,
+                    operation_task_id, product_id, product_name, work_order_no, barcode_id, inspector_id,
                     inspection_at, final_result, status
                 )
                 values (
                     :id, :inspectionNo, :inspectionType, :planId, :workOrderId, :taskId,
-                    :operationTaskId, :productId, :barcodeId, :inspectorId,
+                    :operationTaskId, :productId, :productName, :workOrderNo, :barcodeId, :inspectorId,
                     :inspectionAt, :finalResult, :status
                 )
                 """, inspectionOrderParams(order));
@@ -339,6 +341,8 @@ public class QualityRepository {
                     task_id = :taskId,
                     operation_task_id = :operationTaskId,
                     product_id = :productId,
+                    product_name = :productName,
+                    work_order_no = :workOrderNo,
                     barcode_id = :barcodeId,
                     inspector_id = :inspectorId,
                     inspection_at = :inspectionAt,
@@ -404,7 +408,8 @@ public class QualityRepository {
     ) {
         StringBuilder sql = new StringBuilder("""
                 select id, source_type, source_id, product_id, barcode_id, process_id,
-                       defect_reason_id, defect_qty, handle_method, rework_order_id, status
+                       defect_reason_id, defect_reason_name, defect_qty,
+                       handle_method, rework_order_id, status
                 from qc_defect_record
                 where 1 = 1
                 """);
@@ -422,7 +427,8 @@ public class QualityRepository {
     public Optional<QcDefectRecord> findDefectRecordById(Long id) {
         return findOne("""
                 select id, source_type, source_id, product_id, barcode_id, process_id,
-                       defect_reason_id, defect_qty, handle_method, rework_order_id, status
+                       defect_reason_id, defect_reason_name, defect_qty,
+                       handle_method, rework_order_id, status
                 from qc_defect_record
                 where id = :id
                 """, Map.of("id", id), defectRecordMapper());
@@ -432,11 +438,11 @@ public class QualityRepository {
         jdbc.update("""
                 insert into qc_defect_record (
                     id, source_type, source_id, product_id, barcode_id, process_id,
-                    defect_reason_id, defect_qty, handle_method, rework_order_id, status
+                    defect_reason_id, defect_reason_name, defect_qty, handle_method, rework_order_id, status
                 )
                 values (
                     :id, :sourceType, :sourceId, :productId, :barcodeId, :processId,
-                    :defectReasonId, :defectQty, :handleMethod, :reworkOrderId, :status
+                    :defectReasonId, :defectReasonName, :defectQty, :handleMethod, :reworkOrderId, :status
                 )
                 """, defectRecordParams(record));
     }
@@ -450,6 +456,7 @@ public class QualityRepository {
                     barcode_id = :barcodeId,
                     process_id = :processId,
                     defect_reason_id = :defectReasonId,
+                    defect_reason_name = :defectReasonName,
                     defect_qty = :defectQty,
                     handle_method = :handleMethod,
                     rework_order_id = :reworkOrderId,
@@ -578,6 +585,8 @@ public class QualityRepository {
                 .addValue("taskId", order.taskId())
                 .addValue("operationTaskId", order.operationTaskId())
                 .addValue("productId", order.productId())
+                .addValue("productName", order.productName())
+                .addValue("workOrderNo", order.workOrderNo())
                 .addValue("barcodeId", order.barcodeId())
                 .addValue("inspectorId", order.inspectorId())
                 .addValue("inspectionAt", order.inspectionAt())
@@ -605,6 +614,7 @@ public class QualityRepository {
                 .addValue("barcodeId", record.barcodeId())
                 .addValue("processId", record.processId())
                 .addValue("defectReasonId", record.defectReasonId())
+                .addValue("defectReasonName", record.defectReasonName())
                 .addValue("defectQty", record.defectQty())
                 .addValue("handleMethod", record.handleMethod())
                 .addValue("reworkOrderId", record.reworkOrderId())
@@ -667,9 +677,11 @@ public class QualityRepository {
                 rs.getString("inspection_type"),
                 getLong(rs, "plan_id"),
                 getLong(rs, "work_order_id"),
+                rs.getString("work_order_no"),
                 getLong(rs, "task_id"),
                 getLong(rs, "operation_task_id"),
                 getLong(rs, "product_id"),
+                rs.getString("product_name"),
                 getLong(rs, "barcode_id"),
                 getLong(rs, "inspector_id"),
                 rs.getTimestamp("inspection_at") == null ? null : rs.getTimestamp("inspection_at").toLocalDateTime(),
@@ -699,6 +711,7 @@ public class QualityRepository {
                 getLong(rs, "barcode_id"),
                 getLong(rs, "process_id"),
                 getLong(rs, "defect_reason_id"),
+                rs.getString("defect_reason_name"),
                 rs.getBigDecimal("defect_qty"),
                 rs.getString("handle_method"),
                 getLong(rs, "rework_order_id"),

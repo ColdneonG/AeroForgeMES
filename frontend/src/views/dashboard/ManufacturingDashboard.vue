@@ -27,7 +27,7 @@
                 <span>{{ line.counts[1] }}</span><i class="warn"></i>
                 <span>{{ line.counts[2] }}</span><i class="flag"></i>
               </div>
-              <button aria-label="collapse">⌃</button>
+              <button :aria-label="$t('dashboard.collapseLine')">⌃</button>
             </div>
 
             <div class="card-body">
@@ -42,8 +42,8 @@
                 <strong>{{ line.produced }}</strong>
               </div>
 
-              <div class="donut" :style="{ '--value': line.oee }">
-                <span>{{ line.oee }}%</span>
+              <div class="donut" :style="{ '--value': line.completionRate }">
+                <span>{{ line.completionRate }}%</span>
               </div>
             </div>
 
@@ -56,7 +56,7 @@
                 <strong>{{ line.performance }}%</strong>
               </div>
               <div class="forecast">
-                <span>{{ $t('dashboard.yearForecast') }}</span>
+                <span>{{ $t('dashboard.runningOrders') }}</span>
                 <strong>{{ line.forecastText }}</strong>
               </div>
             </div>
@@ -69,7 +69,7 @@
                 <strong>{{ line.id }}</strong>
                 <span>{{ line.name }}</span>
               </div>
-              <button aria-label="expand">⌄</button>
+              <button :aria-label="$t('dashboard.expandLine')">⌄</button>
             </div>
           </template>
         </article>
@@ -100,7 +100,7 @@
             />
             <circle cx="118" cy="112" r="5" fill="#73818b" />
           </svg>
-          <strong>{{ gauge.value }} %</strong>
+          <strong>{{ gauge.value }}%</strong>
         </article>
       </div>
 
@@ -111,7 +111,7 @@
             <h2>{{ $t('dashboard.stockLevel') }}</h2>
             <p>{{ $t('dashboard.stockDesc') }}</p>
           </div>
-          <button aria-label="collapse stock">⌃</button>
+          <button :aria-label="$t('dashboard.collapseStock')">⌃</button>
         </header>
 
         <div class="stock-table-wrap">
@@ -122,6 +122,8 @@
                 <th>{{ $t('dashboard.material') }}</th>
                 <th>{{ $t('dashboard.requiredQty') }}</th>
                 <th>{{ $t('dashboard.actualQty') }}</th>
+                <th>{{ $t('dashboard.unit') }}</th>
+                <th>{{ $t('dashboard.stockStatus') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -133,6 +135,8 @@
                 </td>
                 <td>{{ item.required }}</td>
                 <td>{{ item.actual }}</td>
+                <td>{{ item.unit }}</td>
+                <td>{{ item.statusLabel }}</td>
               </tr>
             </tbody>
           </table>
@@ -155,38 +159,49 @@ const stock = ref([])
 const loading = ref(false)
 const error = ref('')
 
-const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
 const numberOrZero = (value) => {
   const number = Number(value)
   return Number.isFinite(number) ? number : 0
 }
 
+const formatQty = (value) => new Intl.NumberFormat().format(numberOrZero(value))
+const metricLabel = (metricKey) => t(`dashboard.metrics.${metricKey}`)
+const stockState = (status) => ({ SUFFICIENT: 'sufficient', LOW: 'low', SHORTAGE: 'shortage' }[status] || 'info')
+
 const mapLine = (row) => ({
-  id: row.lineCode || row.line_code || row.id,
-  name: row.lineName || row.line_name || row.name || '-',
-  lot: row.lotNo || row.lot_no || row.lot || '-',
-  workOrder: row.workOrderNo || row.work_order_no || row.workOrder || '-',
-  product: row.productName || row.product_name || row.product || '-',
-  produced: row.producedText || row.produced_text || `${row.completedQty ?? row.completed_qty ?? 0} / ${row.planQty ?? row.plan_qty ?? 0}`,
-  forecastText: row.forecastText || row.forecast_text || row.forecast || '-',
-  oee: numberOrZero(row.oee),
+  id: row.lineCode,
+  name: row.lineName,
+  lot: row.batchNo,
+  workOrder: row.workOrderNo,
+  product: row.productName,
+  produced: `${formatQty(row.completedQty)} / ${formatQty(row.plannedQty)}`,
+  forecastText: t('dashboard.runningOrdersValue', { count: row.runningOrderCount ?? 0 }),
+  completionRate: numberOrZero(row.completionRate),
   performance: numberOrZero(row.performance),
-  forecast: Array.isArray(row.forecast) ? row.forecast : [],
-  counts: Array.isArray(row.counts) ? row.counts : [0, 0, 0],
+  forecast: Array.isArray(row.outputTrend) ? row.outputTrend : [],
+  counts: [formatQty(row.completedQty), formatQty(row.goodQty), formatQty(row.defectQty)],
   active: Boolean(row.active)
 })
 
 const mapGauge = (row) => ({
-  label: row.label || row.metricName || row.metric_name || row.metricCode || row.metric_code || '-',
-  value: numberOrZero(row.value ?? row.metricValue ?? row.metric_value)
+  label: metricLabel(row.metricKey),
+  value: numberOrZero(row.value).toFixed(2)
 })
 
 const mapStock = (row) => ({
-  state: row.state || row.tone || 'info',
-  code: row.materialCode || row.material_code || row.code || row.id,
-  material: row.materialName || row.material_name || row.material || '-',
-  required: row.requiredQty || row.required_qty || row.required || '-',
-  actual: row.actualQty || row.actual_qty || row.actual || '-'
+  state: stockState(row.stockStatus),
+  code: row.materialCode,
+  material: row.materialName,
+  required: formatQty(row.requiredQty),
+  actual: formatQty(row.actualQty),
+  unit: row.unitName,
+  statusLabel: t(`dashboard.stockStatuses.${row.stockStatus}`)
+})
+
+const adaptDashboard = (payload) => ({
+  lines: Array.isArray(payload?.lines) ? payload.lines.map(mapLine) : [],
+  gauges: Array.isArray(payload?.gauges) ? payload.gauges.map(mapGauge) : [],
+  stock: Array.isArray(payload?.stock) ? payload.stock.map(mapStock) : []
 })
 
 const loadDashboard = async () => {
@@ -194,10 +209,10 @@ const loadDashboard = async () => {
   error.value = ''
 
   try {
-    const data = await getManufacturingDashboard()
-    lines.value = recordsOf(data.lines || data.lineStatus || data.line_status || data).map(mapLine)
-    gauges.value = recordsOf(data.gauges || data.metrics || []).map(mapGauge)
-    stock.value = recordsOf(data.stock || data.materialStock || data.material_stock || []).map(mapStock)
+    const data = adaptDashboard(await getManufacturingDashboard())
+    lines.value = data.lines
+    gauges.value = data.gauges
+    stock.value = data.stock
   } catch (e) {
     lines.value = []
     gauges.value = []

@@ -4,7 +4,6 @@
       <div>
         <p>{{ $t('boards.workshop.eyebrow') }}</p>
         <h1>{{ $t('boards.workshop.title') }}</h1>
-        <span>{{ $t('boards.workshop.demoDisabled') }}</span>
       </div>
       <div class="board-time">{{ $t('boards.workshop.overview', { active: activeAreas, total: areas.length }) }}</div>
     </div>

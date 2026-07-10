@@ -33,14 +33,20 @@ const rows = ref([])
 const loading = ref(false)
 const error = ref('')
 const recordsOf = (payload) => (Array.isArray(payload) ? payload : payload?.records || payload?.data || [])
+const syncStatusLabels = {
+  PENDING: 'status.syncPending',
+  FAILED: 'status.syncFailed',
+  SUCCESS: 'status.syncSuccess',
+  CLOSED: 'status.closed'
+}
+const displaySyncStatus = (status) => syncStatusLabels[status] ? t(syncStatusLabels[status]) : status || '-'
 
 const mapRow = (row) => ({
   id: row.syncNo || row.sync_no || row.requestNo || row.request_no || row.id,
-  module: row.module || row.apiName || row.api_name || row.resource || '-',
+  module: row.module || row.apiName || row.api_name || row.interfaceCode || row.interface_code || row.resource || '-',
   direction: row.direction || '-',
   externalNo: row.externalNo || row.external_no || row.bizNo || row.biz_no || '-',
-  result: row.result || row.message || '-',
-  status: row.status || '-',
+  status: displaySyncStatus(row.status || row.syncStatus || row.sync_status),
   raw: row
 })
 
@@ -62,7 +68,6 @@ const columns = [
   { key: 'module', label: t('tableColumns.api') },
   { key: 'direction', label: t('tableColumns.direction') },
   { key: 'externalNo', label: t('tableColumns.externalId') },
-  { key: 'result', label: t('tableColumns.result') },
   { key: 'status', label: t('tableColumns.status') }
 ]
 const rowActions = [

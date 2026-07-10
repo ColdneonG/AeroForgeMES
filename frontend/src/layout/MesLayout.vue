@@ -43,7 +43,7 @@
       </aside>
     </Transition>
 
-    <section class="siemens-main">
+    <section class="siemens-main" @click="closeSideMenu">
       <header class="siemens-topbar">
         <div class="product-title">
           <span class="product-title-cn">{{ t('layout.productCn') }}</span>
@@ -193,14 +193,15 @@ const toggleModule = (group) => {
 
   activeGroupName.value = groupName
   isMenuOpen.value = true
-  if (groupName === '电子看板' && routeGroupName.value !== '电子看板') {
-    const dashboard = group.items.find((item) => item.name === 'dashboard') || group.items[0]
-    router.push({ name: dashboard.name })
-  }
 }
 
 const isGroupActive = (groupName) =>
   groupName === activeGroupName.value || (!isMenuOpen.value && groupName === routeGroupName.value)
+
+const closeSideMenu = () => {
+  isMenuOpen.value = false
+  activeGroupName.value = routeGroupName.value
+}
 
 const logoutUser = async () => {
   await logout()

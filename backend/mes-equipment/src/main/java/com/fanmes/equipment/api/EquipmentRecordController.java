@@ -161,7 +161,14 @@ public class EquipmentRecordController {
                 List.of("id", "equipment_code", "equipment_name", "category_id", "manufacturer_id", "line_id", "station_id", "model", "serial_no", "purchase_date", "equipment_status", "status"),
                 List.of("equipment_code", "equipment_name"),
                 List.of("equipment_code", "equipment_name", "category_id", "manufacturer_id", "line_id", "station_id", "equipment_status", "status"),
-                "status", "ENABLED"));
+                "status", "ENABLED",
+                "from eqp_equipment e" +
+                " left join eqp_category c on e.category_id = c.id" +
+                " left join eqp_manufacturer m on e.manufacturer_id = m.id" +
+                " left join mes_system.md_production_line l on e.line_id = l.id" +
+                " left join mes_system.md_workstation ws on e.station_id = ws.id",
+                "e.",
+                "e.*, c.category_name, m.manufacturer_name, l.line_name, ws.station_name"));
         map.put("maintenance-tasks", new TableSpec("maintenance-tasks", "eqp_maintenance_task",
                 List.of("id", "maintenance_no", "equipment_id", "plan_at", "assigned_to", "completed_at", "result", "status"),
                 List.of("maintenance_no"),

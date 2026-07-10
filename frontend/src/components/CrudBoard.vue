@@ -108,7 +108,7 @@ import { useI18n } from 'vue-i18n'
 import AuditLogPanel from './AuditLogPanel.vue'
 import PermissionButton from './PermissionButton.vue'
 import { authState } from '../stores/auth'
-import { buildAuditEntry } from '../utils/statusFlow'
+import { buildAuditEntry, statusFlows } from '../utils/statusFlow'
 
 const { t } = useI18n()
 
@@ -150,7 +150,11 @@ watch(
   }
 )
 
-const statuses = computed(() => [...new Set(localRows.value.map((row) => row.status).filter(Boolean))])
+const statuses = computed(() => {
+  const flowStatuses = props.flowType && statusFlows[props.flowType] ? Object.keys(statusFlows[props.flowType]) : []
+  const dataStatuses = localRows.value.map((row) => row.status).filter(Boolean)
+  return [...new Set([...flowStatuses, ...dataStatuses])]
+})
 const dataScope = computed(() => authState.permissions.dataScopes?.join(' / ') || t('common.filter.dataScopeUnloaded'))
 
 const filteredRows = computed(() => {
@@ -202,11 +206,12 @@ const addAuditEntry = ({ action, from, to, remark }) => {
   ]
 }
 
-defineExpose({ addAuditEntry })
+defineExpose({ addAuditEntry, selectRow })
 
 const runAction = (button, target = selected.value, source = 'primary') => {
   if (!target) return
 
+  selected.value = target
   emit(source === 'primary' ? 'primary-action' : 'row-action', { action: button.action, button, row: target })
   if (props.handleActionsExternally) return
 

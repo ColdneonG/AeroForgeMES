@@ -290,7 +290,7 @@
     "title": "生产驾驶舱",
     "description": "全厂生产概览、关键指标、产线状态与实时预警。",
     "listTitle": "生产驾驶舱",
-    "packagingLines": "包装产线",
+    "packagingLines": "生产驾驶舱",
     "loading": "正在加载驾驶舱数据...",
     "noData": "无驾驶舱数据。",
     "lot": "批次",
@@ -299,11 +299,29 @@
     "itemsProduced": "已生产 / 待生产",
     "outputPerformance": "产出绩效",
     "yearForecast": "年度预测",
+    "runningOrders": "运行工单",
+    "runningOrdersValue": "{count} 个",
+    "collapseLine": "收起产线卡片",
+    "expandLine": "展开产线卡片",
+    "collapseStock": "收起库存水位",
     "stockLevel": "库存水位",
     "stockDesc": "包装物料码头库存概览",
     "material": "物料",
     "requiredQty": "需求数量",
     "actualQty": "实际数量",
+    "unit": "单位",
+    "stockStatus": "库存状态",
+    "metrics": {
+      "oee": "OEE",
+      "availability": "稼动率",
+      "performance": "性能",
+      "quality": "质量率"
+    },
+    "stockStatuses": {
+      "SUFFICIENT": "充足",
+      "LOW": "偏低",
+      "SHORTAGE": "缺料"
+    },
     "apiError": "驾驶舱接口尚未接入。"
   },
   "boards": {
@@ -514,7 +532,31 @@
     "eyebrow": "报表分析",
     "title": "报表分析",
     "description": "产量、质量、设备、追溯等多维度报表查询。",
-    "listTitle": "报表分析"
+    "listTitle": "报表分析",
+    "actions": {
+      "auditOpened": "已打开“{report}”的审计详情。",
+      "auditRemark": "查看“{report}”审计详情",
+      "exported": "已导出“{report}”真实报表数据。",
+      "exportRemark": "导出“{report}”真实报表数据",
+      "noExportData": "“{report}”暂无可导出的报表数据。"
+    },
+    "exportColumns": {
+      "statDate": "统计日期",
+      "lineCode": "产线编码",
+      "lineName": "产线名称",
+      "workOrderNo": "工单号",
+      "productCode": "产品编码",
+      "productName": "产品名称",
+      "plannedQty": "计划数量",
+      "reportedQty": "报工数量",
+      "qualifiedQty": "合格数量",
+      "defectiveQty": "不良数量",
+      "reportCount": "报工次数",
+      "dimensionId": "维度ID",
+      "statPeriod": "统计周期",
+      "statTime": "统计时间",
+      "metricValue": "指标值"
+    }
   },
   "wage": {
     "eyebrow": "计件工资",

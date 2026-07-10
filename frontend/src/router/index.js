@@ -137,15 +137,13 @@ const moduleRoutes = [
   {
     path: 'erp',
     name: 'erpIntegration',
-    component: () => import('../views/integration/IntegrationCenter.vue'),
-    props: { eyebrow: 'ERP接口', title: 'ERP 生产任务与工艺数据读取', description: 'ERP生产任务单读取、工艺数据读取、同步日志和失败重试。' },
+    component: () => import('../views/integration/ErpIntegration.vue'),
     meta: { title: 'ERP接口', icon: '⇄', permission: 'erp:view', group: 'ERP接口' }
   },
   {
     path: 'standard-api',
     name: 'standardApi',
-    component: () => import('../views/integration/IntegrationCenter.vue'),
-    props: { eyebrow: '标准API接口', title: '标准 API 数据读写监控', description: '计量单位、工单、任务单、设备计数报工和完工单接口监控。' },
+    component: () => import('../views/integration/StandardApiCatalog.vue'),
     meta: { title: '标准API接口', icon: 'API', permission: 'standard-api:view', group: '标准API接口' }
   },
   {
@@ -289,26 +287,30 @@ const moduleRoutes = [
   {
     path: 'quality/first-last',
     name: 'firstLastInspection',
-    component: () => import('../views/common/DashboardFeaturePage.vue'),
-    meta: { title: '首末件检验单', icon: '✓', permission: 'quality:first-last:view', group: '质量管理', featureKey: 'first-last-inspection' }
+    component: () => import('../views/quality/InspectionOrders.vue'),
+    props: { eyebrow: '质量管理', title: '首末件检验单', description: '首件/末件检验记录与结果判定。', listTitle: '首末件检验单', inspectionType: '首件,末件' },
+    meta: { title: '首末件检验单', icon: '✓', permission: 'quality:first-last:view', group: '质量管理' }
   },
   {
     path: 'quality/patrol',
     name: 'patrolInspection',
-    component: () => import('../views/common/DashboardFeaturePage.vue'),
-    meta: { title: '巡检单', icon: '✓', permission: 'quality:patrol:view', group: '质量管理', featureKey: 'patrol-inspection' }
+    component: () => import('../views/quality/InspectionOrders.vue'),
+    props: { eyebrow: '质量管理', title: '巡检单', description: '过程巡检记录与检验结果判定。', listTitle: '巡检单', inspectionType: '巡检' },
+    meta: { title: '巡检单', icon: '✓', permission: 'quality:patrol:view', group: '质量管理' }
   },
   {
     path: 'quality/inbound',
     name: 'inboundInspection',
-    component: () => import('../views/common/DashboardFeaturePage.vue'),
-    meta: { title: '成品入库检验单', icon: '✓', permission: 'quality:inbound:view', group: '质量管理', featureKey: 'inbound-inspection' }
+    component: () => import('../views/quality/InspectionOrders.vue'),
+    props: { eyebrow: '质量管理', title: '成品入库检验单', description: '成品入库检验记录与结果判定。', listTitle: '成品入库检验单', inspectionType: '成品入库' },
+    meta: { title: '成品入库检验单', icon: '✓', permission: 'quality:inbound:view', group: '质量管理' }
   },
   {
     path: 'quality/outbound',
     name: 'outboundInspection',
-    component: () => import('../views/common/DashboardFeaturePage.vue'),
-    meta: { title: '成品发货检验单', icon: '✓', permission: 'quality:outbound:view', group: '质量管理', featureKey: 'outbound-inspection' }
+    component: () => import('../views/quality/InspectionOrders.vue'),
+    props: { eyebrow: '质量管理', title: '成品发货检验单', description: '成品发货检验记录与结果判定。', listTitle: '成品发货检验单', inspectionType: '成品发货' },
+    meta: { title: '成品发货检验单', icon: '✓', permission: 'quality:outbound:view', group: '质量管理' }
   },
   {
     path: 'andon/types',

@@ -42,6 +42,27 @@ public class GenericRecordService {
         return result;
     }
 
+    public Map<String, Object> listByPrefixes(TableSpec spec, String column, List<String> prefixes, Map<String, String> params) {
+        int page = parseInt(params.get("page"), 1);
+        int size = Math.min(parseInt(params.get("size"), 20), 200);
+        String where = " where (" + prefixes.stream().map(prefix -> quote(column) + " like ?").collect(java.util.stream.Collectors.joining(" or ")) + ")";
+        List<Object> args = new ArrayList<>();
+        prefixes.forEach(prefix -> args.add(prefix + "%"));
+        args.add(size);
+        args.add((page - 1) * size);
+        List<Map<String, Object>> rows = jdbc.query("select * from " + quote(spec.table()) + where + " order by id desc limit ? offset ?", args);
+
+        Number total = (Number) jdbc.query("select count(1) total from " + quote(spec.table()) + where, prefixes.stream().map(prefix -> (Object) (prefix + "%")).toList())
+                .get(0)
+                .get("total");
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("records", rows);
+        result.put("page", page);
+        result.put("size", size);
+        result.put("total", total.longValue());
+        return result;
+    }
+
     public Map<String, Object> get(TableSpec spec, long id) {
         List<Map<String, Object>> rows = jdbc.query("select * from " + quote(spec.table()) + " where id = ?", List.of(id));
         if (rows.isEmpty()) {

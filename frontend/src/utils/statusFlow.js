@@ -38,6 +38,14 @@ export const statusFlows = {
     失败: ['retry', 'close'],
     成功: ['audit'],
     已关闭: ['audit']
+  },
+  inspectionOrder: {
+    '待检': ['start', 'void'],
+    '检验中': ['pass', 'fail', 'void'],
+    '合格': ['close'],
+    '不合格': ['close'],
+    '已关闭': ['audit'],
+    '作废': ['audit']
   }
 }
 

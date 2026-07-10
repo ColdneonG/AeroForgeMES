@@ -1185,6 +1185,18 @@ button {
   background: #25a9c7;
 }
 
+.stock-state.sufficient {
+  background: #25a9c7;
+}
+
+.stock-state.low {
+  background: #f0a720;
+}
+
+.stock-state.shortage {
+  background: #e01828;
+}
+
 @media (max-width: 1600px) {
   .plant-dashboard {
     grid-template-columns: minmax(650px, 46%) minmax(520px, 1fr);

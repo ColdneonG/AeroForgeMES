@@ -11,8 +11,30 @@ public record TableSpec(
         List<String> requiredColumns,
         List<String> filterColumns,
         String statusColumn,
-        String defaultStatus
+        String defaultStatus,
+        String fromClause,
+        String columnPrefix,
+        String selectExpression
 ) {
+    public TableSpec(String resource, String table,
+                     List<String> writableColumns,
+                     List<String> requiredColumns,
+                     List<String> filterColumns,
+                     String statusColumn, String defaultStatus) {
+        this(resource, table, writableColumns, requiredColumns, filterColumns,
+                statusColumn, defaultStatus, null, null, null);
+    }
+
+    public TableSpec(String resource, String table,
+                     List<String> writableColumns,
+                     List<String> requiredColumns,
+                     List<String> filterColumns,
+                     String statusColumn, String defaultStatus,
+                     String fromClause, String columnPrefix) {
+        this(resource, table, writableColumns, requiredColumns, filterColumns,
+                statusColumn, defaultStatus, fromClause, columnPrefix, null);
+    }
+
     public Set<String> writableSet() {
         return new LinkedHashSet<>(writableColumns);
     }

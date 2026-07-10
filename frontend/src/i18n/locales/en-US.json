@@ -299,11 +299,29 @@
     "itemsProduced": "Items Produced / To Be Produced",
     "outputPerformance": "Output Performance",
     "yearForecast": "Year Forecast",
+    "runningOrders": "Running Orders",
+    "runningOrdersValue": "{count}",
+    "collapseLine": "Collapse line card",
+    "expandLine": "Expand line card",
+    "collapseStock": "Collapse stock level",
     "stockLevel": "Stock Level",
     "stockDesc": "Stock picture on the dock level of packaging materials",
     "material": "Material",
     "requiredQty": "Required Qty.",
     "actualQty": "Actual Qty.",
+    "unit": "Unit",
+    "stockStatus": "Stock Status",
+    "metrics": {
+      "oee": "OEE",
+      "availability": "Availability",
+      "performance": "Performance",
+      "quality": "Quality"
+    },
+    "stockStatuses": {
+      "SUFFICIENT": "Sufficient",
+      "LOW": "Low",
+      "SHORTAGE": "Shortage"
+    },
     "apiError": "Dashboard API is not connected yet."
   },
   "boards": {
@@ -514,7 +532,31 @@
     "eyebrow": "Reports",
     "title": "Report Center",
     "description": "Multi-dimensional reports: output, quality, equipment, traceability and more.",
-    "listTitle": "Reports"
+    "listTitle": "Reports",
+    "actions": {
+      "auditOpened": "Opened audit details for \"{report}\".",
+      "auditRemark": "Viewed audit details for \"{report}\"",
+      "exported": "Exported real report data for \"{report}\".",
+      "exportRemark": "Exported real report data for \"{report}\"",
+      "noExportData": "No report data is available for \"{report}\"."
+    },
+    "exportColumns": {
+      "statDate": "Stat Date",
+      "lineCode": "Line Code",
+      "lineName": "Line Name",
+      "workOrderNo": "Work Order No.",
+      "productCode": "Product Code",
+      "productName": "Product Name",
+      "plannedQty": "Planned Qty.",
+      "reportedQty": "Reported Qty.",
+      "qualifiedQty": "Qualified Qty.",
+      "defectiveQty": "Defective Qty.",
+      "reportCount": "Report Count",
+      "dimensionId": "Dimension ID",
+      "statPeriod": "Stat Period",
+      "statTime": "Stat Time",
+      "metricValue": "Metric Value"
+    }
   },
   "wage": {
     "eyebrow": "Piecework Wage",

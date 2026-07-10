@@ -31,8 +31,8 @@ const mapEquipment = (row) => ({
   id: row.equipmentCode || row.equipment_code || row.id,
   type: row.categoryName || row.category_name || (row.categoryId || row.category_id || '-'),
   maker: row.manufacturerName || row.manufacturer_name || (row.manufacturerId || row.manufacturer_id || '-'),
-  dept: row.departmentName || row.department_name || (row.lineId || row.line_id || '-'),
-  manager: row.managerName || row.manager_name || (row.stationId || row.station_id || '-'),
+  dept: row.departmentName || row.department_name || row.line_name || row.lineName || (row.lineId || row.line_id || '-'),
+  manager: row.managerName || row.manager_name || row.station_name || row.stationName || (row.stationId || row.station_id || '-'),
   status: row.equipmentStatus || row.equipment_status || row.status || '-',
   raw: row
 })
