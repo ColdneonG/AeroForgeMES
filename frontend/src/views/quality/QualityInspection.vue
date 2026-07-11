@@ -329,19 +329,9 @@ onMounted(loadRows)
   min-height: 0;
 }
 
-.api-state {
-  margin: 0;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
-}
-
 .siemens-table tbody tr.row-selected {
-  background: #e5f0ff;
-  outline: 2px solid #0a6cff;
+  background: var(--mes-primary-soft);
+  outline: 2px solid var(--mes-primary);
   outline-offset: -2px;
 }
 
@@ -350,11 +340,11 @@ onMounted(loadRows)
 }
 
 .siemens-table tbody tr:hover {
-  background: #f0f4f8;
+  background: var(--mes-bg-subtle);
 }
 
 .siemens-table tbody tr.row-selected:hover {
-  background: #d6e8ff;
+  background: var(--mes-primary-soft);
 }
 
 .detail-toolbar {
@@ -369,13 +359,13 @@ onMounted(loadRows)
 }
 
 .detail-list dt {
-  color: #6b7c8a;
-  font-size: 13px;
-  font-weight: 500;
+  color: var(--mes-text-secondary);
+  font-size: var(--mes-font-sm);
+  font-weight: var(--mes-font-medium);
 }
 
 .detail-list dd {
-  color: #1e2a33;
-  font-size: 14px;
+  color: var(--mes-text-primary);
+  font-size: var(--mes-font-base);
 }
 </style>

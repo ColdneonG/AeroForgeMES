@@ -1,27 +1,18 @@
 <template>
-  <section class="mes-workspace">
-    <div class="mes-page-heading">
-      <div>
-        <p>{{ t('shopfloor.workbench.eyebrow') }}</p>
-        <h1>{{ t('shopfloor.workbench.title') }}</h1>
-        <span>{{ t('common.feature.demoDisabled') }}</span>
-      </div>
-    </div>
-    <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
-    <p v-if="error" class="api-state error">{{ error }}</p>
-    <CrudBoard
-      :eyebrow="t('shopfloor.workbench.eyebrow')"
-      :title="t('shopfloor.workbench.title')"
-      :description="t('shopfloor.workbench.description')"
-      :list-title="t('shopfloor.workbench.listTitle')"
-      :rows="rows"
-      :columns="columns"
-      row-key="id"
-      flow-type="task"
-      :row-actions="rowActions"
-      :handle-actions-externally="true"
-    />
-  </section>
+  <p v-if="loading" class="api-state">{{ t('common.loading.generic') }}</p>
+  <p v-if="error" class="api-state error">{{ error }}</p>
+  <CrudBoard
+    :eyebrow="t('shopfloor.workbench.eyebrow')"
+    :title="t('shopfloor.workbench.title')"
+    :description="t('shopfloor.workbench.description')"
+    :list-title="t('shopfloor.workbench.listTitle')"
+    :rows="rows"
+    :columns="columns"
+    row-key="id"
+    flow-type="task"
+    :row-actions="rowActions"
+    :handle-actions-externally="true"
+  />
 </template>
 
 <script setup>
@@ -75,15 +66,3 @@ const rowActions = [
 
 onMounted(loadRows)
 </script>
-
-<style scoped>
-.api-state {
-  margin: 12px 24px;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
-}
-</style>

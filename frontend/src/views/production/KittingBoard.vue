@@ -137,47 +137,27 @@ onMounted(loadRows)
 </script>
 
 <style scoped>
-.api-state {
-  margin: 12px 24px 0;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
-}
-
 .missing-section {
   margin-top: 16px;
   padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--mes-border-soft);
 }
 
 .missing-title {
   display: block;
   margin-bottom: 8px;
   font-size: 13px;
-  color: #1a202c;
-}
-
-.missing-section .mes-table {
-  width: 100%;
-  font-size: 12px;
-}
-
-.missing-section .mes-table th,
-.missing-section .mes-table td {
-  padding: 4px 6px;
+  color: var(--mes-text-primary);
 }
 
 .missing-loading {
   margin-top: 12px;
-  color: #a0aec0;
+  color: var(--mes-text-muted);
   font-size: 13px;
 }
 
 .empty-detail {
-  color: #a0aec0;
+  color: var(--mes-text-muted);
   font-size: 13px;
   padding-top: 12px;
 }

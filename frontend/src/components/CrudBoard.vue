@@ -1,12 +1,12 @@
 <template>
   <section class="mes-workspace">
-    <div class="mes-page-heading">
-      <div>
-        <p>{{ eyebrow }}</p>
+    <div class="mes-page-heading mes-page-header">
+      <div class="mes-page-header-content">
+        <p class="mes-page-eyebrow">{{ eyebrow }}</p>
         <h1>{{ title }}</h1>
-        <span>{{ description }}</span>
+        <span class="mes-page-description">{{ description }}</span>
       </div>
-      <div class="mes-toolbar">
+      <div class="mes-toolbar mes-page-actions">
         <PermissionButton
           v-for="button in primaryActions"
           :key="button.action"
@@ -21,7 +21,7 @@
       </div>
     </div>
 
-    <div class="mes-filter-bar">
+    <div class="mes-filter-bar mes-filter-bar--crud">
       <label>
         {{ t('common.filter.keyword') }}
         <input v-model="keyword" type="search" :placeholder="t('common.filter.keywordPlaceholder')" />
@@ -36,13 +36,13 @@
       <span class="data-scope">{{ t('common.filter.dataScope', { scope: dataScope }) }}</span>
     </div>
 
-    <div class="mes-board-grid">
-      <section class="mes-panel">
+    <div class="mes-board-grid mes-crud-layout">
+      <section class="mes-panel mes-list-panel">
         <div class="mes-panel-title">
           <strong>{{ listTitle }}</strong>
           <span>{{ t('common.list.items', { count: filteredRows.length }) }}</span>
         </div>
-        <table class="mes-table">
+        <table class="mes-table mes-table--crud">
           <thead>
             <tr>
               <th v-for="column in columns" :key="column.key">{{ column.label }}</th>
@@ -60,7 +60,7 @@
                 <span v-if="column.key === 'status'" class="status-pill">{{ row[column.key] }}</span>
                 <span v-else>{{ row[column.key] }}</span>
               </td>
-              <td class="row-actions">
+              <td class="row-actions mes-row-actions">
                 <PermissionButton
                   v-for="button in rowActions"
                   :key="button.action"
@@ -75,25 +75,25 @@
               </td>
             </tr>
             <tr v-if="filteredRows.length === 0">
-              <td :colspan="columns.length + 1" class="empty-cell">{{ t('common.list.noMatch') }}</td>
+              <td :colspan="columns.length + 1" class="empty-cell mes-state mes-state-empty">{{ t('common.list.noMatch') }}</td>
             </tr>
           </tbody>
         </table>
       </section>
 
-      <aside class="mes-panel detail-panel">
+      <aside class="mes-panel detail-panel mes-detail-panel">
         <div class="mes-panel-title">
           <strong>{{ t('common.detail.title') }}</strong>
           <span>{{ selected?.[rowKey] || t('common.detail.unselected') }}</span>
         </div>
         <slot name="detail" :selected="selected" :columns="columns">
-          <dl v-if="selected" class="detail-list">
+          <dl v-if="selected" class="detail-list mes-detail-list">
             <template v-for="column in columns" :key="column.key">
               <dt>{{ column.label }}</dt>
               <dd>{{ selected[column.key] }}</dd>
             </template>
           </dl>
-          <div v-else class="empty-detail">{{ t('common.detail.emptyHint') }}</div>
+          <div v-else class="empty-detail mes-state mes-state-empty">{{ t('common.detail.emptyHint') }}</div>
         </slot>
       </aside>
     </div>
@@ -116,7 +116,7 @@ const props = defineProps({
   eyebrow: { type: String, default: 'MES' },
   title: { type: String, required: true },
   description: { type: String, default: '' },
-  listTitle: { type: String, default: '业务列表' },
+  listTitle: { type: String, default: '涓氬姟鍒楄〃' },
   rows: { type: Array, default: () => [] },
   columns: { type: Array, default: () => [] },
   rowKey: { type: String, default: 'id' },

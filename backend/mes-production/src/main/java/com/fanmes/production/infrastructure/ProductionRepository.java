@@ -13,11 +13,9 @@ import org.springframework.util.StringUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @Repository
 public class ProductionRepository {
@@ -348,12 +346,12 @@ public class ProductionRepository {
     public void insertShopTask(ShopTask task) {
         jdbc.update("""
                 insert into shop_task (
-                    id, task_no, work_order_id, dispatch_id, product_id, route_id,
-                    line_id, team_id, plan_qty, started_at, ended_at, status
+                    id, task_no, work_order_id, dispatch_id, product_id, product_name, route_id,
+                    line_id, line_name, team_id, plan_qty, started_at, ended_at, status
                 )
                 values (
-                    :id, :taskNo, :workOrderId, :dispatchId, :productId, :routeId,
-                    :lineId, :teamId, :planQty, :startedAt, :endedAt, :status
+                    :id, :taskNo, :workOrderId, :dispatchId, :productId, :productName, :routeId,
+                    :lineId, :lineName, :teamId, :planQty, :startedAt, :endedAt, :status
                 )
                 """, shopTaskParams(task));
     }
@@ -369,6 +367,7 @@ public class ProductionRepository {
         StringBuilder sql = new StringBuilder("""
                 select st.id, st.task_no, st.work_order_id, st.dispatch_id, st.product_id, st.route_id,
                        st.line_id, st.team_id, st.plan_qty, st.started_at, st.ended_at, st.status,
+                       st.product_name, st.line_name,
                        wo.work_order_no,
                        rh.route_name
                 from shop_task st
@@ -385,44 +384,6 @@ public class ProductionRepository {
         appendEquals(sql, params, "st.team_id", teamId);
         sql.append(" order by st.id desc");
         return jdbc.query(sql.toString(), params, shopTaskWithNamesMapper());
-    }
-
-    public Map<Long, String> findItemNames(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return Map.of();
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("ids", ids);
-        List<Map<String, Object>> rows = jdbc.query(
-                "select id, item_name from mes_system.md_item where id in (:ids)",
-                params,
-                (rs, rowNum) -> Map.of(
-                        "id", rs.getLong("id"),
-                        "name", rs.getString("item_name")
-                )
-        );
-        Map<Long, String> result = new java.util.HashMap<>();
-        for (Map<String, Object> row : rows) {
-            result.put((Long) row.get("id"), (String) row.get("name"));
-        }
-        return result;
-    }
-
-    public Map<Long, String> findLineNames(Set<Long> ids) {
-        if (ids == null || ids.isEmpty()) return Map.of();
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("ids", ids);
-        List<Map<String, Object>> rows = jdbc.query(
-                "select id, line_name from mes_system.md_production_line where id in (:ids)",
-                params,
-                (rs, rowNum) -> Map.of(
-                        "id", rs.getLong("id"),
-                        "name", rs.getString("line_name")
-                )
-        );
-        Map<Long, String> result = new java.util.HashMap<>();
-        for (Map<String, Object> row : rows) {
-            result.put((Long) row.get("id"), (String) row.get("name"));
-        }
-        return result;
     }
 
     public Optional<ShopTask> findShopTaskById(Long id) {
@@ -572,8 +533,10 @@ public class ProductionRepository {
                 .addValue("workOrderId", task.workOrderId())
                 .addValue("dispatchId", task.dispatchId())
                 .addValue("productId", task.productId())
+                .addValue("productName", task.productName())
                 .addValue("routeId", task.routeId())
                 .addValue("lineId", task.lineId())
+                .addValue("lineName", task.lineName())
                 .addValue("teamId", task.teamId())
                 .addValue("planQty", task.planQty())
                 .addValue("startedAt", task.startedAt())
@@ -675,9 +638,9 @@ public class ProductionRepository {
                 rs.getTimestamp("ended_at") == null ? null : rs.getTimestamp("ended_at").toLocalDateTime(),
                 rs.getString("status"),
                 rs.getString("work_order_no"),
-                null, // productName — filled by service layer
+                rs.getString("product_name"),
                 rs.getString("route_name"),
-                null  // lineName — filled by service layer
+                rs.getString("line_name")
         );
     }
 

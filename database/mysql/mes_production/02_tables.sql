@@ -158,8 +158,10 @@ CREATE TABLE IF NOT EXISTS `shop_task` (
   `work_order_id` BIGINT DEFAULT NULL COMMENT '生产工单',
   `dispatch_id` BIGINT DEFAULT NULL COMMENT '派工单',
   `product_id` BIGINT DEFAULT NULL COMMENT '产品',
+  `product_name` VARCHAR(128) DEFAULT NULL COMMENT '产品名称(冗余)',
   `route_id` BIGINT DEFAULT NULL COMMENT '工艺路线',
   `line_id` BIGINT DEFAULT NULL COMMENT '产线',
+  `line_name` VARCHAR(128) DEFAULT NULL COMMENT '产线名称(冗余)',
   `team_id` BIGINT DEFAULT NULL COMMENT '班组',
   `plan_qty` DECIMAL(18,6) DEFAULT NULL COMMENT '计划数量',
   `started_at` DATETIME DEFAULT NULL COMMENT '实际开工',
@@ -309,6 +311,15 @@ CREATE TABLE IF NOT EXISTS `bc_rule` (
   UNIQUE KEY `uk_bc_rule_code` (`rule_code`),
   KEY `idx_bc_rule_type` (`type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='条码规则';
+
+CREATE TABLE IF NOT EXISTS `bc_rule_sequence` (
+  `rule_id` BIGINT NOT NULL COMMENT '条码规则',
+  `sequence_key` VARCHAR(32) NOT NULL COMMENT '流水维度，默认日期 yyyyMMdd',
+  `current_value` BIGINT NOT NULL DEFAULT 0 COMMENT '当前流水号',
+  `updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`rule_id`, `sequence_key`),
+  KEY `idx_bc_rule_sequence_updated` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='条码规则并发流水';
 
 CREATE TABLE IF NOT EXISTS `bc_template` (
   `id` BIGINT NOT NULL COMMENT '主键',
@@ -550,3 +561,215 @@ CREATE TABLE IF NOT EXISTS `mes_operation_log` (
   KEY `idx_mes_operation_log_operator` (`operator_id`),
   KEY `idx_mes_operation_log_time` (`operated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='operation log';
+
+SET @shop_task_product_name_sql = IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'shop_task' AND COLUMN_NAME = 'product_name') = 0,
+  'ALTER TABLE `shop_task` ADD COLUMN `product_name` VARCHAR(128) DEFAULT NULL COMMENT ''产品名称(冗余)'' AFTER `product_id`',
+  'SELECT 1'
+);
+PREPARE shop_task_product_name_stmt FROM @shop_task_product_name_sql;
+EXECUTE shop_task_product_name_stmt;
+DEALLOCATE PREPARE shop_task_product_name_stmt;
+
+SET @shop_task_line_name_sql = IF(
+  (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'shop_task' AND COLUMN_NAME = 'line_name') = 0,
+  'ALTER TABLE `shop_task` ADD COLUMN `line_name` VARCHAR(128) DEFAULT NULL COMMENT ''产线名称(冗余)'' AFTER `line_id`',
+  'SELECT 1'
+);
+PREPARE shop_task_line_name_stmt FROM @shop_task_line_name_sql;
+EXECUTE shop_task_line_name_stmt;
+DEALLOCATE PREPARE shop_task_line_name_stmt;
+
+CREATE TABLE IF NOT EXISTS `sop_document` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `sop_code` VARCHAR(64) NOT NULL COMMENT 'SOP code',
+  `sop_name` VARCHAR(128) NOT NULL COMMENT 'SOP name',
+  `category` VARCHAR(64) DEFAULT NULL COMMENT 'SOP category',
+  `owner_id` BIGINT DEFAULT NULL COMMENT 'owner user',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'ENABLED/DISABLED/VOID',
+  `current_version_id` BIGINT DEFAULT NULL COMMENT 'current effective version',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  `updated_at` DATETIME DEFAULT NULL COMMENT 'updated time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_document_code` (`sop_code`),
+  KEY `idx_sop_document_status` (`status`),
+  KEY `idx_sop_document_current_version` (`current_version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='versioned SOP document';
+
+CREATE TABLE IF NOT EXISTS `sop_version` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `sop_id` BIGINT NOT NULL COMMENT 'SOP document',
+  `version_no` VARCHAR(32) NOT NULL COMMENT 'version number',
+  `revision_type` VARCHAR(32) DEFAULT NULL COMMENT 'NEW/MINOR/MAJOR/EMERGENCY',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'DRAFT/PENDING_REVIEW/APPROVED/EFFECTIVE',
+  `effective_from` DATETIME DEFAULT NULL COMMENT 'effective from',
+  `effective_to` DATETIME DEFAULT NULL COMMENT 'effective to',
+  `submit_by` BIGINT DEFAULT NULL COMMENT 'submit user',
+  `submit_at` DATETIME DEFAULT NULL COMMENT 'submit time',
+  `review_by` BIGINT DEFAULT NULL COMMENT 'review user',
+  `review_at` DATETIME DEFAULT NULL COMMENT 'review time',
+  `approve_by` BIGINT DEFAULT NULL COMMENT 'approve user',
+  `approve_at` DATETIME DEFAULT NULL COMMENT 'approve time',
+  `publish_by` BIGINT DEFAULT NULL COMMENT 'publish user',
+  `publish_at` DATETIME DEFAULT NULL COMMENT 'publish time',
+  `model_version_id` BIGINT DEFAULT NULL COMMENT 'bound GLB model version',
+  `remark` VARCHAR(500) DEFAULT NULL COMMENT 'remark',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  `updated_at` DATETIME DEFAULT NULL COMMENT 'updated time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_version_no` (`sop_id`, `version_no`),
+  KEY `idx_sop_version_status` (`status`),
+  KEY `idx_sop_version_model` (`model_version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP version';
+
+CREATE TABLE IF NOT EXISTS `sop_step` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `version_id` BIGINT NOT NULL COMMENT 'SOP version',
+  `step_no` INT NOT NULL COMMENT 'step number',
+  `step_name` VARCHAR(128) NOT NULL COMMENT 'step name',
+  `instruction` TEXT COMMENT 'operation instruction',
+  `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'TEXT/IMAGE/VIDEO/PDF/MODEL_3D',
+  `standard_duration` INT DEFAULT NULL COMMENT 'standard duration seconds',
+  `key_step` TINYINT DEFAULT NULL COMMENT 'key step flag',
+  `min_stay_seconds` INT DEFAULT NULL COMMENT 'minimum viewing seconds',
+  `confirm_required` TINYINT DEFAULT NULL COMMENT 'confirmation required',
+  `parameter_required` TINYINT DEFAULT NULL COMMENT 'parameter required',
+  `photo_required` TINYINT DEFAULT NULL COMMENT 'photo required',
+  `skip_allowed` TINYINT DEFAULT NULL COMMENT 'skip allowed',
+  `abnormal_handling` VARCHAR(500) DEFAULT NULL COMMENT 'abnormal handling',
+  `quality_item_id` BIGINT DEFAULT NULL COMMENT 'quality item',
+  `andon_type_id` BIGINT DEFAULT NULL COMMENT 'andon type',
+  `enabled` TINYINT DEFAULT NULL COMMENT 'enabled flag',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  `updated_at` DATETIME DEFAULT NULL COMMENT 'updated time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_step_no` (`version_id`, `step_no`),
+  KEY `idx_sop_step_version` (`version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP step';
+
+CREATE TABLE IF NOT EXISTS `sop_attachment` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `version_id` BIGINT NOT NULL COMMENT 'SOP version',
+  `step_id` BIGINT DEFAULT NULL COMMENT 'SOP step',
+  `attachment_type` VARCHAR(32) DEFAULT NULL COMMENT 'IMAGE/VIDEO/PDF/FILE/MODEL_3D',
+  `file_name` VARCHAR(255) DEFAULT NULL COMMENT 'original file name',
+  `content_type` VARCHAR(128) DEFAULT NULL COMMENT 'MIME type',
+  `file_size` BIGINT DEFAULT NULL COMMENT 'file size',
+  `object_key` VARCHAR(500) DEFAULT NULL COMMENT 'storage object key',
+  `file_url` VARCHAR(500) DEFAULT NULL COMMENT 'download URL',
+  `sha256` VARCHAR(64) DEFAULT NULL COMMENT 'SHA-256',
+  `display_order` INT DEFAULT NULL COMMENT 'display order',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  PRIMARY KEY (`id`),
+  KEY `idx_sop_attachment_version` (`version_id`),
+  KEY `idx_sop_attachment_step` (`step_id`),
+  KEY `idx_sop_attachment_hash` (`sha256`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP attachment metadata';
+
+CREATE TABLE IF NOT EXISTS `sop_binding` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `version_id` BIGINT NOT NULL COMMENT 'SOP version',
+  `binding_type` VARCHAR(32) NOT NULL COMMENT 'TASK/PRODUCT_ROUTE_STATION/PRODUCT_ROUTE/PRODUCT_PROCESS',
+  `product_id` BIGINT DEFAULT NULL COMMENT 'product',
+  `route_id` BIGINT DEFAULT NULL COMMENT 'route',
+  `route_step_id` BIGINT DEFAULT NULL COMMENT 'route step',
+  `process_id` BIGINT DEFAULT NULL COMMENT 'process',
+  `workstation_id` BIGINT DEFAULT NULL COMMENT 'workstation',
+  `equipment_id` BIGINT DEFAULT NULL COMMENT 'equipment',
+  `task_id` BIGINT DEFAULT NULL COMMENT 'task',
+  `priority` INT DEFAULT NULL COMMENT 'match priority',
+  `confirm_mode` VARCHAR(32) DEFAULT NULL COMMENT 'confirmation mode',
+  `effective_from` DATETIME DEFAULT NULL COMMENT 'effective from',
+  `effective_to` DATETIME DEFAULT NULL COMMENT 'effective to',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'ACTIVE/DISABLED',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  `updated_at` DATETIME DEFAULT NULL COMMENT 'updated time',
+  PRIMARY KEY (`id`),
+  KEY `idx_sop_binding_version` (`version_id`),
+  KEY `idx_sop_binding_task` (`task_id`),
+  KEY `idx_sop_binding_product_route` (`product_id`, `route_id`, `workstation_id`, `status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP binding';
+
+CREATE TABLE IF NOT EXISTS `sop_model` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `model_code` VARCHAR(64) NOT NULL COMMENT 'model code',
+  `model_name` VARCHAR(128) NOT NULL COMMENT 'model name',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'ENABLED/DISABLED/VOID',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  `updated_at` DATETIME DEFAULT NULL COMMENT 'updated time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_model_code` (`model_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP 3D model';
+
+CREATE TABLE IF NOT EXISTS `sop_model_version` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `model_id` BIGINT NOT NULL COMMENT 'model',
+  `version_no` VARCHAR(32) NOT NULL COMMENT 'version number',
+  `file_name` VARCHAR(255) DEFAULT NULL COMMENT 'file name',
+  `object_key` VARCHAR(500) DEFAULT NULL COMMENT 'storage object key',
+  `file_url` VARCHAR(500) DEFAULT NULL COMMENT 'download URL',
+  `sha256` VARCHAR(64) DEFAULT NULL COMMENT 'SHA-256',
+  `file_size` BIGINT DEFAULT NULL COMMENT 'file size',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'DRAFT/EFFECTIVE/DISABLED',
+  `created_at` DATETIME DEFAULT NULL COMMENT 'created time',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_model_version_no` (`model_id`, `version_no`),
+  KEY `idx_sop_model_version_hash` (`sha256`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP GLB model version';
+
+CREATE TABLE IF NOT EXISTS `sop_task_snapshot` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `task_id` BIGINT NOT NULL COMMENT 'shop task',
+  `sop_id` BIGINT NOT NULL COMMENT 'SOP document',
+  `version_id` BIGINT NOT NULL COMMENT 'locked SOP version',
+  `version_no` VARCHAR(32) DEFAULT NULL COMMENT 'locked version number',
+  `model_id` BIGINT DEFAULT NULL COMMENT 'locked model',
+  `model_version_id` BIGINT DEFAULT NULL COMMENT 'locked model version',
+  `model_sha256` VARCHAR(64) DEFAULT NULL COMMENT 'model SHA-256',
+  `snapshot_json` LONGTEXT COMMENT 'immutable snapshot JSON',
+  `locked_by` BIGINT DEFAULT NULL COMMENT 'lock user',
+  `locked_at` DATETIME DEFAULT NULL COMMENT 'lock time',
+  `match_rule` VARCHAR(128) DEFAULT NULL COMMENT 'match rule',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'ACTIVE/COMPLETED',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_task_snapshot_task` (`task_id`),
+  KEY `idx_sop_task_snapshot_version` (`version_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='locked SOP task snapshot';
+
+CREATE TABLE IF NOT EXISTS `sop_execution_record` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `snapshot_id` BIGINT NOT NULL COMMENT 'task snapshot',
+  `task_id` BIGINT NOT NULL COMMENT 'shop task',
+  `sop_id` BIGINT NOT NULL COMMENT 'SOP document',
+  `version_id` BIGINT NOT NULL COMMENT 'SOP version',
+  `operator_id` BIGINT DEFAULT NULL COMMENT 'operator',
+  `opened_at` DATETIME DEFAULT NULL COMMENT 'opened time',
+  `completed_at` DATETIME DEFAULT NULL COMMENT 'completed time',
+  `status` VARCHAR(32) DEFAULT NULL COMMENT 'ACTIVE/COMPLETED',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_execution_snapshot` (`snapshot_id`),
+  KEY `idx_sop_execution_task` (`task_id`, `opened_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP execution record';
+
+CREATE TABLE IF NOT EXISTS `sop_step_execution_record` (
+  `id` BIGINT NOT NULL COMMENT 'primary key',
+  `execution_id` BIGINT NOT NULL COMMENT 'execution record',
+  `snapshot_id` BIGINT NOT NULL COMMENT 'task snapshot',
+  `task_id` BIGINT NOT NULL COMMENT 'shop task',
+  `step_id` BIGINT NOT NULL COMMENT 'SOP step',
+  `step_no` INT DEFAULT NULL COMMENT 'step number',
+  `view_started_at` DATETIME DEFAULT NULL COMMENT 'view start time',
+  `confirmed_at` DATETIME DEFAULT NULL COMMENT 'confirmation time',
+  `stay_seconds` INT DEFAULT NULL COMMENT 'actual stay seconds',
+  `parameter_json` TEXT COMMENT 'parameter values',
+  `photo_attachment_id` BIGINT DEFAULT NULL COMMENT 'photo attachment',
+  `result` VARCHAR(32) DEFAULT NULL COMMENT 'VIEWED/CONFIRMED/SKIPPED',
+  `operator_id` BIGINT DEFAULT NULL COMMENT 'operator',
+  `idempotency_key` VARCHAR(128) DEFAULT NULL COMMENT 'idempotency key',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_sop_step_execution_snapshot_step` (`snapshot_id`, `step_id`),
+  KEY `idx_sop_step_execution_task` (`task_id`, `step_no`),
+  KEY `idx_sop_step_execution_idem` (`idempotency_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='SOP step execution record';

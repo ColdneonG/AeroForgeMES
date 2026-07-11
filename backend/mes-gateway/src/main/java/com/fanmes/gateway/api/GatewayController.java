@@ -47,7 +47,6 @@ public class GatewayController {
                 "/api/openapi/", trimUrl(integrationUrl),
                 "/api/production/", trimUrl(productionUrl),
                 "/api/quality/", trimUrl(qualityUrl),
-                "/api/andon/", trimUrl(productionUrl),
                 "/internal/", trimUrl(productionUrl)
         );
         this.legacyRoutes = Map.ofEntries(
@@ -132,7 +131,7 @@ public class GatewayController {
     }
 
     private boolean hopByHopHeader(String name) {
-        return List.of("connection", "host", "content-length", "transfer-encoding", "upgrade").contains(name.toLowerCase());
+        return List.of("connection", "host", "content-length", "transfer-encoding", "upgrade", "expect").contains(name.toLowerCase());
     }
 
     private String trimUrl(String value) {

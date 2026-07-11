@@ -1,6 +1,9 @@
 spring:
   application:
     name: mes-gateway
+  servlet:
+    multipart:
+      enabled: false
 
 server:
   port: 8080

@@ -26,7 +26,7 @@
         </thead>
         <tbody>
           <tr>
-            <td :colspan="columns.length" class="feature-empty">{{ t('common.feature.noData') }}</td>
+            <td :colspan="columns.length" class="feature-empty mes-state mes-state-empty">{{ t('common.feature.noData') }}</td>
           </tr>
         </tbody>
       </table>

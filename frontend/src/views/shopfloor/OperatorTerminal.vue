@@ -163,13 +163,13 @@ onMounted(loadRows)
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
   min-height: 58px;
-  background: #f7f9fa;
-  border: 1px solid #d7dde1;
+  background: var(--mes-bg-subtle);
+  border: 1px solid var(--mes-border);
 }
 
 .station-strip div {
   padding: 8px 12px;
-  border-right: 1px solid #e2e8ec;
+  border-right: 1px solid var(--mes-border-soft);
 }
 
 .station-strip div:last-child {
@@ -182,7 +182,7 @@ onMounted(loadRows)
 }
 
 .station-strip span {
-  color: #71818b;
+  color: var(--mes-text-secondary);
   font-size: 11px;
 }
 
@@ -216,18 +216,21 @@ onMounted(loadRows)
 
 .station-input {
   width: 100%;
-  height: 32px;
+  height: var(--mes-control-height);
   margin-top: 12px;
   padding: 0 10px;
-  border: 1px solid #b9c8d1;
+  color: var(--mes-text-primary);
+  background: var(--mes-bg-input);
+  border: 1px solid var(--mes-border-input);
+  border-radius: var(--mes-radius-sm);
 }
 
 .instruction-visual {
   display: grid;
   min-height: 360px;
   place-items: center;
-  background: #f7f9fa;
-  border: 1px solid #d7dde1;
+  background: var(--mes-bg-subtle);
+  border: 1px solid var(--mes-border);
 }
 
 .instruction-visual strong,
@@ -237,14 +240,14 @@ onMounted(loadRows)
 }
 
 .instruction-visual strong {
-  color: #00799f;
+  color: var(--mes-primary);
   font-size: 24px;
-  font-weight: 650;
+  font-weight: var(--mes-font-semibold);
 }
 
 .instruction-visual span {
   margin-top: 8px;
-  color: #71818b;
+  color: var(--mes-text-secondary);
 }
 
 .operator-actions {
@@ -261,13 +264,4 @@ onMounted(loadRows)
   grid-column: 1 / -1;
 }
 
-.api-state {
-  margin: 12px 24px;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
-}
 </style>

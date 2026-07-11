@@ -135,10 +135,16 @@ CREATE TABLE IF NOT EXISTS `mes_operation_log` (
   KEY `idx_mes_operation_log_time` (`operated_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='operation log';
 
--- 兼容已有库：添加去正则化冗余列
-ALTER TABLE `qc_inspection_order`
-  ADD COLUMN IF NOT EXISTS `product_name` VARCHAR(128) DEFAULT NULL COMMENT '产品名称(冗余)',
-  ADD COLUMN IF NOT EXISTS `work_order_no` VARCHAR(64) DEFAULT NULL COMMENT '工单号(冗余)';
+-- 兼容已有库：添加去正则化冗余列（MySQL 8.0 通用写法，兼容 < 8.0.29）
+-- 通过 INFORMATION_SCHEMA 检测列是否存在，避免重复添加报错
+SET @s = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = 'mes_quality' AND TABLE_NAME = 'qc_inspection_order' AND COLUMN_NAME = 'product_name') = 0,
+  'ALTER TABLE `qc_inspection_order` ADD COLUMN `product_name` VARCHAR(128) DEFAULT NULL COMMENT ''产品名称(冗余)'', ADD COLUMN `work_order_no` VARCHAR(64) DEFAULT NULL COMMENT ''工单号(冗余)''',
+  'SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
-ALTER TABLE `qc_defect_record`
-  ADD COLUMN IF NOT EXISTS `defect_reason_name` VARCHAR(128) DEFAULT NULL COMMENT '不良原因名称(冗余)';
+SET @s = IF((SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE TABLE_SCHEMA = 'mes_quality' AND TABLE_NAME = 'qc_defect_record' AND COLUMN_NAME = 'defect_reason_name') = 0,
+  'ALTER TABLE `qc_defect_record` ADD COLUMN `defect_reason_name` VARCHAR(128) DEFAULT NULL COMMENT ''不良原因名称(冗余)''',
+  'SELECT 1');
+PREPARE stmt FROM @s; EXECUTE stmt; DEALLOCATE PREPARE stmt;

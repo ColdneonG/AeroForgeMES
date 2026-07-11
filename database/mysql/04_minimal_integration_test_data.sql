@@ -16,9 +16,7 @@ INSERT IGNORE INTO `mes_system`.`md_item` (`id`, `item_code`, `item_name`, `item
 (9400001, 'FG-FAN-500', 'FS-500 落地扇', '产品', '500mm', 9300001, '启用'),
 (9400002, 'FG-FAN-230', 'TF-230 台扇', '产品', '230mm', 9300001, '启用'),
 (9400003, 'MAT-MOTOR-65', '65W 电机', '物料', '65W', 9300001, '启用'),
-(9400004, 'MAT-GUARD-500', '500mm 网罩套件', '物料', '500mm', 9300002, '启用'),
-(9400005, 'MAT-CARTON-FAN', '风扇包装外箱', '包装材料', 'FS-500/TF-230 通用', 9300001, '启用'),
-(9400006, 'MAT-FILM-PE', 'PE 包装缠绕膜', '包装材料', '500mm', 9300001, '启用');
+(9400004, 'MAT-GUARD-500', '500mm 网罩套件', '物料', '500mm', 9300002, '启用');
 
 INSERT IGNORE INTO `mes_system`.`md_production_line` (`id`, `line_code`, `line_name`, `workshop_id`, `capacity_per_hour`, `status`) VALUES
 (9500001, 'LINE-ASSY-01', '总装一线', 9100001, 60.000000, '启用'),
@@ -121,18 +119,24 @@ INSERT IGNORE INTO `mes_production`.`prod_work_order` (`id`, `work_order_no`, `e
 (4000001, 'WO20260708001', 'ERP-WO-20260708-001', 'ERP', 9400001, 120.000000, 30.000000, 28.000000, 2.000000, 9300001, '2026-07-08 08:00:00', '2026-07-08 18:00:00', '2026-07-10', 9500001, 9700201, '生产中'),
 (4000002, 'WO20260708002', 'ERP-WO-20260708-002', 'ERP', 9400002, 80.000000, 0.000000, 0.000000, 0.000000, 9300001, '2026-07-08 09:00:00', '2026-07-08 17:00:00', '2026-07-11', 9500002, 9700201, '已下发'),
 (4000003, 'WO20260708003', 'API-WO-20260708-003', 'API', 9400001, 60.000000, 60.000000, 59.000000, 1.000000, 9300001, '2026-07-07 08:00:00', '2026-07-07 16:00:00', '2026-07-09', 9500001, 9700201, '已完成'),
-(4000004, 'WO20260708004', 'MAN-WO-20260708-004', '手工', 9400002, 100.000000, 0.000000, 0.000000, 0.000000, 9300001, '2026-07-09 08:00:00', '2026-07-09 18:00:00', '2026-07-12', 9500002, 9700201, '待下发'),
-(4000005, 'WO20260709001', 'ERP-WO-20260709-001', 'ERP', 9400002, 96.000000, 48.000000, 46.000000, 2.000000, 9300001, '2026-07-09 08:00:00', '2026-07-09 18:00:00', '2026-07-12', 9500002, 9700201, '生产中');
+(4000004, 'WO20260708004', 'MAN-WO-20260708-004', '手工', 9400002, 100.000000, 0.000000, 0.000000, 0.000000, 9300001, '2026-07-09 08:00:00', '2026-07-09 18:00:00', '2026-07-12', 9500002, 9700201, '待下发');
 
 INSERT IGNORE INTO `mes_production`.`prod_dispatch_order` (`id`, `dispatch_no`, `work_order_id`, `line_id`, `station_id`, `team_id`, `plan_qty`, `planned_start_at`, `planned_end_at`, `status`) VALUES
 (4100001, 'DISP20260708001', 4000001, 9500001, 9600001, 9200001, 60.000000, '2026-07-08 08:00:00', '2026-07-08 12:00:00', '生产中'),
-(4100002, 'DISP20260708002', 4000002, 9500002, 9600001, 9200001, 80.000000, '2026-07-08 13:00:00', '2026-07-08 17:00:00', '已下发'),
-(4100003, 'DISP20260709001', 4000005, 9500002, 9600001, 9200001, 96.000000, '2026-07-09 08:00:00', '2026-07-09 18:00:00', '生产中');
+(4100002, 'DISP20260708002', 4000002, 9500002, 9600001, 9200001, 80.000000, '2026-07-08 13:00:00', '2026-07-08 17:00:00', '已下发');
 
-INSERT IGNORE INTO `mes_production`.`shop_task` (`id`, `task_no`, `work_order_id`, `dispatch_id`, `product_id`, `route_id`, `line_id`, `team_id`, `plan_qty`, `started_at`, `ended_at`, `status`) VALUES
-(4200001, 'TASK20260708001', 4000001, 4100001, 9400001, 9700201, 9500001, 9200001, 60.000000, '2026-07-08 08:10:00', NULL, '生产中'),
-(4200002, 'TASK20260708002', 4000002, 4100002, 9400002, 9700201, 9500002, 9200001, 80.000000, NULL, NULL, '已下发'),
-(4200003, 'TASK20260709001', 4000005, 4100003, 9400002, 9700201, 9500002, 9200001, 96.000000, '2026-07-09 08:10:00', NULL, '生产中');
+INSERT IGNORE INTO `mes_production`.`shop_task` (`id`, `task_no`, `work_order_id`, `dispatch_id`, `product_id`, `product_name`, `route_id`, `line_id`, `line_name`, `team_id`, `plan_qty`, `started_at`, `ended_at`, `status`) VALUES
+(4200001, 'TASK20260708001', 4000001, 4100001, 9400001, 'FS-500 落地扇', 9700201, 9500001, '总装一线', 9200001, 60.000000, '2026-07-08 08:10:00', NULL, '生产中'),
+(4200002, 'TASK20260708002', 4000002, 4100002, 9400002, 'TF-230 台扇', 9700201, 9500002, '总装二线', 9200001, 80.000000, NULL, NULL, '已下发'),
+(4200003, 'TASK20260708003', 4000001, 4100001, 9400001, 'FS-500 落地扇', 9700201, 9500001, '总装一线', 9200001, 60.000000, NULL, NULL, '已下发');
+
+UPDATE `mes_production`.`shop_task`
+SET `product_name` = 'FS-500 落地扇', `line_name` = '总装一线'
+WHERE `id` = 4200001;
+
+UPDATE `mes_production`.`shop_task`
+SET `product_name` = 'TF-230 台扇', `line_name` = '总装二线'
+WHERE `id` = 4200002;
 
 INSERT IGNORE INTO `mes_production`.`shop_operation_task` (`id`, `operation_task_no`, `task_id`, `route_step_id`, `process_id`, `station_id`, `device_id`, `operator_id`, `plan_qty`, `reported_qty`, `status`) VALUES
 (4300001, 'OPT20260708001', 4200001, 9700301, 9700001, 9600001, 2000201, 1000001, 60.000000, 30.000000, '生产中'),
@@ -140,15 +144,11 @@ INSERT IGNORE INTO `mes_production`.`shop_operation_task` (`id`, `operation_task
 
 INSERT IGNORE INTO `mes_production`.`prod_kitting_analysis` (`id`, `analysis_no`, `work_order_id`, `task_id`, `analysis_time`, `kitting_status`, `missing_count`, `status`) VALUES
 (4400001, 'KIT20260708001', 4000001, 4200001, '2026-07-08 07:40:00', '齐套', 0, '已完成'),
-(4400002, 'KIT20260708002', 4000002, 4200002, '2026-07-08 08:30:00', '缺料', 1, '已完成'),
-(4400003, 'KIT20260709001', 4000005, 4200003, '2026-07-09 07:40:00', '部分齐套', 1, '已完成');
+(4400002, 'KIT20260708002', 4000002, 4200002, '2026-07-08 08:30:00', '缺料', 1, '已完成');
 
 INSERT IGNORE INTO `mes_production`.`prod_kitting_missing_item` (`id`, `analysis_id`, `material_id`, `required_qty`, `available_qty`, `missing_qty`, `expected_arrival_at`) VALUES
 (4400101, 4400001, 9400003, 60.000000, 80.000000, 0.000000, NULL),
-(4400102, 4400002, 9400004, 80.000000, 50.000000, 30.000000, '2026-07-08 14:00:00'),
-(4400103, 4400001, 9400005, 120.000000, 160.000000, 0.000000, NULL),
-(4400104, 4400003, 9400005, 96.000000, 60.000000, 36.000000, '2026-07-09 14:00:00'),
-(4400105, 4400003, 9400006, 96.000000, 120.000000, 0.000000, NULL);
+(4400102, 4400002, 9400004, 80.000000, 50.000000, 30.000000, '2026-07-08 14:00:00');
 
 INSERT IGNORE INTO `mes_quality`.`qc_inspection_order` (`id`, `inspection_no`, `inspection_type`, `plan_id`, `work_order_id`, `task_id`, `operation_task_id`, `product_id`, `product_name`, `work_order_no`, `barcode_id`, `inspector_id`, `inspection_at`, `final_result`, `status`) VALUES
 (5000001, 'QC20260708001', '首件', 3000201, 4000001, 4200001, 4300001, 9400001, 'FS-500 落地扇', 'WO20260708001', NULL, 1000001, '2026-07-08 08:30:00', '合格', '合格'),
@@ -377,6 +377,10 @@ INSERT IGNORE INTO `mes_production`.`bc_rule` (`id`, `rule_code`, `rule_name`, `
 (7100102, 'BCR-MATERIAL-BATCH', '材料批次规则', 7100002, 'MAT-${itemCode}-${yyyyMMdd}', 3, '启用'),
 (7100103, 'BCR-CARTON', '外箱码规则', 7100003, 'CTN-${yyyyMMdd}-${####}', 4, '启用');
 
+INSERT IGNORE INTO `mes_production`.`bc_rule_sequence` (`rule_id`, `sequence_key`, `current_value`, `updated_at`) VALUES
+(7100101, '20260708', 2, '2026-07-08 08:02:00'),
+(7100103, '20260708', 1, '2026-07-08 11:30:00');
+
 INSERT IGNORE INTO `mes_production`.`bc_template` (`id`, `template_code`, `template_name`, `type_id`, `template_content`, `paper_width`, `paper_height`, `status`) VALUES
 (7100201, 'BCT-PRODUCT', '产品标签模板', 7100001, '{"fields":["barcode","item","workOrder"]}', 60.00, 40.00, '启用'),
 (7100202, 'BCT-MATERIAL', '物料标签模板', 7100002, '{"fields":["batch","material","supplier"]}', 80.00, 50.00, '启用'),
@@ -391,9 +395,7 @@ INSERT IGNORE INTO `mes_production`.`bc_barcode` (`id`, `barcode_value`, `type_i
 (7100401, 'SN202607080001', 7100001, 7100301, 9400001, 'BATCH-FAN-0708A', 4000001, 4200001, NULL, 1, '生成', '已打印'),
 (7100402, 'SN202607080002', 7100001, 7100301, 9400001, 'BATCH-FAN-0708A', 4000001, 4200001, NULL, 1, '生成', '已扫码'),
 (7100403, 'MAT-MOTOR-20260708-A', 7100002, 7100302, 9400003, 'MOTOR-0708A', 4000001, 4200001, NULL, 0, '外部导入', '已生成'),
-(7100404, 'CTN202607080001', 7100003, 7100303, 9400001, 'BATCH-FAN-0708A', 4000001, 4200001, NULL, 1, '生成', '已打印'),
-(7100405, 'SN202607090001', 7100001, 7100301, 9400002, 'BATCH-FAN-0709B', 4000005, 4200003, NULL, 1, '生成', '已打印'),
-(7100406, 'CTN202607090001', 7100003, 7100303, 9400002, 'BATCH-FAN-0709B', 4000005, 4200003, NULL, 1, '生成', '已打印');
+(7100404, 'CTN202607080001', 7100003, 7100303, 9400001, 'BATCH-FAN-0708A', 4000001, 4200001, NULL, 1, '生成', '已打印');
 
 INSERT IGNORE INTO `mes_production`.`bc_print_record` (`id`, `barcode_id`, `template_id`, `print_by`, `print_at`, `print_count`, `printer_name`) VALUES
 (7100501, 7100401, 7100201, 1000001, '2026-07-08 08:05:00', 1, 'LABEL-01'),
@@ -406,9 +408,7 @@ INSERT IGNORE INTO `mes_production`.`shop_product_status` (`id`, `barcode_id`, `
 INSERT IGNORE INTO `mes_production`.`shop_report` (`id`, `report_no`, `report_type`, `task_id`, `operation_task_id`, `product_id`, `barcode_id`, `process_id`, `station_id`, `device_id`, `operator_id`, `report_qty`, `qualified_qty`, `defective_qty`, `report_at`, `status`) VALUES
 (7200101, 'RPT20260708001', '普通', 4200001, 4300001, 9400001, 7100401, 9700001, 9600001, 2000201, 1000001, 30.000000, 30.000000, 0.000000, '2026-07-08 09:00:00', '已完成'),
 (7200102, 'RPT20260708002', '检测', 4200001, 4300002, 9400001, 7100402, 9700002, 9600002, 2000203, 1000001, 30.000000, 28.000000, 2.000000, '2026-07-08 10:20:00', '已完成'),
-(7200103, 'RPT20260708003', '设备计数', 4200001, 4300001, 9400001, NULL, 9700001, 9600001, 2000201, 1000001, 18.000000, 18.000000, 0.000000, '2026-07-08 11:00:00', '已完成'),
-(7200104, 'RPT20260709001', '普通', 4200003, NULL, 9400002, 7100405, 9700001, 9600001, 2000202, 1000001, 24.000000, 23.000000, 1.000000, '2026-07-09 09:00:00', '已完成'),
-(7200105, 'RPT20260709002', '检测', 4200003, NULL, 9400002, 7100406, 9700002, 9600002, 2000204, 1000001, 24.000000, 23.000000, 1.000000, '2026-07-09 10:10:00', '已完成');
+(7200103, 'RPT20260708003', '设备计数', 4200001, 4300001, 9400001, NULL, 9700001, 9600001, 2000201, 1000001, 18.000000, 18.000000, 0.000000, '2026-07-08 11:00:00', '已完成');
 
 INSERT IGNORE INTO `mes_production`.`shop_report_material` (`id`, `report_id`, `material_id`, `material_barcode_id`, `qty`) VALUES
 (7200201, 7200101, 9400003, 7100403, 30.000000),
@@ -508,8 +508,7 @@ INSERT IGNORE INTO `mes_equipment`.`iot_debug_log` (`id`, `equipment_id`, `reque
 
 INSERT IGNORE INTO `mes_equipment`.`eqp_oee_snapshot` (`id`, `equipment_id`, `line_id`, `stat_date`, `availability`, `performance`, `quality_rate`, `oee`) VALUES
 (2001101, 2000201, 9500001, '2026-07-08', 0.920000, 0.880000, 0.960000, 0.777216),
-(2001102, 2000203, 9500001, '2026-07-08', 0.950000, 0.900000, 0.933333, 0.797999),
-(2001103, 2000202, 9500002, '2026-07-09', 0.900000, 0.840000, 0.958333, 0.724500);
+(2001102, 2000203, 9500001, '2026-07-08', 0.950000, 0.900000, 0.933333, 0.797999);
 
 INSERT IGNORE INTO `mes_equipment`.`eqp_energy_record` (`id`, `equipment_id`, `energy_type`, `value`, `unit_id`, `record_at`) VALUES
 (2001201, 2000201, '电', 38.500000, NULL, '2026-07-08 12:00:00'),
@@ -554,65 +553,6 @@ INSERT IGNORE INTO `mes_report`.`board_data_cache` (`id`, `board_id`, `dimension
 (8000402, 8000302, 9100001, '{"lines":2,"openAndon":1,"completionRate":0.63}', '2026-07-08 12:00:00', '2026-07-08 12:02:00'),
 (8000403, 8000303, 9000001, '{"production":"RUNNING","quality":"WARN","equipment":"WARN","andon":"OPEN"}', '2026-07-08 12:00:00', '2026-07-08 12:02:00');
 
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `line_code`, `line_name`, `work_order_no`, `product_code`, `product_name`, `planned_qty`, `reported_qty`, `qualified_qty`, `defective_qty`, `report_count`, `status`) VALUES
-(8100001, 'OUTPUT_QTY_DAY', 1, '2026-07-09', '日', '产线', 'LINE-ASSY-02', '总装二线', 'LINE-ASSY-02', '总装二线', 'WO20260709001', 'FG-FAN-230', 'TF-230 台扇', 96.000000, 48.000000, 46.000000, 2.000000, 2, '已完成'),
-(8100002, 'OUTPUT_QTY_DAY', 2, '2026-07-08', '日', '产线', 'LINE-ASSY-01', '总装一线', 'LINE-ASSY-01', '总装一线', 'WO20260708001', 'FG-FAN-500', 'FS-500 落地扇', 60.000000, 78.000000, 76.000000, 2.000000, 3, '已完成')
-ON DUPLICATE KEY UPDATE `reported_qty` = VALUES(`reported_qty`), `qualified_qty` = VALUES(`qualified_qty`), `defective_qty` = VALUES(`defective_qty`), `report_count` = VALUES(`report_count`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `line_code`, `line_name`, `work_order_no`, `product_code`, `product_name`, `business_no`, `business_type`, `reason_name`, `defective_qty`, `status`, `remark`) VALUES
-(8100101, 'DEFECT_QTY_DAY', 1, '2026-07-08', '日', '产线', 'LINE-ASSY-01', '总装一线', 'LINE-ASSY-01', '总装一线', 'WO20260708001', 'FG-FAN-500', 'FS-500 落地扇', 'QC20260708002', '巡检', '外观划伤', 2.000000, '待处理', '巡检发现外观异常'),
-(8100102, 'DEFECT_QTY_DAY', 2, '2026-07-09', '日', '产线', 'LINE-ASSY-02', '总装二线', 'LINE-ASSY-02', '总装二线', 'WO20260709001', 'FG-FAN-230', 'TF-230 台扇', 'RPT20260709001', '报工', '装配擦伤', 1.000000, '待处理', '联调报工不良')
-ON DUPLICATE KEY UPDATE `defective_qty` = VALUES(`defective_qty`), `status` = VALUES(`status`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `line_code`, `line_name`, `business_no`, `availability`, `performance`, `quality_rate`, `oee`, `status`) VALUES
-(8100201, 'OEE_DAY', 1, '2026-07-09', '日', '产线', 'LINE-ASSY-02', '总装二线', 'LINE-ASSY-02', '总装二线', 'EQ-ASSY-02', 0.900000, 0.840000, 0.958333, 0.724500, '已生成'),
-(8100202, 'OEE_DAY', 2, '2026-07-08', '日', '产线', 'LINE-ASSY-01', '总装一线', 'LINE-ASSY-01', '总装一线', 'EQ-ASSY-01', 0.920000, 0.880000, 0.960000, 0.777216, '已生成'),
-(8100203, 'OEE_DAY', 3, '2026-07-08', '日', '产线', 'LINE-ASSY-01', '总装一线', 'LINE-ASSY-01', '总装一线', 'EQ-QC-01', 0.950000, 0.900000, 0.933333, 0.797999, '已生成')
-ON DUPLICATE KEY UPDATE `availability` = VALUES(`availability`), `performance` = VALUES(`performance`), `quality_rate` = VALUES(`quality_rate`), `oee` = VALUES(`oee`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `line_code`, `line_name`, `work_order_no`, `business_no`, `business_type`, `reason_name`, `operator_name`, `started_at`, `ended_at`, `status`, `remark`) VALUES
-(8100301, 'ANDON_OPEN', 1, '2026-07-08', '日', '产线', 'LINE-ASSY-01', '总装一线', 'LINE-ASSY-01', '总装一线', 'WO20260708001', 'ANDON20260708001', '设备异常', '设备停机', '联调测试员', '2026-07-08 10:35:00', NULL, '处理中', '设备维护人员已接单')
-ON DUPLICATE KEY UPDATE `status` = VALUES(`status`), `remark` = VALUES(`remark`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `operator_name`, `total_qty`, `total_amount`, `ended_at`, `status`) VALUES
-(8100401, 'WAGE_AMOUNT_MONTH', 1, '2026-07-01', '月', '人员', 'EMP-T001', '联调测试员', '联调测试员', 58.000000, 58.400000, '2026-07-08 12:10:00', '已确认')
-ON DUPLICATE KEY UPDATE `total_qty` = VALUES(`total_qty`), `total_amount` = VALUES(`total_amount`), `status` = VALUES(`status`);
-
-INSERT INTO `mes_report`.`rpt_dashboard_line` (`id`, `line_id`, `line_code`, `line_name`, `batch_no`, `work_order_no`, `product_name`, `planned_qty`, `completed_qty`, `good_qty`, `defect_qty`, `oee`, `performance`, `output_trend`, `running_order_count`, `active_flag`) VALUES
-(8200001, 9500001, 'LINE-ASSY-01', '总装一线', 'BATCH-FAN-0708A', 'WO20260708001', 'FS-500 落地扇', 120.000000, 30.000000, 30.000000, 0.000000, 78.760750, 89.000000, '0,0,0,0,100,100,60', 0, 0),
-(8200002, 9500002, 'LINE-ASSY-02', '总装二线', 'BATCH-FAN-0709B', 'WO20260709001', 'TF-230 台扇', 96.000000, 48.000000, 46.000000, 2.000000, 72.450000, 84.000000, '0,0,0,0,0,100,100', 3, 1)
-ON DUPLICATE KEY UPDATE `batch_no` = VALUES(`batch_no`), `work_order_no` = VALUES(`work_order_no`), `completed_qty` = VALUES(`completed_qty`);
-
-INSERT INTO `mes_report`.`rpt_dashboard_metric` (`id`, `metric_key`, `metric_value`) VALUES
-(8200101, 'oee', 76.657167),
-(8200102, 'availability', 92.333333),
-(8200103, 'performance', 87.333333),
-(8200104, 'quality', 95.055533)
-ON DUPLICATE KEY UPDATE `metric_value` = VALUES(`metric_value`);
-
-INSERT INTO `mes_report`.`rpt_dashboard_stock` (`id`, `material_code`, `material_name`, `unit_name`, `required_qty`, `actual_qty`, `stock_status`) VALUES
-(8200201, 'MAT-CARTON-FAN', '风扇包装外箱', '个', 216.000000, 220.000000, 'SUFFICIENT'),
-(8200202, 'MAT-FILM-PE', 'PE 包装缠绕膜', '个', 96.000000, 120.000000, 'SUFFICIENT'),
-(8200203, 'MAT-GUARD-500', '500mm 网罩套件', '套', 80.000000, 50.000000, 'LOW'),
-(8200204, 'MAT-MOTOR-65', '65W 电机', '个', 60.000000, 80.000000, 'SUFFICIENT')
-ON DUPLICATE KEY UPDATE `required_qty` = VALUES(`required_qty`), `actual_qty` = VALUES(`actual_qty`), `stock_status` = VALUES(`stock_status`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `line_code`, `line_name`, `work_order_no`, `product_code`, `product_name`, `planned_qty`, `reported_qty`, `qualified_qty`, `defective_qty`, `report_count`, `oee`, `performance`, `status`, `remark`) VALUES
-(8100501, 'BOARD-LINE-ASSY-01', 1, '2026-07-08', '日', '产线看板', 'LINE-ASSY-01', '总装一线', 'LINE-ASSY-01', '总装一线', 'WO20260708001', 'FG-FAN-500', 'FS-500 落地扇', 120.000000, 78.000000, 76.000000, 2.000000, 1, 0.777216, 0.880000, 'RUNNING', '总装一线看板实时汇总')
-ON DUPLICATE KEY UPDATE `reported_qty` = VALUES(`reported_qty`), `qualified_qty` = VALUES(`qualified_qty`), `defective_qty` = VALUES(`defective_qty`), `oee` = VALUES(`oee`), `status` = VALUES(`status`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `line_code`, `line_name`, `qualified_qty`, `defective_qty`, `oee`, `report_count`, `business_no`, `reason_name`, `status`, `remark`) VALUES
-(8100601, 'BOARD-WORKSHOP-ASSY', 1, '2026-07-08', '日', '车间区域', 'WS-ASSY', '总装车间', NULL, NULL, 122.000000, 4.000000, 0.750858, 2, 'ANDON20260708001', '设备停机', 'WARN', '负责风扇产品总装，含2条产线'),
-(8100602, 'BOARD-WORKSHOP-ASSY', 2, '2026-07-08', '日', '车间区域', 'WS-QC', '质量车间', NULL, NULL, 0.000000, 0.000000, 0.000000, 0, NULL, NULL, 'RUNNING', '负责产品质量检验')
-ON DUPLICATE KEY UPDATE `dimension_type` = VALUES(`dimension_type`), `dimension_code` = VALUES(`dimension_code`), `dimension_name` = VALUES(`dimension_name`), `line_code` = VALUES(`line_code`), `line_name` = VALUES(`line_name`), `qualified_qty` = VALUES(`qualified_qty`), `defective_qty` = VALUES(`defective_qty`), `oee` = VALUES(`oee`), `report_count` = VALUES(`report_count`), `business_no` = VALUES(`business_no`), `reason_name` = VALUES(`reason_name`), `status` = VALUES(`status`), `remark` = VALUES(`remark`);
-
-INSERT INTO `mes_report`.`rpt_report_dataset` (`id`, `metric_code`, `row_no`, `stat_date`, `stat_period`, `dimension_type`, `dimension_code`, `dimension_name`, `qualified_qty`, `defective_qty`, `oee`, `status`, `remark`) VALUES
-(8100701, 'BOARD-CONTROL-CENTER', 1, '2026-07-09', '日', '模块', 'production', '生产', 122.000000, 4.000000, NULL, 'RUNNING', '双产线联调生产中'),
-(8100702, 'BOARD-CONTROL-CENTER', 2, '2026-07-09', '日', '模块', 'quality', '质量', NULL, 4.000000, NULL, 'WARN', '存在日不良记录'),
-(8100703, 'BOARD-CONTROL-CENTER', 3, '2026-07-09', '日', '模块', 'equipment', '设备', NULL, NULL, 0.766572, 'WARN', 'OEE 低于目标阈值'),
-(8100704, 'BOARD-CONTROL-CENTER', 4, '2026-07-09', '日', '模块', 'andon', '安灯', NULL, NULL, NULL, 'OPEN', '存在未关闭安灯')
-ON DUPLICATE KEY UPDATE `qualified_qty` = VALUES(`qualified_qty`), `defective_qty` = VALUES(`defective_qty`), `oee` = VALUES(`oee`), `status` = VALUES(`status`), `remark` = VALUES(`remark`);
-
 INSERT IGNORE INTO `mes_integration`.`int_external_system` (`id`, `system_code`, `system_name`, `auth_type`, `status`) VALUES
 (7000001, 'ERP-DEMO', '联调 ERP 系统', 'TOKEN', 'ENABLED'),
 (7000002, 'OPENAPI-DEMO', '联调标准 API 客户端', 'APP_KEY', 'ENABLED'),
@@ -633,3 +573,94 @@ INSERT IGNORE INTO `mes_integration`.`int_response_log` (`id`, `sync_log_id`, `h
 (7000301, 7000101, 200, '{"success":true,"taskId":4200001}', '2026-07-08 07:30:02', 120),
 (7000302, 7000102, 400, '{"success":false,"message":"工序编码重复"}', '2026-07-08 07:35:03', 180),
 (7000303, 7000104, 200, '{"success":true}', '2026-07-08 11:00:01', 80);
+
+INSERT IGNORE INTO `mes_auth`.`sys_permission` (`id`, `permission_code`, `permission_name`, `permission_type`, `module_code`) VALUES
+(1000901, 'process:sop:list', '电子 SOP 列表', 'BUTTON', 'process'),
+(1000902, 'process:sop:query', '电子 SOP 查询', 'BUTTON', 'process'),
+(1000903, 'process:sop:add', '电子 SOP 新增', 'BUTTON', 'process'),
+(1000904, 'process:sop:edit', '电子 SOP 编辑', 'BUTTON', 'process'),
+(1000905, 'process:sop:copyVersion', '电子 SOP 复制版本', 'BUTTON', 'process'),
+(1000906, 'process:sop:submit', '电子 SOP 提交审核', 'BUTTON', 'process'),
+(1000907, 'process:sop:review', '电子 SOP 审核', 'BUTTON', 'process'),
+(1000908, 'process:sop:approve', '电子 SOP 批准', 'BUTTON', 'process'),
+(1000909, 'process:sop:publish', '电子 SOP 发布', 'BUTTON', 'process'),
+(1000910, 'process:sop:disable', '电子 SOP 停用', 'BUTTON', 'process'),
+(1000911, 'process:sop:void', '电子 SOP 作废', 'BUTTON', 'process'),
+(1000912, 'process:sop:binding', '电子 SOP 绑定', 'BUTTON', 'process'),
+(1000913, 'process:sopModel:upload', '电子 SOP 三维模型上传', 'BUTTON', 'process'),
+(1000914, 'production:sop:view', '生产 SOP 查看', 'BUTTON', 'shopfloor'),
+(1000915, 'production:sop:execute', '生产 SOP 执行', 'BUTTON', 'shopfloor'),
+(1000916, 'production:sop:confirm', '生产 SOP 步骤确认', 'BUTTON', 'shopfloor'),
+(1000917, 'production:sop:executionList', '生产 SOP 执行记录', 'BUTTON', 'shopfloor');
+
+INSERT IGNORE INTO `mes_auth`.`sys_role_permission` (`id`, `role_id`, `permission_id`) VALUES
+(1000901, 1000001, 1000901),
+(1000902, 1000001, 1000902),
+(1000903, 1000001, 1000903),
+(1000904, 1000001, 1000904),
+(1000905, 1000001, 1000905),
+(1000906, 1000001, 1000906),
+(1000907, 1000001, 1000907),
+(1000908, 1000001, 1000908),
+(1000909, 1000001, 1000909),
+(1000910, 1000001, 1000910),
+(1000911, 1000001, 1000911),
+(1000912, 1000001, 1000912),
+(1000913, 1000001, 1000913),
+(1000914, 1000001, 1000914),
+(1000915, 1000001, 1000915),
+(1000916, 1000001, 1000916),
+(1000917, 1000001, 1000917);
+
+INSERT IGNORE INTO `mes_auth`.`sys_permission`
+(`id`, `permission_code`, `permission_name`, `permission_type`, `module_code`) VALUES
+(1000951, 'barcode:rule:add', '条码规则新增', 'BUTTON', 'barcode'),
+(1000952, 'barcode:rule:edit', '条码规则编辑和启停', 'BUTTON', 'barcode'),
+(1000953, 'barcode:rule:delete', '条码规则删除', 'BUTTON', 'barcode'),
+(1000954, 'barcode:application-rule:add', '条码应用规则新增', 'BUTTON', 'barcode'),
+(1000955, 'barcode:application-rule:edit', '条码应用规则编辑', 'BUTTON', 'barcode'),
+(1000956, 'barcode:application-rule:delete', '条码应用规则删除', 'BUTTON', 'barcode'),
+(1000957, 'barcode:generate', '条码批量生成', 'BUTTON', 'barcode'),
+(1000958, 'barcode:print', '条码打印与补打', 'BUTTON', 'barcode'),
+(1000959, 'barcode:scan', '条码扫码登记', 'BUTTON', 'barcode'),
+(1000960, 'barcode:bind', '条码包装关系绑定', 'BUTTON', 'barcode'),
+(1000961, 'barcode:close', '条码关闭', 'BUTTON', 'barcode'),
+(1000962, 'barcode:void', '条码作废', 'BUTTON', 'barcode');
+
+INSERT IGNORE INTO `mes_auth`.`sys_role_permission` (`id`, `role_id`, `permission_id`) VALUES
+(1000951, 1000001, 1000951),
+(1000952, 1000001, 1000952),
+(1000953, 1000001, 1000953),
+(1000954, 1000001, 1000954),
+(1000955, 1000001, 1000955),
+(1000956, 1000001, 1000956),
+(1000957, 1000001, 1000957),
+(1000958, 1000001, 1000958),
+(1000959, 1000001, 1000959),
+(1000960, 1000001, 1000960),
+(1000961, 1000001, 1000961),
+(1000962, 1000001, 1000962);
+
+INSERT IGNORE INTO `mes_production`.`sop_document`
+(`id`, `sop_code`, `sop_name`, `category`, `owner_id`, `status`, `current_version_id`, `created_at`, `updated_at`) VALUES
+(7900001, 'SOP-FAN-ASSY-001', '风扇总装电子 SOP', 'STANDARD_OPERATION', 1000001, 'ENABLED', 7900101, '2026-07-08 08:00:00', '2026-07-08 08:30:00');
+
+INSERT IGNORE INTO `mes_production`.`sop_version`
+(`id`, `sop_id`, `version_no`, `revision_type`, `status`, `effective_from`, `effective_to`, `submit_by`, `submit_at`, `review_by`, `review_at`, `approve_by`, `approve_at`, `publish_by`, `publish_at`, `model_version_id`, `remark`, `created_at`, `updated_at`) VALUES
+(7900101, 7900001, 'V1.0', 'NEW', 'EFFECTIVE', '2026-07-08 08:30:00', NULL, 1000001, '2026-07-08 08:10:00', 1000001, '2026-07-08 08:20:00', 1000001, '2026-07-08 08:25:00', 1000001, '2026-07-08 08:30:00', NULL, '演示版：支持任务锁版和步骤确认', '2026-07-08 08:00:00', '2026-07-08 08:30:00');
+
+INSERT IGNORE INTO `mes_production`.`sop_step`
+(`id`, `version_id`, `step_no`, `step_name`, `instruction`, `content_type`, `standard_duration`, `key_step`, `min_stay_seconds`, `confirm_required`, `parameter_required`, `photo_required`, `skip_allowed`, `abnormal_handling`, `quality_item_id`, `andon_type_id`, `enabled`, `created_at`, `updated_at`) VALUES
+(7900201, 7900101, 10, '工装与物料确认', '确认电机、网罩、扇叶和螺丝齐套；检查工装夹具定位销无松动。', 'TEXT', 60, 1, 0, 1, 0, 0, 0, '缺料或工装异常时发起安灯。', NULL, 7600002, 1, '2026-07-08 08:00:00', '2026-07-08 08:00:00'),
+(7900202, 7900101, 20, '电机与支架装配', '按定位孔装入电机支架，先不安装扇叶；使用扭矩工具锁紧固定螺丝，确认线束不被挤压。', 'MODEL_3D', 120, 1, 0, 1, 1, 0, 0, '扭矩不达标时禁止报工。', NULL, 7600001, 1, '2026-07-08 08:00:00', '2026-07-08 08:00:00'),
+(7900204, 7900101, 30, '扇叶与螺丝装配', '装入扇叶组件，按对角顺序拧紧固定螺丝；确认扇叶旋转无刮擦、无偏摆。', 'MODEL_3D', 150, 1, 0, 1, 1, 0, 0, '扇叶偏摆或螺丝滑牙时停止装配并发起质量异常。', NULL, 7600001, 1, '2026-07-08 08:00:00', '2026-07-08 08:00:00'),
+(7900203, 7900101, 40, '外观与试运行确认', '检查防护网罩卡扣到位，低中高三档运行无异响，填写确认结果。', 'TEXT', 90, 1, 0, 1, 1, 0, 0, '发现异响或外观缺陷时转质量异常。', 3000101, 7600003, 1, '2026-07-08 08:00:00', '2026-07-08 08:00:00');
+
+INSERT IGNORE INTO `mes_production`.`sop_attachment`
+(`id`, `version_id`, `step_id`, `attachment_type`, `file_name`, `content_type`, `file_size`, `object_key`, `file_url`, `sha256`, `display_order`, `created_at`) VALUES
+(7900501, 7900101, 7900202, 'MODEL_3D', '电机支架装配模型.glb', 'model/gltf-binary', 653300, 'sop/models/20260710/12025-fan.glb', '/api/production/sop/files/7900501', '3ed2dee0ffb7333f0baaa540136f7328a9dc85c3bd9a83da734f443d7f46c153', 20, '2026-07-10 16:20:00'),
+(7900502, 7900101, 7900204, 'MODEL_3D', '扇叶螺丝装配模型.glb', 'model/gltf-binary', 653300, 'sop/models/20260710/ad7a03dc-08f9-470d-a119-48690a4ef868.glb', '/api/production/sop/files/7900502', '3ed2dee0ffb7333f0baaa540136f7328a9dc85c3bd9a83da734f443d7f46c153', 30, '2026-07-10 16:20:00');
+
+INSERT IGNORE INTO `mes_production`.`sop_binding`
+(`id`, `version_id`, `binding_type`, `product_id`, `route_id`, `route_step_id`, `process_id`, `workstation_id`, `equipment_id`, `task_id`, `priority`, `confirm_mode`, `effective_from`, `effective_to`, `status`, `created_at`, `updated_at`) VALUES
+(7900301, 7900101, 'PRODUCT_ROUTE_STATION', 9400001, 9700201, NULL, NULL, 9600001, NULL, NULL, 80, 'PER_TASK', '2026-07-08 08:30:00', NULL, 'ACTIVE', '2026-07-08 08:00:00', '2026-07-08 08:30:00');

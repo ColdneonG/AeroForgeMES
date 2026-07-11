@@ -235,18 +235,18 @@ onMounted(loadRows)
   align-items: center;
   min-height: 0;
   padding: 16px 20px;
-  background: #f7f9fa;
-  border: 1px solid #d7dde1;
+  background: var(--mes-bg-subtle);
+  border: 1px solid var(--mes-border);
 }
 
 .route-node {
   display: grid;
   height: 80px;
-  color: #ffffff;
+  color: var(--mes-text-inverse);
   font-size: 20px;
-  font-weight: 650;
+  font-weight: var(--mes-font-semibold);
   place-items: center;
-  background: #00799f;
+  background: var(--mes-primary);
 }
 
 .route-meta strong,
@@ -256,16 +256,6 @@ onMounted(loadRows)
 
 .route-meta span {
   margin-top: 8px;
-  color: #71818b;
-}
-
-.api-state {
-  margin: 12px 24px;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
+  color: var(--mes-text-secondary);
 }
 </style>

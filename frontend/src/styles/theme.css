@@ -1,38 +1,122 @@
 :root {
-  --mes-primary: #00759a;
-  --mes-primary-dark: #006f8e;
-  --mes-primary-active: #006b8f;
-  --mes-primary-hover: #005a78;
-  --mes-blue: #006b8f;
-  --mes-accent: #6ea7c4;
-  --mes-accent-soft: #e7f0f7;
-  --mes-bg: #f2f4f6;
-  --mes-card: #ffffff;
-  --mes-card-bg: #ffffff;
-  --mes-line: #d6e0e6;
-  --mes-line-soft: #e2e8ec;
-  --mes-line-strong: #b9c8d1;
-  --mes-text-title: #1f2d3d;
-  --mes-text: #1f2d3d;
-  --mes-text-main: #1f2d3d;
-  --mes-muted: #5f6f7a;
-  --mes-text-secondary: #5f6f7a;
-  --mes-text-weak: #8a99a6;
+  /* Typography */
+  --mes-font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+  --mes-font-family-display: "Source Han Sans SC Bold", "Microsoft YaHei", sans-serif;
+  --mes-font-family-number: "Montserrat SemiBold", "Segoe UI", sans-serif;
+  --mes-font-xs: 12px;
+  --mes-font-sm: 13px;
+  --mes-font-base: 14px;
+  --mes-font-md: 16px;
+  --mes-font-lg: 20px;
+  --mes-font-xl: 28px;
+  --mes-font-regular: 400;
+  --mes-font-medium: 500;
+  --mes-font-semibold: 600;
+  --mes-font-bold: 700;
+  --mes-line-tight: 1.25;
+  --mes-line-normal: 1.5;
+
+  /* Brand and semantic colors */
+  --mes-primary: #00799f;
+  --mes-primary-dark: #006f91;
+  --mes-primary-hover: #006b85;
+  --mes-primary-active: #006f91;
+  --mes-primary-soft: #e4f5f8;
   --mes-success: #2e7d5b;
   --mes-success-bg: #e7f2ed;
-  --mes-info: #2f75a8;
-  --mes-info-bg: #e7f0f7;
-  --mes-standby: #8a6d3b;
-  --mes-standby-bg: #f4ead7;
   --mes-warning: #b7791f;
   --mes-warning-text: #b7791f;
   --mes-warning-bg: #f8e9c8;
   --mes-danger: #b23a3a;
   --mes-danger-bg: #f7e4e4;
+  --mes-info: #2f75a8;
+  --mes-info-bg: #e7f0f7;
+  --mes-standby: #8a6d3b;
+  --mes-standby-bg: #f4ead7;
   --mes-stable: #62717b;
   --mes-stable-bg: #edf1f3;
-  --mes-radius: 3px;
-  --mes-card-radius: 3px;
-  --mes-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  --mes-font: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+
+  /* Surfaces, text, and borders */
+  --mes-bg-page: #eeeeee;
+  --mes-bg-workspace: #eef2f4;
+  --mes-bg-surface: #ffffff;
+  --mes-bg-subtle: #f7fafb;
+  --mes-bg-table-head: #e8eef2;
+  --mes-bg-input: #ffffff;
+  --mes-text-heading: #1f3139;
+  --mes-text-primary: #25323b;
+  --mes-text-secondary: #5f6f7a;
+  --mes-text-muted: #8a99a6;
+  --mes-text-inverse: #ffffff;
+  --mes-border: #d7dde1;
+  --mes-border-soft: #e2e8ec;
+  --mes-border-strong: #b9c8d1;
+  --mes-border-input: #b9c8d1;
+  --mes-border-focus: #00799f;
+
+  /* Spacing and controls */
+  --mes-space-1: 4px;
+  --mes-space-2: 8px;
+  --mes-space-3: 12px;
+  --mes-space-4: 16px;
+  --mes-space-5: 20px;
+  --mes-space-6: 24px;
+  --mes-space-8: 32px;
+  --mes-page-padding-x: 24px;
+  --mes-page-padding-y: 22px;
+  --mes-section-gap: 16px;
+  --mes-panel-padding: 16px;
+  --mes-table-cell-y: 8px;
+  --mes-table-cell-x: 12px;
+  --mes-control-height: 32px;
+  --mes-button-height: 32px;
+
+  /* Radius and shadow */
+  --mes-radius-sm: 2px;
+  --mes-radius-md: 4px;
+  --mes-radius-lg: 6px;
+  --mes-shadow-sm: 0 1px 2px rgba(26, 48, 60, 0.06);
+  --mes-shadow-md: 0 2px 6px rgba(26, 48, 60, 0.10);
+
+  /* Status tags */
+  --mes-status-ok-text: #2e7d5b;
+  --mes-status-ok-bg: #e7f2ed;
+  --mes-status-warn-text: #8a6d3b;
+  --mes-status-warn-bg: #f4ead7;
+  --mes-status-danger-text: #b23a3a;
+  --mes-status-danger-bg: #f7e4e4;
+  --mes-status-info-text: #2f75a8;
+  --mes-status-info-bg: #e7f0f7;
+
+  /* Dark control-center theme */
+  --mes-control-bg: #062b36;
+  --mes-control-surface: #0b3946;
+  --mes-control-surface-soft: rgba(255, 255, 255, 0.04);
+  --mes-control-border: rgba(139, 216, 233, 0.32);
+  --mes-control-text: #d9edf2;
+  --mes-control-text-muted: #9fc7d0;
+  --mes-control-primary: #14b2a6;
+  --mes-control-success: #65d6a5;
+  --mes-control-warning: #ffd334;
+  --mes-control-danger: #ff6b73;
+
+  /* Existing token aliases retained for compatibility. */
+  --mes-blue: var(--mes-primary-active);
+  --mes-accent: #6ea7c4;
+  --mes-accent-soft: var(--mes-info-bg);
+  --mes-bg: var(--mes-bg-page);
+  --mes-card: var(--mes-bg-surface);
+  --mes-card-bg: var(--mes-bg-surface);
+  --mes-line: var(--mes-border);
+  --mes-line-soft: var(--mes-border-soft);
+  --mes-line-strong: var(--mes-border-strong);
+  --mes-text-title: var(--mes-text-heading);
+  --mes-text: var(--mes-text-primary);
+  --mes-text-main: var(--mes-text-primary);
+  --mes-muted: var(--mes-text-secondary);
+  --mes-text-weak: var(--mes-text-muted);
+  --mes-radius: var(--mes-radius-sm);
+  --mes-card-radius: var(--mes-radius-sm);
+  --mes-shadow: var(--mes-shadow-sm);
+  --mes-font: var(--mes-font-family);
 }

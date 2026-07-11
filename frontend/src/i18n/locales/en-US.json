@@ -174,8 +174,6 @@
     "direction": "Direction",
     "externalId": "External ID",
     "result": "Result",
-    "abnormalDesc": "Abnormal Desc",
-    "faultReason": "Fault Reason",
     "kittingRate": "Kitting Rate",
     "risk": "Risk",
     "shortage": "Shortage",
@@ -241,9 +239,7 @@
     "shutdown": "Shutdown",
     "rework": "Rework",
     "info": "Info",
-    "inProgress": "In Progress",
-    "processing": "In Progress",
-    "cancelled": "Cancelled"
+    "inProgress": "In Progress"
   },
   "barcode": {
     "rules": {
@@ -299,29 +295,11 @@
     "itemsProduced": "Items Produced / To Be Produced",
     "outputPerformance": "Output Performance",
     "yearForecast": "Year Forecast",
-    "runningOrders": "Running Orders",
-    "runningOrdersValue": "{count}",
-    "collapseLine": "Collapse line card",
-    "expandLine": "Expand line card",
-    "collapseStock": "Collapse stock level",
     "stockLevel": "Stock Level",
     "stockDesc": "Stock picture on the dock level of packaging materials",
     "material": "Material",
     "requiredQty": "Required Qty.",
     "actualQty": "Actual Qty.",
-    "unit": "Unit",
-    "stockStatus": "Stock Status",
-    "metrics": {
-      "oee": "OEE",
-      "availability": "Availability",
-      "performance": "Performance",
-      "quality": "Quality"
-    },
-    "stockStatuses": {
-      "SUFFICIENT": "Sufficient",
-      "LOW": "Low",
-      "SHORTAGE": "Shortage"
-    },
     "apiError": "Dashboard API is not connected yet."
   },
   "boards": {
@@ -469,10 +447,7 @@
       "eyebrow": "Equipment",
       "title": "Inspection & Maintenance",
       "description": "Equipment inspection plans, maintenance tasks, repair work orders — full lifecycle.",
-      "listTitle": "Inspection & Maintenance",
-      "typeMaintenance": "Maintenance",
-      "typeInspection": "Inspection",
-      "typeRepair": "Repair"
+      "listTitle": "Inspection & Maintenance"
     }
   },
   "quality": {
@@ -490,7 +465,6 @@
     "inspectionTasks": "Inspection Tasks",
     "inspectionTypes": "IQC / PQC / FQC",
     "task": "Task",
-    "workOrder": "Work Order",
     "product": "Product",
     "type": "Type",
     "result": "Result",
@@ -513,14 +487,7 @@
     "time": "Time",
     "status": "Status",
     "noDispositionData": "No disposition flow data.",
-    "apiError": "Data loading failed. Please check backend API or gateway configuration.",
-    "backToList": "Back to List",
-    "detailLoadError": "Failed to load inspection order details.",
-    "actions": {
-      "start": "Start Inspection",
-      "pass": "Pass",
-      "fail": "Fail"
-    }
+    "apiError": "Data loading failed. Please check backend API or gateway configuration."
   },
   "andon": {
     "eyebrow": "Andon",
@@ -532,31 +499,7 @@
     "eyebrow": "Reports",
     "title": "Report Center",
     "description": "Multi-dimensional reports: output, quality, equipment, traceability and more.",
-    "listTitle": "Reports",
-    "actions": {
-      "auditOpened": "Opened audit details for \"{report}\".",
-      "auditRemark": "Viewed audit details for \"{report}\"",
-      "exported": "Exported real report data for \"{report}\".",
-      "exportRemark": "Exported real report data for \"{report}\"",
-      "noExportData": "No report data is available for \"{report}\"."
-    },
-    "exportColumns": {
-      "statDate": "Stat Date",
-      "lineCode": "Line Code",
-      "lineName": "Line Name",
-      "workOrderNo": "Work Order No.",
-      "productCode": "Product Code",
-      "productName": "Product Name",
-      "plannedQty": "Planned Qty.",
-      "reportedQty": "Reported Qty.",
-      "qualifiedQty": "Qualified Qty.",
-      "defectiveQty": "Defective Qty.",
-      "reportCount": "Report Count",
-      "dimensionId": "Dimension ID",
-      "statPeriod": "Stat Period",
-      "statTime": "Stat Time",
-      "metricValue": "Metric Value"
-    }
+    "listTitle": "Reports"
   },
   "wage": {
     "eyebrow": "Piecework Wage",

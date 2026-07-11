@@ -222,8 +222,8 @@ onMounted(loadRows)
 
 .metric-tile {
   padding: 14px;
-  background: #f7f9fa;
-  border: 1px solid #d7dde1;
+  background: var(--mes-bg-subtle);
+  border: 1px solid var(--mes-border);
 }
 
 .metric-tile span,
@@ -232,7 +232,7 @@ onMounted(loadRows)
 }
 
 .metric-tile span {
-  color: #71818b;
+  color: var(--mes-text-secondary);
 }
 
 .metric-tile strong {
@@ -247,20 +247,11 @@ onMounted(loadRows)
 }
 
 .downtime-row span {
-  color: #71818b;
+  color: var(--mes-text-secondary);
 }
 
 .downtime-row .siemens-progress {
   margin-top: 8px;
 }
 
-.api-state {
-  margin: 12px 24px;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
-}
 </style>

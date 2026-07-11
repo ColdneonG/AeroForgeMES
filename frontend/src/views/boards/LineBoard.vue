@@ -94,15 +94,3 @@ const loadRows = async () => {
 
 onMounted(loadRows)
 </script>
-
-<style scoped>
-.board-state {
-  margin: 12px 0;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.board-state.error {
-  color: #b42318;
-}
-</style>

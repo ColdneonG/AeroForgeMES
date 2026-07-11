@@ -144,19 +144,3 @@ const handleRowAction = async ({ action, row }) => {
 
 onMounted(loadRows)
 </script>
-
-<style scoped>
-.api-state {
-  margin: 12px 24px 0;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.api-state.error {
-  color: #b42318;
-}
-
-.api-state.success {
-  color: #0f766e;
-}
-</style>

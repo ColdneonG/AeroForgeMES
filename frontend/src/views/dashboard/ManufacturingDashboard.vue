@@ -234,15 +234,3 @@ function needlePoint(value) {
 
 onMounted(loadDashboard)
 </script>
-
-<style scoped>
-.dashboard-state {
-  margin: 12px 0;
-  color: #52616b;
-  font-size: 14px;
-}
-
-.dashboard-state.error {
-  color: #b42318;
-}
-</style>

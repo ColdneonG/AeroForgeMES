@@ -305,28 +305,7 @@ public class ProductionService {
             Long lineId,
             Long teamId
     ) {
-        List<ShopTask> tasks = repository.listShopTasks(keyword, status, workOrderId, dispatchId, lineId, teamId);
-
-        // batch-resolve cross-database names (mes_system)
-        Set<Long> productIds = new java.util.HashSet<>();
-        Set<Long> lineIds = new java.util.HashSet<>();
-        for (ShopTask t : tasks) {
-            if (t.productId() != null) productIds.add(t.productId());
-            if (t.lineId() != null) lineIds.add(t.lineId());
-        }
-
-        Map<Long, String> productNames = productIds.isEmpty() ? Map.of() : repository.findItemNames(productIds);
-        Map<Long, String> lineNames = lineIds.isEmpty() ? Map.of() : repository.findLineNames(lineIds);
-
-        return tasks.stream().map(t -> new ShopTask(
-                t.id(), t.taskNo(), t.workOrderId(), t.dispatchId(),
-                t.productId(), t.routeId(), t.lineId(), t.teamId(),
-                t.planQty(), t.startedAt(), t.endedAt(), t.status(),
-                t.workOrderNo(),
-                productNames.getOrDefault(t.productId(), null),
-                t.routeName(),
-                lineNames.getOrDefault(t.lineId(), null)
-        )).toList();
+        return repository.listShopTasks(keyword, status, workOrderId, dispatchId, lineId, teamId);
     }
 
     public DispatchOrder getDispatchOrder(Long id) {
