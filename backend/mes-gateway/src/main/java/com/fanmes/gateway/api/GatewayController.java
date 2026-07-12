@@ -47,6 +47,7 @@ public class GatewayController {
                 "/api/openapi/", trimUrl(integrationUrl),
                 "/api/production/", trimUrl(productionUrl),
                 "/api/quality/", trimUrl(qualityUrl),
+                "/api/andon/", trimUrl(productionUrl),
                 "/internal/", trimUrl(productionUrl)
         );
         this.legacyRoutes = Map.ofEntries(

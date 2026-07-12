@@ -24,7 +24,11 @@ public class TokenAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (!authEnabled || "OPTIONS".equalsIgnoreCase(request.getMethod()) || request.getRequestURI().contains("/health")) {
+        String requestUri = request.getRequestURI();
+        if (!authEnabled
+                || "OPTIONS".equalsIgnoreCase(request.getMethod())
+                || requestUri.contains("/health")
+                || "/api/auth/login".equals(requestUri)) {
             filterChain.doFilter(request, response);
             return;
         }
