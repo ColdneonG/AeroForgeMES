@@ -101,4 +101,44 @@ const router = createRouter({
  scrollBehavior: (_to, _from, savedPosition) => savedPosition || { top: 0 },
 })
 router.afterEach((to) => { document.title = String(to.meta.title || 'AeroForge MES') })
+
+const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+let prefersReducedMotion = reducedMotionQuery.matches
+let initialNavigation = true
+let exitOverlay: HTMLDivElement | undefined
+
+function showPageExitOverlay() {
+  exitOverlay?.remove()
+  exitOverlay = document.createElement('div')
+  exitOverlay.className = 'page-exit-overlay'
+  document.body.appendChild(exitOverlay)
+}
+
+function clearPageExitOverlay() {
+  exitOverlay?.remove()
+  exitOverlay = undefined
+}
+
+// Keep the preference live when it changes at the operating-system level.
+reducedMotionQuery.addEventListener('change', (event) => {
+  prefersReducedMotion = event.matches
+})
+
+// Vue Router is the single navigation path for links, shortcuts, and code-driven
+// navigation, so the guard provides the exit transition consistently.
+router.beforeEach(async (to, from) => {
+  if (initialNavigation) {
+    initialNavigation = false
+    return true
+  }
+  if (prefersReducedMotion || to.fullPath === from.fullPath) return true
+
+  showPageExitOverlay()
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 200))
+  return true
+})
+
+router.afterEach(() => {
+  window.requestAnimationFrame(clearPageExitOverlay)
+})
 export default router
