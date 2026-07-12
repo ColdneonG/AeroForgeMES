@@ -53,3 +53,7 @@ tmp/
 temp/
 .cache/
 .eslintcache
+
+tests/
+docs/
+scripts/
