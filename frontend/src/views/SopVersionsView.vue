@@ -3,7 +3,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
 </script>
 
 <template>
-<MesLayout active="sop-docs">
+<MesLayout active="sop-versions">
   
   <header class="app-header"><div class="header-breadcrumb"><span>电子SOP</span> <span class="bc-sep">/</span> <span class="bc-current">版本管理</span></div><div class="header-actions"><span class="user-avatar">张</span></div></header>
   <main class="app-main" data-od-id="sopv-main">

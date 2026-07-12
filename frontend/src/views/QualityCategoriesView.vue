@@ -5,7 +5,7 @@ const { notify } = usePageInteractions()
 </script>
 
 <template>
-<MesLayout active="quality-items">
+<MesLayout active="quality-categories">
   
   <header class="app-header"><div class="header-breadcrumb"><span>质量与追溯</span> <span class="bc-sep">/</span> <span class="bc-current">检验项分类</span></div><div class="header-actions"><button class="btn btn-primary btn-sm" @click="notify('新建分类 — POST /api/quality/item-categories')">+ 新建分类</button><span class="user-avatar">李</span></div></header>
   <main class="app-main" data-od-id="qccat-main">

@@ -3,7 +3,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
 </script>
 
 <template>
-<MesLayout active="erp">
+<MesLayout active="sync-logs">
   
   <header class="app-header"><div class="header-breadcrumb"><span>集成管理</span> <span class="bc-sep">/</span> <span class="bc-current">同步日志</span></div><div class="header-actions"><button class="btn btn-secondary btn-sm">导出日志</button><span class="user-avatar">陈</span></div></header>
   <main class="app-main" data-od-id="synclog-main">

@@ -3,7 +3,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
 </script>
 
 <template>
-<MesLayout active="sop-docs">
+<MesLayout active="sop-steps">
   
   <header class="app-header"><div class="header-breadcrumb"><span>电子SOP</span> <span class="bc-sep">/</span> <span class="bc-current">步骤编排</span></div><div class="header-actions"><button class="btn btn-primary btn-sm">+ 添加步骤</button><span class="user-avatar">张</span></div></header>
   <main class="app-main" data-od-id="sopsteps-main">

@@ -5,7 +5,7 @@ const { notify } = usePageInteractions()
 </script>
 
 <template>
-<MesLayout active="erp">
+<MesLayout active="openapi">
   
   <header class="app-header"><div class="header-breadcrumb"><span>集成管理</span> <span class="bc-sep">/</span> <span class="bc-current">OpenAPI</span></div><div class="header-actions"><button class="btn btn-primary btn-sm" @click="notify('注册应用 — 对接 /api/openapi')">+ 注册应用</button><span class="user-avatar">陈</span></div></header>
   <main class="app-main" data-od-id="oapi-main">

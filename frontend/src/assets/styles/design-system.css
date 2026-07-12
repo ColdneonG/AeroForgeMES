@@ -1495,8 +1495,15 @@ img, svg { display: block; max-width: 100%; }
 }
 
 /* ---- Responsive baseline (desktop-first; graceful degradation) --- */
-/* At narrow widths, switch to stacked single-column with hidden sidebar */
+/* At narrow widths, keep sidebar visible with reduced width */
 @media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 200px 1fr;
+  }
+  .app-main { padding: var(--space-4); }
+}
+
+@media (max-width: 720px) {
   .app-shell {
     grid-template-columns: 1fr;
     grid-template-rows: var(--header-h) 1fr var(--statusbar-h);
@@ -1506,8 +1513,6 @@ img, svg { display: block; max-width: 100%; }
       "statusbar";
   }
   .app-sidebar { display: none; }
-  .app-main { padding: var(--space-4); }
-  /* Expose sidebar via hamburger toggle handled by app.js */
 }
 
 /* Ensure tables don't force horizontal overflow on small screens */

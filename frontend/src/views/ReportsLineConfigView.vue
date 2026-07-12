@@ -3,7 +3,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
 </script>
 
 <template>
-<MesLayout active="ccenter">
+<MesLayout active="line-config">
   
   <header class="app-header"><div class="header-breadcrumb"><span>数据与系统</span> <span class="bc-sep">/</span> <span class="bc-current">产线看板配置</span></div><div class="header-actions"><button class="btn btn-primary btn-sm">+ 新建配置</button><span class="user-avatar">张</span></div></header>
   <main class="app-main" data-od-id="lconf-main">

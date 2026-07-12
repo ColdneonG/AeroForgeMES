@@ -5,7 +5,7 @@ const { notify } = usePageInteractions()
 </script>
 
 <template>
-<MesLayout active="sop-exec">
+<MesLayout active="sopexec">
   
   <header class="app-header">
     <div class="header-breadcrumb"><span>电子SOP</span> <span class="bc-sep">/</span> <span class="bc-current">执行终端</span></div>

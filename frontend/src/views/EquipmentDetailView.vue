@@ -5,7 +5,7 @@ const activeTab = ref('info')
 </script>
 
 <template>
-<MesLayout active="equip-ledger">
+<MesLayout active="equip-detail">
   
   <header class="app-header"><div class="header-breadcrumb"><span>设备与安灯</span> <span class="bc-sep">/</span> <RouterLink to="/equipment/ledger">设备台账</RouterLink> <span class="bc-sep">/</span> <span class="bc-current">EQ-001 注塑机 #1</span></div><div class="header-actions"><button class="btn btn-primary btn-sm">编辑</button><span class="user-avatar">张</span></div></header>
   <main class="app-main" data-od-id="eqdet-main">

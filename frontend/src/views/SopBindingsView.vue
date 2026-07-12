@@ -3,7 +3,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
 </script>
 
 <template>
-<MesLayout active="sop-docs">
+<MesLayout active="sop-bindings">
   
   <header class="app-header"><div class="header-breadcrumb"><span>电子SOP</span> <span class="bc-sep">/</span> <span class="bc-current">绑定配置</span></div><div class="header-actions"><button class="btn btn-primary btn-sm">+ 新建绑定</button><span class="user-avatar">张</span></div></header>
   <main class="app-main" data-od-id="sopbind-main">

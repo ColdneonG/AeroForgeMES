@@ -3,7 +3,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
 </script>
 
 <template>
-<MesLayout active="barcode-rules">
+<MesLayout active="barcode-types">
   
   <header class="app-header"><div class="header-breadcrumb"><span>条码与追溯</span> <span class="bc-sep">/</span> <span class="bc-current">条码类型</span></div><div class="header-actions"><button class="btn btn-primary btn-sm">+ 新建类型</button><span class="user-avatar">张</span></div></header>
   <main class="app-main" data-od-id="btypes-main">

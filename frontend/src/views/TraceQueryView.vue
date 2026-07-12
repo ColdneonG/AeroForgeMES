@@ -5,7 +5,7 @@ const { traceVisible } = usePageInteractions()
 </script>
 
 <template>
-<MesLayout active="trace-query">
+<MesLayout active="trace">
   
   <header class="app-header">
     <div class="header-breadcrumb"><span>条码与追溯</span> <span class="bc-sep">/</span> <span class="bc-current">追溯查询</span></div>
