@@ -1,41 +1,55 @@
 # Dependencies
 node_modules/
 
-# Frontend build output
+# Build output and generated files
 dist/
 .vite/
-
-# Java / Maven build output
+coverage/
+*.tsbuildinfo
 target/
 *.class
 *.jar
 *.war
 *.ear
 
-# Logs
+# Logs and diagnostic reports
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
+hs_err_pid*
+replay_pid*
 
-# Local environment
+# Local environment and machine-specific configuration
 .env
 .env.*
 !.env.example
+!.env.*.example
+*.local
 
 # IDE and editor files
 .idea/
-.vscode/
 *.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
 *.swp
 *.swo
+*~
+.classpath
+.project
+.settings/
 
-# OS files
+# OS metadata
 .DS_Store
 Thumbs.db
+Desktop.ini
 
-# Temporary files
+# Temporary and cache files
 tmp/
 temp/
+.cache/
+.eslintcache
