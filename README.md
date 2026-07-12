@@ -8,9 +8,7 @@ Fan MES is organized as a lightweight microservice project for fan manufacturing
 - `frontend/`: Vue admin, workshop pad, mini program, and kanban frontends.
 - `database/`: MySQL schema, migration, and seed scripts split by service ownership.
 - `deploy/`: Docker, Nacos, Nginx, and local compose deployment assets.
-- `docs/`: Project-facing architecture, API, and deployment notes.
-- `scripts/`: Development, database, and deployment helper scripts.
-- `tests/`: API, E2E, contract, integration, and load tests.
+
 
 ## Backend Services
 
