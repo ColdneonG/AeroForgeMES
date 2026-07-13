@@ -1,33 +1,10 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
-import { usePageInteractions } from '@/composables/usePageInteractions'
-const { notify } = usePageInteractions()
+import { getQualityRecords, postQualityAction, type QualityRecord } from '@/api/quality'
+const rows = ref<QualityRecord[]>([]); const error = ref(''); const value = (row: QualityRecord, key: string) => String(row[key] ?? '-')
+async function load() { try { rows.value = await getQualityRecords('/quality/items') } catch (e) { error.value = e instanceof Error ? e.message : '检验项加载失败' } }
+async function action(row: QualityRecord, name: string) { if (!row.id) return; try { await postQualityAction(`/quality/items/${row.id}/${name}`); await load() } catch (e) { error.value = e instanceof Error ? e.message : '检验项操作失败' } }
+onMounted(load)
 </script>
-
-<template>
-<MesLayout active="quality-items">
-  
-  <header class="app-header"><div class="header-breadcrumb"><span>质量与追溯</span> <span class="bc-sep">/</span> <span class="bc-current">检验项管理</span></div><div class="header-actions"><button class="btn btn-primary btn-sm" @click="notify('新建检验项 — POST /api/quality/items')">+ 新建检验项</button><span class="user-avatar">李</span></div></header>
-  <main class="app-main" data-od-id="items-main">
-    <h1 class="page-title">检验项管理</h1>
-    <div class="card mb-5"><div class="search-bar" style="margin-bottom:0;">
-      <div class="form-group" style="min-width:160px;"><label class="form-label">检验项名称</label><input class="form-input" type="text" placeholder="搜索..." /></div>
-      <div class="form-group" style="min-width:140px;"><label class="form-label">分类</label><select class="form-select"><option>全部</option><option>外观检查</option><option>尺寸测量</option><option>电气性能</option><option>功能测试</option><option>安全测试</option></select></div>
-      <div class="form-group" style="min-width:130px;"><label class="form-label">状态</label><select class="form-select"><option>全部</option><option>启用</option><option>停用</option></select></div>
-      <button class="btn btn-secondary btn-sm" style="align-self:flex-end;">筛选</button>
-    </div></div>
-    <div class="data-table-wrap"><table class="data-table">
-      <thead><tr><th>检验项编码</th><th>检验项名称</th><th>分类</th><th>规格要求</th><th>量具</th><th>单位</th><th>公差范围</th><th>状态</th><th>操作</th></tr></thead>
-      <tbody>
-        <tr><td class="cell-mono">CI-001</td><td>外观检查</td><td>外观检查</td><td>无划伤、色差、变形</td><td>目视</td><td>—</td><td>—</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>启用</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm">编辑</button></td></tr>
-        <tr><td class="cell-mono">CI-002</td><td>运转测试</td><td>功能测试</td><td>3 档运转正常，无异响</td><td>通电测试台</td><td>—</td><td>—</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>启用</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm">编辑</button></td></tr>
-        <tr><td class="cell-mono">CI-003</td><td>风速测试</td><td>功能测试</td><td>高速档风速 ≥4.5 m/s</td><td>风速仪</td><td>m/s</td><td>≥4.5</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>启用</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm">编辑</button></td></tr>
-        <tr><td class="cell-mono">CI-004</td><td>绝缘耐压</td><td>安全测试</td><td>AC 1500V / 1min 无击穿</td><td>耐压测试仪</td><td>V</td><td>≥1500</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>启用</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm">编辑</button></td></tr>
-        <tr><td class="cell-mono">CI-005</td><td>功率测试</td><td>电气性能</td><td>额定功率 75W±10%</td><td>功率计</td><td>W</td><td>67.5–82.5</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>启用</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm">编辑</button></td></tr>
-        <tr><td class="cell-mono">CI-006</td><td>噪音测试</td><td>功能测试</td><td>高速档噪音 ≤55dB(A)</td><td>噪音计</td><td>dB(A)</td><td>≤55</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>启用</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm">编辑</button></td></tr>
-      </tbody>
-    </table></div>
-  </main>
-  <footer class="app-statusbar"><span class="statusbar-item"><span class="dot ok"></span>系统正常</span><span class="statusbar-sep">|</span><span class="statusbar-item">检验项管理 · 12 个检验项</span><span class="statusbar-sep">|</span><span class="statusbar-item" style="margin-left:auto;">风擎工控 AeroForge MES v2.0 · 李检验</span></footer>
-</MesLayout>
-</template>
+<template><MesLayout active="quality-items"><header class="app-header"><div class="header-breadcrumb"><span>质量与追溯</span><span class="bc-sep">/</span><span class="bc-current">检验项管理</span></div><div class="header-actions"><span class="user-avatar">张</span></div></header><main class="app-main"><h1 class="page-title">检验项管理</h1><div v-if="error" class="alert alert-error mb-5"><span class="alert-icon">!</span>{{ error }}</div><div class="data-table-wrap"><table class="data-table"><thead><tr><th>检验项编码</th><th>检验项名称</th><th>分类</th><th>值类型</th><th>标准值</th><th>下限</th><th>上限</th><th>状态</th><th>操作</th></tr></thead><tbody><tr v-if="!rows.length"><td colspan="9">暂无检验项</td></tr><tr v-for="row in rows" :key="row.id"><td class="cell-mono">{{ value(row, 'itemCode') }}</td><td>{{ value(row, 'itemName') }}</td><td>{{ value(row, 'categoryId') }}</td><td>{{ value(row, 'valueType') }}</td><td>{{ value(row, 'standardValue') }}</td><td>{{ value(row, 'lowerLimit') }}</td><td>{{ value(row, 'upperLimit') }}</td><td><span class="badge badge-status-ok"><span class="badge-dot"></span>{{ value(row, 'status') }}</span></td><td class="cell-actions"><button class="btn btn-ghost btn-sm" @click="action(row, 'enable')">启用</button><button class="btn btn-ghost btn-sm" @click="action(row, 'disable')">停用</button></td></tr></tbody></table></div></main><footer class="app-statusbar"><span class="statusbar-item"><span class="dot ok"></span>检验项 · {{ rows.length }} 条</span></footer></MesLayout></template>

@@ -3,6 +3,7 @@ package com.fanmes.production.infrastructure;
 import com.fanmes.production.domain.DispatchOrder;
 import com.fanmes.production.domain.KittingAnalysis;
 import com.fanmes.production.domain.KittingMissingItem;
+import com.fanmes.production.domain.OperationProgress;
 import com.fanmes.production.domain.ShopTask;
 import com.fanmes.production.domain.WorkOrder;
 import org.springframework.jdbc.core.RowMapper;
@@ -386,6 +387,27 @@ public class ProductionRepository {
         return jdbc.query(sql.toString(), params, shopTaskWithNamesMapper());
     }
 
+    public List<OperationProgress> listOperationProgress(Long workOrderId) {
+        return jdbc.query("""
+                select ot.id as operation_task_id, ot.operation_task_no, ot.task_id, st.task_no,
+                       rs.step_no, ot.process_id, rp.process_code, rp.process_name, ot.station_id,
+                       ot.plan_qty, coalesce(ot.reported_qty, 0) as reported_qty,
+                       coalesce(sum(sr.qualified_qty), 0) as qualified_qty,
+                       coalesce(sum(sr.defective_qty), 0) as defective_qty, ot.status
+                from shop_operation_task ot
+                join shop_task st on st.id = ot.task_id
+                left join route_step rs on rs.id = ot.route_step_id
+                left join route_process rp on rp.id = ot.process_id
+                left join shop_report sr on sr.operation_task_id = ot.id
+                    and coalesce(sr.status, '') not in ('VOID', 'CLOSED', '作废', '已关闭')
+                where st.work_order_id = :workOrderId
+                group by ot.id, ot.operation_task_no, ot.task_id, st.task_no, rs.step_no,
+                         ot.process_id, rp.process_code, rp.process_name, ot.station_id,
+                         ot.plan_qty, ot.reported_qty, ot.status
+                order by coalesce(rs.step_no, 999999), ot.id
+                """, Map.of("workOrderId", workOrderId), operationProgressMapper());
+    }
+
     public Optional<ShopTask> findShopTaskById(Long id) {
         return findOne("""
                 select id, task_no, work_order_id, dispatch_id, product_id, route_id,
@@ -642,6 +664,17 @@ public class ProductionRepository {
                 rs.getString("route_name"),
                 rs.getString("line_name")
         );
+    }
+
+    private RowMapper<OperationProgress> operationProgressMapper() {
+        return (rs, rowNum) -> new OperationProgress(
+                rs.getLong("operation_task_id"), rs.getString("operation_task_no"),
+                rs.getLong("task_id"), rs.getString("task_no"),
+                rs.getObject("step_no", Integer.class), rs.getLong("process_id"),
+                rs.getString("process_code"), rs.getString("process_name"),
+                rs.getObject("station_id", Long.class), rs.getBigDecimal("plan_qty"),
+                rs.getBigDecimal("reported_qty"), rs.getBigDecimal("qualified_qty"),
+                rs.getBigDecimal("defective_qty"), rs.getString("status"));
     }
 
     private Long getLong(ResultSet rs, String columnName) throws SQLException {

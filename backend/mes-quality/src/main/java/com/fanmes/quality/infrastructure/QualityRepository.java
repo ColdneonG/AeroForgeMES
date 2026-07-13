@@ -281,6 +281,7 @@ public class QualityRepository {
             String inspectionType,
             String status,
             Long planId,
+            Long workOrderId,
             Long taskId,
             Long operationTaskId,
             Long barcodeId
@@ -298,6 +299,7 @@ public class QualityRepository {
         appendEquals(sql, params, "inspection_type", inspectionType);
         appendEquals(sql, params, "status", status);
         appendEquals(sql, params, "plan_id", planId);
+        appendEquals(sql, params, "work_order_id", workOrderId);
         appendEquals(sql, params, "task_id", taskId);
         appendEquals(sql, params, "operation_task_id", operationTaskId);
         appendEquals(sql, params, "barcode_id", barcodeId);

@@ -221,6 +221,7 @@ public class QualityController {
             @RequestParam(required = false) String inspectionType,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) Long planId,
+            @RequestParam(required = false) Long workOrderId,
             @RequestParam(required = false) Long taskId,
             @RequestParam(required = false) Long operationTaskId,
             @RequestParam(required = false) Long barcodeId
@@ -230,6 +231,7 @@ public class QualityController {
                 inspectionType,
                 status,
                 planId,
+                workOrderId,
                 taskId,
                 operationTaskId,
                 barcodeId

@@ -54,6 +54,11 @@ temp/
 .cache/
 .eslintcache
 
+# Local database exports and historical archives (not source-controlled)
+database/archive/
+database/**/*.dump
+database/**/*.sql.gz
+
 tests/
 docs/
 scripts/

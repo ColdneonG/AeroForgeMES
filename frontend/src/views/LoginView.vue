@@ -1,25 +1,31 @@
 <script setup lang="ts">
-import { ref, onBeforeUnmount } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import LoginBackground from '@/components/LoginBackground.vue'
 import symbolmarkNegative from '@/assets/images/Symbolmark-negative.png'
 import wordmark from '@/assets/images/Wordmark.png'
+import { ApiError } from '@/api/client'
+import { login } from '@/api/auth'
 const router = useRouter()
 const username = ref('')
 const password = ref('')
 const showError = ref(false)
 const loading = ref(false)
-let loginTimer: number | undefined
-function handleLogin() {
+const errorMessage = ref('用户名或密码错误，请重试。')
+async function handleLogin() {
   showError.value = false
   if (!username.value.trim() || !password.value.trim()) { showError.value = true; return }
   loading.value = true
-  loginTimer = window.setTimeout(() => {
-    if ((username.value === 'admin' && password.value === 'aero2024') || password.value.length >= 4) router.push('/dashboard')
-    else { loading.value = false; showError.value = true }
-  }, 600)
+  try {
+    await login(username.value.trim(), password.value)
+    await router.push('/dashboard')
+  } catch (error) {
+    errorMessage.value = error instanceof ApiError ? error.message : '登录失败，请稍后重试。'
+    showError.value = true
+  } finally {
+    loading.value = false
+  }
 }
-onBeforeUnmount(() => { if (loginTimer) window.clearTimeout(loginTimer) })
 </script>
 
 <template>
@@ -50,7 +56,7 @@ onBeforeUnmount(() => { if (loginTimer) window.clearTimeout(loginTimer) })
                  required autocomplete="current-password" />
         </div>
         <div v-show="showError" id="loginError" class="alert alert-error" style="margin-bottom:var(--space-4);">
-          <span class="alert-icon">!</span> 用户名或密码错误，请重试。
+          <span class="alert-icon">!</span> {{ errorMessage }}
         </div>
         <button id="loginBtn" type="submit" class="btn btn-primary btn-lg" data-od-id="login-submit"
                 :class="{ 'btn-loading': loading }" :disabled="loading">登 录</button>

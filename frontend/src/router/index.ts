@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { currentUser } from '@/api/auth'
 const AndonExceptionsView = () => import('@/views/AndonExceptionsView.vue')
 const BarcodeListView = () => import('@/views/BarcodeListView.vue')
 const BarcodeRulesView = () => import('@/views/BarcodeRulesView.vue')
@@ -127,6 +128,10 @@ reducedMotionQuery.addEventListener('change', (event) => {
 // Vue Router is the single navigation path for links, shortcuts, and code-driven
 // navigation, so the guard provides the exit transition consistently.
 router.beforeEach(async (to, from) => {
+  if (to.path !== '/login' && !currentUser()) {
+    return { path: '/login', query: { redirect: to.fullPath } }
+  }
+  if (to.path === '/login' && currentUser()) return '/dashboard'
   if (initialNavigation) {
     initialNavigation = false
     return true

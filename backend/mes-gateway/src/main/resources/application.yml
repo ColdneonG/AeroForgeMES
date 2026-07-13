@@ -9,8 +9,13 @@ server:
   port: 8080
 
 fanmes:
+  security:
+    auth-enabled: true
+  jwt:
+    secret: ${FANMES_JWT_SECRET:fan-mes-change-this-development-secret-2026}
+    issuer: fan-mes
+    expires-in-seconds: 28800
   gateway:
-    auth-enabled: false
     routes:
       auth: http://localhost:8081
       system: http://localhost:8082

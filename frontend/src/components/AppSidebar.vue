@@ -1,7 +1,28 @@
 <script setup lang="ts">
-import { computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { computed, onMounted, onBeforeUnmount, nextTick, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+import { get } from '@/api/client'
 
 const props = defineProps<{ active: string }>()
+const route = useRoute()
+const reminderCounts = ref<Record<string, number>>({})
+const terminalStatuses = new Set(['COMPLETED', 'CLOSED', 'VOID', '关闭', '已关闭', '作废', '已作废'])
+
+function isOpen(record: Record<string, unknown>) {
+  return !terminalStatuses.has(String(record.status || '').trim().toUpperCase())
+}
+
+async function loadReminderCounts() {
+  const sources: Array<[string, string]> = [
+    ['orders', '/production/work-orders'], ['dispatch', '/production/dispatch-orders'],
+    ['tasks', '/production/tasks'], ['kitting', '/production/kitting-analyses'],
+    ['defects', '/quality/defects'], ['andon', '/andon/exceptions'],
+  ]
+  const results = await Promise.allSettled(sources.map(([, path]) => get<Record<string, unknown>[]>(path)))
+  reminderCounts.value = Object.fromEntries(results.map((result, index) => [
+    sources[index][0], result.status === 'fulfilled' ? result.value.filter(isOpen).length : 0,
+  ]))
+}
 
 const SCROLL_KEY = 'sidebar-scroll-top'
 
@@ -20,6 +41,7 @@ function restoreScroll() {
 onMounted(() => {
   nextTick(() => restoreScroll())
   document.getElementById('sidebar-nav')?.addEventListener('scroll', saveScroll, { passive: true })
+  void loadReminderCounts()
 })
 
 onBeforeUnmount(() => {
@@ -27,23 +49,23 @@ onBeforeUnmount(() => {
   document.getElementById('sidebar-nav')?.removeEventListener('scroll', saveScroll)
 })
 
-type MenuItem = { id: string; label: string; to: string; badge?: string; icon: string }
+type MenuItem = { id: string; label: string; to: string; badgeKey?: string; icon: string }
 type MenuSection = { label: string; items: MenuItem[] }
 
 const sections: MenuSection[] = [
   { label: '主菜单', items: [{ id: 'dashboard', label: '工作台', to: '/dashboard', icon: 'grid' }] },
   { label: '生产管理', items: [
-    { id: 'orders', label: '生产订单', to: '/production-orders', badge: '12', icon: 'list' },
-    { id: 'dispatch', label: '派工单', to: '/production/dispatch-orders', badge: '8', icon: 'arrow' },
-    { id: 'tasks', label: '生产任务', to: '/production/tasks', badge: '16', icon: 'check' },
-    { id: 'kitting', label: '齐套分析', to: '/production/kitting', badge: '2', icon: 'boxes' },
+    { id: 'orders', label: '生产订单', to: '/production-orders', badgeKey: 'orders', icon: 'list' },
+    { id: 'dispatch', label: '派工单', to: '/production/dispatch-orders', badgeKey: 'dispatch', icon: 'arrow' },
+    { id: 'tasks', label: '生产任务', to: '/production/tasks', badgeKey: 'tasks', icon: 'check' },
+    { id: 'kitting', label: '齐套分析', to: '/production/kitting', badgeKey: 'kitting', icon: 'boxes' },
     { id: 'kboard', label: '缺料看板', to: '/production/kitting-board', icon: 'board' },
     { id: 'shopfloor', label: '车间看板', to: '/shopfloor', icon: 'factory' },
   ]},
   { label: '质量与追溯', items: [
     { id: 'quality', label: '质量检验', to: '/quality-inspection', icon: 'quality' },
     { id: 'inspexec', label: '检验执行', to: '/quality/inspection-exec', icon: 'scan' },
-    { id: 'defects', label: '缺陷记录', to: '/quality/defects', badge: '9', icon: 'warn' },
+    { id: 'defects', label: '缺陷记录', to: '/quality/defects', badgeKey: 'defects', icon: 'warn' },
     { id: 'quality-plans', label: '检验方案', to: '/quality/plans', icon: 'quality' },
     { id: 'quality-items', label: '检验项', to: '/quality/items', icon: 'list' },
     { id: 'quality-categories', label: '检验项分类', to: '/quality/categories', icon: 'boxes' },
@@ -53,7 +75,7 @@ const sections: MenuSection[] = [
     { id: 'equip-ledger', label: '设备台账', to: '/equipment/ledger', icon: 'list' },
     { id: 'equip-maintain', label: '点检保养', to: '/equipment/maintenance', icon: 'check' },
     { id: 'equip-detail', label: '设备详情', to: '/equipment/detail', icon: 'gear' },
-    { id: 'andon', label: '安灯异常', to: '/andon/exceptions', badge: '3', icon: 'warn' },
+    { id: 'andon', label: '安灯异常', to: '/andon/exceptions', badgeKey: 'andon', icon: 'warn' },
   ]},
   { label: '条码与追溯', items: [
     { id: 'barcode', label: '条码管理', to: '/barcode/list', icon: 'scan' },
@@ -93,6 +115,17 @@ const sections: MenuSection[] = [
 ]
 
 const activeId = computed(() => props.active)
+
+function isActive(item: MenuItem) {
+  return item.id === activeId.value || route.path === item.to
+}
+
+function badgeFor(item: MenuItem) {
+  const count = item.badgeKey ? reminderCounts.value[item.badgeKey] : 0
+  return count > 0 ? String(count) : ''
+}
+
+watch(() => route.fullPath, () => { void loadReminderCounts() })
 </script>
 
 <template>
@@ -103,7 +136,7 @@ const activeId = computed(() => props.active)
     <nav id="sidebar-nav" class="sidebar-nav" :data-active="activeId">
       <div v-for="section in sections" :key="section.label" class="nav-section">
         <div class="nav-section-label">{{ section.label }}</div>
-        <RouterLink v-for="item in section.items" :key="item.to" :to="item.to" class="nav-item" :class="{ active: item.id === activeId }">
+        <RouterLink v-for="item in section.items" :key="item.to" :to="item.to" class="nav-item" :class="{ active: isActive(item) }">
           <span class="nav-icon" aria-hidden="true">
             <svg v-if="item.icon === 'grid'" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
             <svg v-else-if="item.icon === 'chart'" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="1" y="10" width="4" height="5"/><rect x="6" y="6" width="4" height="9"/><rect x="11" y="2" width="4" height="13"/></svg>
@@ -113,7 +146,7 @@ const activeId = computed(() => props.active)
             <svg v-else-if="item.icon === 'arrow'" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 13 13 3M7 3h6v6"/></svg>
             <svg v-else width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2" y="2" width="12" height="12" rx="2"/><path d="M5 6h6M5 9h6M5 12h4"/></svg>
           </span>
-          {{ item.label }}<span v-if="item.badge" class="nav-badge">{{ item.badge }}</span>
+          {{ item.label }}<span v-if="badgeFor(item)" class="nav-badge">{{ badgeFor(item) }}</span>
         </RouterLink>
       </div>
     </nav>

@@ -2,6 +2,7 @@
 import { onBeforeUnmount, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import AppSidebar from '@/components/AppSidebar.vue'
+import { logout } from '@/api/auth'
 defineProps<{ active: string }>()
 const router = useRouter()
 const shortcuts: Record<string, string> = {
@@ -23,6 +24,10 @@ function handleShortcut(event: KeyboardEvent) {
     router.push('/dashboard')
   }
 }
+async function handleLogout() {
+  logout()
+  await router.replace('/login')
+}
 onMounted(() => document.addEventListener('keydown', handleShortcut))
 onBeforeUnmount(() => document.removeEventListener('keydown', handleShortcut))
 </script>
@@ -31,5 +36,11 @@ onBeforeUnmount(() => document.removeEventListener('keydown', handleShortcut))
   <div class="app-shell">
     <AppSidebar :active="active" />
     <slot />
+    <button class="global-logout" type="button" title="退出登录" aria-label="退出登录" @click="handleLogout">
+      <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <path d="M8 1v7" stroke-linecap="round"/>
+        <path d="M4.1 3.3a6 6 0 1 0 7.8 0" stroke-linecap="round"/>
+      </svg>
+    </button>
   </div>
 </template>

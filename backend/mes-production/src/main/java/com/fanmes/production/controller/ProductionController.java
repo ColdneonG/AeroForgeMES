@@ -4,6 +4,7 @@ import com.fanmes.common.api.ApiResponse;
 import com.fanmes.production.domain.DispatchOrder;
 import com.fanmes.production.domain.KittingAnalysis;
 import com.fanmes.production.domain.KittingMissingItem;
+import com.fanmes.production.domain.OperationProgress;
 import com.fanmes.production.domain.ShopTask;
 import com.fanmes.production.domain.WorkOrder;
 import com.fanmes.production.dto.CompleteWorkOrderRequest;
@@ -309,6 +310,11 @@ public class ProductionController {
             @RequestParam(required = false) Long teamId
     ) {
         return ApiResponse.ok(service.listShopTasks(keyword, status, workOrderId, dispatchId, lineId, teamId));
+    }
+
+    @GetMapping("/work-orders/{id}/operation-progress")
+    public ApiResponse<List<OperationProgress>> operationProgress(@PathVariable Long id) {
+        return ApiResponse.ok(service.listOperationProgress(id));
     }
 
     @PostMapping("/tasks/{id}/start")

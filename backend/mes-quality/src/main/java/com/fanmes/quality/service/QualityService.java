@@ -268,11 +268,12 @@ public class QualityService {
             String inspectionType,
             String status,
             Long planId,
+            Long workOrderId,
             Long taskId,
             Long operationTaskId,
             Long barcodeId
     ) {
-        return repository.listInspectionOrders(keyword, inspectionType, status, planId, taskId, operationTaskId, barcodeId);
+        return repository.listInspectionOrders(keyword, inspectionType, status, planId, workOrderId, taskId, operationTaskId, barcodeId);
     }
 
     public QcInspectionOrder getInspectionOrder(Long id) {

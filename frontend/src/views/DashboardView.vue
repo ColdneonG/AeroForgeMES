@@ -1,5 +1,31 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
+import { getAndonExceptions, getManufacturingDashboard, getWorkOrders, type WorkOrder } from '@/api/production'
+
+const orders = ref<WorkOrder[]>([])
+const andonCount = ref(0)
+const gauges = ref<Record<string, number>>({})
+const activeOrders = computed(() => orders.value.filter((order) => !['COMPLETED', 'CLOSED', 'VOID'].includes(String(order.status))).slice(0, 4))
+const closedAndonStatuses = new Set(['CLOSED', 'VOID', '关闭', '已关闭', '作废', '已作废'])
+
+function metric(keys: string[], fallback = '-') {
+  const value = keys.map((key) => gauges.value[key]).find((item) => item !== undefined)
+  return value === undefined ? fallback : new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 1 }).format(value)
+}
+
+function progress(order: WorkOrder) {
+  const planned = Number(order.planQty || 0)
+  const completed = Number(order.completedQty || 0)
+  return planned ? Math.min(100, Math.round((completed / planned) * 100)) : 0
+}
+
+onMounted(async () => {
+  const [workOrders, dashboard, andon] = await Promise.allSettled([getWorkOrders(), getManufacturingDashboard(), getAndonExceptions()])
+  if (workOrders.status === 'fulfilled') orders.value = workOrders.value
+  if (dashboard.status === 'fulfilled') gauges.value = Object.fromEntries(dashboard.value.gauges.map((item) => [item.metricKey, Number(item.value)]))
+  if (andon.status === 'fulfilled') andonCount.value = andon.value.filter((item) => !closedAndonStatuses.has(String(item.status || '').trim().toUpperCase())).length
+})
 </script>
 
 <template>
@@ -27,27 +53,27 @@ import MesLayout from '@/layouts/MesLayout.vue'
     <section class="kpi-grid" data-od-id="dashboard-kpi">
       <div class="kpi-card accent-border" data-od-id="kpi-output">
         <span class="kpi-label">今日产量（台）</span>
-        <span class="kpi-value" v-count-up>1,286</span>
+        <span class="kpi-value" v-count-up>{{ metric(['dailyOutput', 'TODAY_OUTPUT']) }}</span>
         <span class="kpi-change up">↑ 8.2% 较昨日同期</span>
       </div>
       <div class="kpi-card" data-od-id="kpi-order-done">
         <span class="kpi-label">今日完工订单</span>
-        <span class="kpi-value" v-count-up>14</span>
+        <span class="kpi-value" v-count-up>{{ metric(['completedOrders', 'COMPLETED_ORDERS'], String(orders.filter((order) => order.status === 'COMPLETED').length)) }}</span>
         <span class="kpi-change up">目标 18 单</span>
       </div>
       <div class="kpi-card" data-od-id="kpi-quality">
         <span class="kpi-label">一次合格率</span>
-        <span class="kpi-value" v-count-up>97.6<span class="kpi-unit">%</span></span>
+        <span class="kpi-value" v-count-up>{{ metric(['firstPassRate', 'FIRST_PASS_RATE']) }}<span class="kpi-unit">%</span></span>
         <span class="kpi-change down">↓ 0.3% 较上周</span>
       </div>
       <div class="kpi-card" data-od-id="kpi-oee">
         <span class="kpi-label">设备综合效率 OEE</span>
-        <span class="kpi-value" v-count-up>84.3<span class="kpi-unit">%</span></span>
+        <span class="kpi-value" v-count-up>{{ metric(['oee', 'OEE']) }}<span class="kpi-unit">%</span></span>
         <span class="kpi-change up">↑ 2.1%</span>
       </div>
       <div class="kpi-card accent-border" data-od-id="kpi-andon">
         <span class="kpi-label">安灯异常（未关闭）</span>
-        <span class="kpi-value" v-count-up>3</span>
+        <span class="kpi-value" v-count-up>{{ andonCount }}</span>
         <span class="kpi-change">总装线 ×2 · 绕线 ×1</span>
       </div>
     </section>
@@ -67,33 +93,13 @@ import MesLayout from '@/layouts/MesLayout.vue'
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td class="cell-mono"><RouterLink to="/production-order-detail">MO-20260711-0032</RouterLink></td>
-              <td>FS-40 落地扇</td>
-              <td>500</td>
-              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" style="width:72%;"></div></div><span class="progress-label">72%</span></td>
-              <td><span class="badge badge-status-ok"><span class="badge-dot"></span>生产中</span></td>
-            </tr>
-            <tr>
-              <td class="cell-mono"><RouterLink to="/production-order-detail">MO-20260711-0033</RouterLink></td>
-              <td>FT-30 台扇</td>
-              <td>800</td>
-              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" style="width:45%;"></div></div><span class="progress-label">45%</span></td>
-              <td><span class="badge badge-status-ok"><span class="badge-dot"></span>生产中</span></td>
-            </tr>
-            <tr>
-              <td class="cell-mono"><RouterLink to="/production-order-detail">MO-20260710-0031</RouterLink></td>
-              <td>FS-35 壁扇</td>
-              <td>300</td>
-              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" style="width:94%;"></div></div><span class="progress-label">94%</span></td>
-              <td><span class="badge badge-status-warn"><span class="badge-dot"></span>待质检</span></td>
-            </tr>
-            <tr>
-              <td class="cell-mono"><RouterLink to="/production-order-detail">MO-20260710-0030</RouterLink></td>
-              <td>FS-40 落地扇（遥控款）</td>
-              <td>400</td>
-              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" style="width:28%;"></div></div><span class="progress-label">28%</span></td>
-              <td><span class="badge badge-status-info"><span class="badge-dot"></span>物料等待</span></td>
+            <tr v-if="!activeOrders.length"><td colspan="5" class="text-muted">暂无进行中的生产订单</td></tr>
+            <tr v-for="order in activeOrders" :key="order.id">
+              <td class="cell-mono"><RouterLink :to="{ path: '/production-order-detail', query: { id: order.id } }">{{ order.workOrderNo || `#${order.id}` }}</RouterLink></td>
+              <td>产品 #{{ order.productId ?? '-' }}</td>
+              <td>{{ order.planQty ?? '-' }}</td>
+              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" :style="{ width: `${progress(order)}%` }"></div></div><span class="progress-label">{{ progress(order) }}%</span></td>
+              <td><span class="badge badge-status-ok"><span class="badge-dot"></span>{{ order.status || '-' }}</span></td>
             </tr>
           </tbody>
         </table>
@@ -101,10 +107,10 @@ import MesLayout from '@/layouts/MesLayout.vue'
 
       <!-- Right: Alerts & Recent Events -->
       <section data-od-id="dashboard-alerts">
-        <div class="card" style="margin-bottom:var(--space-5);">
+        <div v-if="false" class="card" style="margin-bottom:var(--space-5);">
           <div class="card-header">
             <h2 class="card-title">安灯异常</h2>
-            <span class="badge badge-status-error"><span class="badge-dot"></span>3 条未关闭</span>
+            <span class="badge badge-status-error"><span class="badge-dot"></span>{{ andonCount }} 条未关闭</span>
           </div>
           <div class="alert alert-error" data-od-id="alert-andon-1">
             <span class="alert-icon">!</span>
@@ -129,7 +135,12 @@ import MesLayout from '@/layouts/MesLayout.vue'
           </div>
         </div>
 
-        <div class="card" data-od-id="dashboard-recent">
+        <div v-else class="card" style="margin-bottom:var(--space-5);">
+          <div class="card-header"><h2 class="card-title">安灯异常</h2><span class="badge badge-status-error"><span class="badge-dot"></span>{{ andonCount }} 条未关闭</span></div>
+          <p class="text-muted">异常明细接口尚未接入，未展示模拟异常记录。</p>
+        </div>
+
+        <div v-if="false" class="card" data-od-id="dashboard-recent">
           <div class="card-header">
             <h2 class="card-title">近期事件</h2>
           </div>
@@ -143,6 +154,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
             </tbody>
           </table>
         </div>
+        <div v-else class="card" data-od-id="dashboard-recent"><div class="card-header"><h2 class="card-title">近期事件</h2></div><p class="text-muted">近期事件接口尚未接入，未展示模拟事件。</p></div>
       </section>
     </div>
   </main>
@@ -153,7 +165,7 @@ import MesLayout from '@/layouts/MesLayout.vue'
     <span class="statusbar-sep">|</span>
     <span class="statusbar-item">在线设备 22/24</span>
     <span class="statusbar-sep">|</span>
-    <span class="statusbar-item"><span class="dot warn"></span>安灯活跃 3</span>
+    <span class="statusbar-item"><span class="dot warn"></span>安灯活跃 {{ andonCount }}</span>
     <span class="statusbar-sep">|</span>
     <span class="statusbar-item" style="margin-left:auto;">风擎工控 AeroForge MES v2.0 · 张工 (生产主管)</span>
   </footer>

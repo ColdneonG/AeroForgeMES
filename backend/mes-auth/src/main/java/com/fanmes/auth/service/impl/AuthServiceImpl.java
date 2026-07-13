@@ -7,9 +7,7 @@ import com.fanmes.auth.domain.vo.UserVO;
 import com.fanmes.auth.repository.AuthRepository;
 import com.fanmes.auth.service.AuthService;
 import com.fanmes.common.exception.BusinessException;
-import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.util.Base64;
+import com.fanmes.common.security.JwtTokenService;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +19,7 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final AuthRepository authRepository;
+    private final JwtTokenService jwtTokenService;
 
     @Override
     public LoginVO login(LoginRequest request) {
@@ -67,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
         Set<String> roles = new HashSet<>(authRepository.findRoleCodes(user.getId()));
         Set<String> permissions = new HashSet<>(authRepository.findPermissionCodes(user.getId()));
         LoginVO vo = new LoginVO();
-        vo.setAccessToken(createToken(user.getUsername()));
+        vo.setAccessToken(jwtTokenService.createToken(user.getId(), user.getUsername(), roles, permissions));
         vo.setUserId(user.getId());
         vo.setUsername(user.getUsername());
         vo.setDisplayName(user.getDisplayName());
@@ -76,17 +75,7 @@ public class AuthServiceImpl implements AuthService {
         return vo;
     }
 
-    private String createToken(String username) {
-        String raw = username + ":" + Instant.now().toEpochMilli();
-        return Base64.getUrlEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
-    }
-
     private String parseUsername(String token) {
-        if (!StringUtils.hasText(token)) {
-            throw new BusinessException("token 不能为空");
-        }
-        String value = token.replace("Bearer ", "");
-        String raw = new String(Base64.getUrlDecoder().decode(value), StandardCharsets.UTF_8);
-        return raw.split(":", 2)[0];
+        return jwtTokenService.verify(token).username();
     }
 }

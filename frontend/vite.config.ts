@@ -11,5 +11,11 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_GATEWAY_URL || 'http://localhost:8080',
+        changeOrigin: true,
+      },
+    },
   },
 })

@@ -9,6 +9,7 @@ import com.fanmes.common.idempotency.IdempotencyService;
 import com.fanmes.production.domain.DispatchOrder;
 import com.fanmes.production.domain.KittingAnalysis;
 import com.fanmes.production.domain.KittingMissingItem;
+import com.fanmes.production.domain.OperationProgress;
 import com.fanmes.production.domain.ProductionStatuses;
 import com.fanmes.production.domain.ShopTask;
 import com.fanmes.production.domain.WorkOrder;
@@ -306,6 +307,11 @@ public class ProductionService {
             Long teamId
     ) {
         return repository.listShopTasks(keyword, status, workOrderId, dispatchId, lineId, teamId);
+    }
+
+    public List<OperationProgress> listOperationProgress(Long workOrderId) {
+        ensureWorkOrderExists(workOrderId);
+        return repository.listOperationProgress(workOrderId);
     }
 
     public DispatchOrder getDispatchOrder(Long id) {
