@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { currentUser } from '@/api/auth'
+import { hasValidSession } from '@/api/session'
 const AndonExceptionsView = () => import('@/views/AndonExceptionsView.vue')
 const BarcodeListView = () => import('@/views/BarcodeListView.vue')
 const BarcodeRulesView = () => import('@/views/BarcodeRulesView.vue')
@@ -22,6 +22,7 @@ const ProductionKittingView = () => import('@/views/ProductionKittingView.vue')
 const ProductionKittingBoardView = () => import('@/views/ProductionKittingBoardView.vue')
 const ProductionTasksView = () => import('@/views/ProductionTasksView.vue')
 const QualityInspectionView = () => import('@/views/QualityInspectionView.vue')
+const QualityInspectionDetailView = () => import('@/views/QualityInspectionDetailView.vue')
 const QualityCategoriesView = () => import('@/views/QualityCategoriesView.vue')
 const QualityDefectsView = () => import('@/views/QualityDefectsView.vue')
 const QualityInspectionExecView = () => import('@/views/QualityInspectionExecView.vue')
@@ -66,18 +67,19 @@ const router = createRouter({
   { path: '/integration/openapi', name: 'IntegrationOpenapiView', component: IntegrationOpenapiView, meta: { title: "OpenAPI管理 — 风擎工控 AeroForge MES" } },
   { path: '/integration/sync-logs', name: 'IntegrationSyncLogsView', component: IntegrationSyncLogsView, meta: { title: "同步日志 — 风擎工控 AeroForge MES" } },
   { path: '/login', name: 'LoginView', component: LoginView, meta: { title: "登录 — 风擎工控 AeroForge MES" } },
-  { path: '/production-order-detail', name: 'ProductionOrderDetailView', component: ProductionOrderDetailView, meta: { title: "订单详情 MO-20260711-0032 — 风擎工控 AeroForge MES" } },
+  { path: '/production-order-detail', name: 'ProductionOrderDetailView', component: ProductionOrderDetailView, meta: { title: "订单详情 MO-20260711-0032 — 风擎工控 AeroForge MES", sidebarActive: 'orders' } },
   { path: '/production-orders', name: 'ProductionOrdersView', component: ProductionOrdersView, meta: { title: "生产订单 — 风擎工控 AeroForge MES" } },
   { path: '/production/dispatch-orders', name: 'ProductionDispatchOrdersView', component: ProductionDispatchOrdersView, meta: { title: "派工单管理 — 风擎工控 AeroForge MES" } },
   { path: '/production/kitting', name: 'ProductionKittingView', component: ProductionKittingView, meta: { title: "齐套分析 — 风擎工控 AeroForge MES" } },
   { path: '/production/kitting-board', name: 'ProductionKittingBoardView', component: ProductionKittingBoardView, meta: { title: "缺料看板 — 风擎工控 AeroForge MES" } },
   { path: '/production/tasks', name: 'ProductionTasksView', component: ProductionTasksView, meta: { title: "生产任务 — 风擎工控 AeroForge MES" } },
   { path: '/quality-inspection', name: 'QualityInspectionView', component: QualityInspectionView, meta: { title: "质量检验 — 风擎工控 AeroForge MES" } },
+  { path: '/quality/inspection-detail', name: 'QualityInspectionDetailView', component: QualityInspectionDetailView, meta: { title: "检验单详情 — 风擎工控 AeroForge MES", sidebarActive: 'quality' } },
   { path: '/quality/categories', name: 'QualityCategoriesView', component: QualityCategoriesView, meta: { title: "检验项分类 — 风擎工控 AeroForge MES" } },
   { path: '/quality/defects', name: 'QualityDefectsView', component: QualityDefectsView, meta: { title: "缺陷记录 — 风擎工控 AeroForge MES" } },
   { path: '/quality/inspection-exec', name: 'QualityInspectionExecView', component: QualityInspectionExecView, meta: { title: "检验执行 — 风擎工控 AeroForge MES" } },
   { path: '/quality/items', name: 'QualityItemsView', component: QualityItemsView, meta: { title: "检验项管理 — 风擎工控 AeroForge MES" } },
-  { path: '/quality/plan-detail', name: 'QualityPlanDetailView', component: QualityPlanDetailView, meta: { title: "方案明细 — 风擎工控 AeroForge MES" } },
+  { path: '/quality/plan-detail', name: 'QualityPlanDetailView', component: QualityPlanDetailView, meta: { title: "方案明细 — 风擎工控 AeroForge MES", sidebarActive: 'quality-plans' } },
   { path: '/quality/plans', name: 'QualityPlansView', component: QualityPlansView, meta: { title: "检验方案 — 风擎工控 AeroForge MES" } },
   { path: '/reports', name: 'ReportsView', component: ReportsView, meta: { title: "生产报表 — 风擎工控 AeroForge MES" } },
   { path: '/reports/control-center', name: 'ReportsControlCenterView', component: ReportsControlCenterView, meta: { title: "控制中心大屏 — 风擎工控 AeroForge MES" } },
@@ -128,10 +130,10 @@ reducedMotionQuery.addEventListener('change', (event) => {
 // Vue Router is the single navigation path for links, shortcuts, and code-driven
 // navigation, so the guard provides the exit transition consistently.
 router.beforeEach(async (to, from) => {
-  if (to.path !== '/login' && !currentUser()) {
+  if (to.path !== '/login' && !hasValidSession()) {
     return { path: '/login', query: { redirect: to.fullPath } }
   }
-  if (to.path === '/login' && currentUser()) return '/dashboard'
+  if (to.path === '/login' && hasValidSession()) return '/dashboard'
   if (initialNavigation) {
     initialNavigation = false
     return true

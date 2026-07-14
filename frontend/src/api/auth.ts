@@ -1,4 +1,5 @@
 import { post } from './client'
+import { clearSession, startSession } from './session'
 
 export interface LoginUser {
   accessToken: string
@@ -10,20 +11,20 @@ export interface LoginUser {
   permissions: string[]
 }
 
-const USER_KEY = 'fanmes.user'
+let activeUser: LoginUser | null = null
 
 export async function login(username: string, password: string) {
   const user = await post<LoginUser>('/auth/login', { username, password })
-  localStorage.setItem('fanmes.accessToken', user.accessToken)
-  localStorage.setItem(USER_KEY, JSON.stringify(user))
+  startSession(user.accessToken)
+  activeUser = user
   return user
 }
 
 export function logout() {
-  localStorage.removeItem('fanmes.accessToken')
-  localStorage.removeItem(USER_KEY)
+  clearSession()
+  activeUser = null
 }
 
 export function currentUser(): LoginUser | null {
-  try { return JSON.parse(localStorage.getItem(USER_KEY) || 'null') as LoginUser | null } catch { return null }
+  return activeUser
 }

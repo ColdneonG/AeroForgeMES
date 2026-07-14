@@ -114,7 +114,9 @@ const sections: MenuSection[] = [
   ]},
 ]
 
-const activeId = computed(() => props.active)
+// Detail pages can declare the menu item they belong to in route metadata.
+// This keeps the parent menu highlighted while a record detail is open.
+const activeId = computed(() => String(route.meta.sidebarActive || props.active))
 
 function isActive(item: MenuItem) {
   return item.id === activeId.value || route.path === item.to

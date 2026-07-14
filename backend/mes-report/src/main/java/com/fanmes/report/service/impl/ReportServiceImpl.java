@@ -107,6 +107,9 @@ public class ReportServiceImpl implements ReportService {
             BigDecimal totalDefects = lines.stream()
                     .map(l -> decimal(l.get("defectQty")))
                     .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal totalOutput = lines.stream()
+                    .map(l -> decimal(l.get("completedQty")))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
             int totalOrders = lines.stream()
                     .mapToInt(l -> ((Number) l.getOrDefault("runningOrderCount", 0)).intValue())
                     .sum();
@@ -122,6 +125,7 @@ public class ReportServiceImpl implements ReportService {
             area.put("status", hasWarn ? "WARN" : "RUNNING");
             area.put("description", "含" + lines.size() + "条产线");
             area.put("orders", totalOrders);
+            area.put("outputQty", totalOutput);
             area.put("equipment", avgOee.stripTrailingZeros().toPlainString() + "%");
             area.put("exceptions", totalDefects.intValue());
             area.put("tone", hasWarn ? "warn" : "running");
@@ -395,6 +399,10 @@ public class ReportServiceImpl implements ReportService {
 
     private Map<String, Object> toWorkshopRow(Map<String, Object> row) {
         BigDecimal defects = decimal(row.get("defectiveQty"));
+        BigDecimal output = decimal(row.get("reportedQty"));
+        if (output.signum() == 0) {
+            output = decimal(row.get("qualifiedQty"));
+        }
         String status = string(row.get("status"));
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("id", string(row.get("dimensionCode")));
@@ -403,6 +411,7 @@ public class ReportServiceImpl implements ReportService {
         result.put("status", status.isBlank() ? (defects.signum() > 0 ? "WARN" : "RUNNING") : status);
         result.put("description", string(row.get("remark")).isBlank() ? "Realtime workshop board data" : string(row.get("remark")));
         result.put("orders", intValue(row.get("reportCount")));
+        result.put("outputQty", output);
         result.put("equipment", percentText(row.get("oee")));
         result.put("exceptions", defects.intValue());
         result.put("tone", tone(status, defects));

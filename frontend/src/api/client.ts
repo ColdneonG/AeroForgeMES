@@ -1,4 +1,6 @@
 /** 统一通过网关访问后端；开发环境由 Vite 将 /api 代理到 8080。 */
+import { clearSession, getValidAccessToken } from './session'
+
 export type ApiEnvelope<T> = { code: number | string; message?: string; data: T }
 
 const API_BASE = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
@@ -13,8 +15,28 @@ export class ApiError extends Error {
   }
 }
 
+function redirectToLogin() {
+  const loginPath = `${import.meta.env.BASE_URL}login`.replace(/\/{2,}/g, '/')
+  if (window.location.pathname === loginPath) return
+
+  const redirect = `${window.location.pathname}${window.location.search}${window.location.hash}`
+  window.location.replace(`${loginPath}?redirect=${encodeURIComponent(redirect)}`)
+}
+
+function endExpiredSession() {
+  clearSession()
+  redirectToLogin()
+}
+
 export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem('fanmes.accessToken')
+  // Login must remain callable after an expired token is found in local storage.
+  const isLoginRequest = path.split('?')[0] === '/auth/login'
+  const token = getValidAccessToken()
+  if (!isLoginRequest && !token) {
+    endExpiredSession()
+    throw new ApiError('Login session has expired. Please sign in again.', 401)
+  }
+
   const headers = new Headers(init.headers)
   if (!(init.body instanceof FormData) && init.body !== undefined) headers.set('Content-Type', 'application/json')
   if (token) headers.set('Authorization', `Bearer ${token}`)
@@ -26,6 +48,10 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
     throw new ApiError('无法连接后端服务，请确认网关已启动。')
   }
   const body = (await response.json().catch(() => null)) as ApiEnvelope<T> | null
+  if (response.status === 401 || body?.code === 401 || body?.code === '401') {
+    endExpiredSession()
+    throw new ApiError(body?.message || 'Login session has expired. Please sign in again.', response.status)
+  }
   if (!response.ok) throw new ApiError(body?.message || `请求失败（${response.status}）`, response.status)
   if (!body || !isSuccess(body.code)) throw new ApiError(body?.message || '请求未成功', response.status)
   return body.data
