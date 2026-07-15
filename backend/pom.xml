@@ -64,6 +64,7 @@
         <lombok.version>1.18.34</lombok.version>
         <hutool.version>5.8.29</hutool.version>
         <fastjson2.version>2.0.51</fastjson2.version>
+        <jjwt.version>0.12.6</jjwt.version>
     </properties>
 
     <!-- ================================================================
@@ -113,6 +114,21 @@
                 <groupId>com.alibaba.fastjson2</groupId>
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
