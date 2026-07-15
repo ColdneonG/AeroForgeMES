@@ -71,3 +71,33 @@ export function post<T>(path: string, data?: unknown) {
 export function put<T>(path: string, data: unknown) {
   return request<T>(path, { method: 'PUT', body: JSON.stringify(data) })
 }
+
+export function del<T>(path: string) {
+  return request<T>(path, { method: 'DELETE' })
+}
+
+/** Sends multipart data without forcing a JSON content type. */
+export function upload<T>(path: string, data: FormData) {
+  return request<T>(path, { method: 'POST', body: data })
+}
+
+/** Reads an authenticated binary response, used by SOP attachments and GLB models. */
+export async function getBlob(path: string): Promise<Blob> {
+  const token = getValidAccessToken()
+  if (!token) {
+    endExpiredSession()
+    throw new ApiError('Login session has expired. Please sign in again.', 401)
+  }
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE}${path}`, { headers: { Authorization: `Bearer ${token}` } })
+  } catch {
+    throw new ApiError('无法连接后端服务，请确认网关已启动。')
+  }
+  if (response.status === 401) {
+    endExpiredSession()
+    throw new ApiError('Login session has expired. Please sign in again.', 401)
+  }
+  if (!response.ok) throw new ApiError(`请求失败（${response.status}）`, response.status)
+  return response.blob()
+}

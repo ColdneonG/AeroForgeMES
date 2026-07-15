@@ -87,11 +87,8 @@ const sections: MenuSection[] = [
   ]},
   { label: '电子 SOP', items: [
     { id: 'sop-docs', label: 'SOP 文档', to: '/sop/documents', icon: 'list' },
-    { id: 'sop-versions', label: '版本管理', to: '/sop/versions', icon: 'list' },
-    { id: 'sop-tasks', label: '任务下发', to: '/sop/tasks', icon: 'arrow' },
     { id: 'sopexec', label: '执行终端', to: '/sop/execution', icon: 'check' },
     { id: 'sop-steps', label: '步骤编排', to: '/sop/steps', icon: 'boxes' },
-    { id: 'sop-bindings', label: '绑定配置', to: '/sop/bindings', icon: 'gear' },
   ]},
   { label: '控制中心', items: [
     { id: 'ccenter', label: '制造大屏', to: '/reports/control-center', icon: 'board' },

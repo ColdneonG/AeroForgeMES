@@ -40,7 +40,6 @@ const SopBindingsView = () => import('@/views/SopBindingsView.vue')
 const SopDocumentsView = () => import('@/views/SopDocumentsView.vue')
 const SopExecutionView = () => import('@/views/SopExecutionView.vue')
 const SopStepsView = () => import('@/views/SopStepsView.vue')
-const SopTasksView = () => import('@/views/SopTasksView.vue')
 const SopVersionsView = () => import('@/views/SopVersionsView.vue')
 const SystemUsersView = () => import('@/views/SystemUsersView.vue')
 const SystemAuditLogsView = () => import('@/views/SystemAuditLogsView.vue')
@@ -92,7 +91,6 @@ const router = createRouter({
   { path: '/sop/documents', name: 'SopDocumentsView', component: SopDocumentsView, meta: { title: "SOP文档管理 — 风擎工控 AeroForge MES" } },
   { path: '/sop/execution', name: 'SopExecutionView', component: SopExecutionView, meta: { title: "SOP执行终端 — 风擎工控 AeroForge MES" } },
   { path: '/sop/steps', name: 'SopStepsView', component: SopStepsView, meta: { title: "SOP步骤编排 — 风擎工控 AeroForge MES" } },
-  { path: '/sop/tasks', name: 'SopTasksView', component: SopTasksView, meta: { title: "SOP任务下发 — 风擎工控 AeroForge MES" } },
   { path: '/sop/versions', name: 'SopVersionsView', component: SopVersionsView, meta: { title: "SOP版本 — 风擎工控 AeroForge MES" } },
   { path: '/system-users', name: 'SystemUsersView', component: SystemUsersView, meta: { title: "用户管理 — 风擎工控 AeroForge MES" } },
   { path: '/system/audit-logs', name: 'SystemAuditLogsView', component: SystemAuditLogsView, meta: { title: "操作日志 — 风擎工控 AeroForge MES" } },
