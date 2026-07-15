@@ -79,6 +79,7 @@ const sections: MenuSection[] = [
   ]},
   { label: '条码与追溯', items: [
     { id: 'barcode', label: '条码管理', to: '/barcode/list', icon: 'scan' },
+    { id: 'barcode-generate-print', label: '生成与打印', to: '/barcode/generate-print', icon: 'scan' },
     { id: 'barcode-types', label: '条码类型', to: '/barcode/types', icon: 'boxes' },
     { id: 'barcode-rules', label: '条码规则', to: '/barcode/rules', icon: 'list' },
     { id: 'barcode-tpl', label: '打印模板', to: '/barcode/templates', icon: 'board' },

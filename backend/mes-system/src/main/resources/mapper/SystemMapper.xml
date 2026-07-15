@@ -22,4 +22,20 @@
         insert into sys_operation_log(id, biz_type, biz_id, action, request_body, operator_id, operated_at, result, error_message)
         values(#{id}, #{dto.bizType}, #{dto.bizId}, #{dto.action}, #{dto.requestBody}, #{dto.operatorId}, now(), #{dto.result}, #{dto.errorMessage})
     </insert>
+    <select id="findEnabledOrgs" resultType="com.fanmes.system.domain.entity.MasterOrg">
+        select id, parent_id, org_code, org_name, org_type, status from md_org
+        where coalesce(status, '启用') not in ('停用', 'DISABLED') order by org_code, id
+    </select>
+    <select id="findEnabledWorkshops" resultType="com.fanmes.system.domain.entity.MasterWorkshop">
+        select id, workshop_code, workshop_name, org_id, status from md_workshop
+        where coalesce(status, '启用') not in ('停用', 'DISABLED')
+        <if test="orgId != null">and org_id = #{orgId}</if>
+        order by workshop_code, id
+    </select>
+    <select id="findEnabledTeams" resultType="com.fanmes.system.domain.entity.MasterTeam">
+        select id, team_code, team_name, workshop_id, leader_id, status from md_team
+        where coalesce(status, '启用') not in ('停用', 'DISABLED')
+        <if test="workshopId != null">and workshop_id = #{workshopId}</if>
+        order by team_code, id
+    </select>
 </mapper>

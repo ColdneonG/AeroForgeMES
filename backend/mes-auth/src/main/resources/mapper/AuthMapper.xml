@@ -5,15 +5,98 @@
         select id, username, password, display_name, mobile, employee_no, org_id, team_id, status
         from sys_user where username = #{username}
     </select>
+    <select id="findUserProfileByUsername" resultType="com.fanmes.auth.domain.entity.SysUser">
+        select u.id, u.username, u.password, u.display_name, u.mobile, u.employee_no,
+               u.org_id, o.org_name, u.team_id, t.team_name, u.status
+        from sys_user u
+        left join mes_system.md_org o on o.id = u.org_id
+        left join mes_system.md_team t on t.id = u.team_id
+        where u.username = #{username}
+    </select>
     <select id="findRoleCodes" resultType="string">
-        select r.role_code from sys_role r join sys_user_role ur on ur.role_id = r.id where ur.user_id = #{userId}
+        select r.role_code from sys_role r join sys_user_role ur on ur.role_id = r.id
+        where ur.user_id = #{userId} and coalesce(r.status, '启用') not in ('停用', 'DISABLED')
     </select>
     <select id="findPermissionCodes" resultType="string">
         select distinct p.permission_code from sys_permission p
         join sys_role_permission rp on rp.permission_id = p.id
-        join sys_user_role ur on ur.role_id = rp.role_id where ur.user_id = #{userId}
+        join sys_user_role ur on ur.role_id = rp.role_id
+        join sys_role r on r.id = ur.role_id
+        where ur.user_id = #{userId} and coalesce(r.status, '启用') not in ('停用', 'DISABLED')
     </select>
     <select id="findAllUsers" resultType="com.fanmes.auth.domain.entity.SysUser">
         select id, display_name from sys_user
     </select>
+    <sql id="userFilter">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (u.username like concat('%', #{keyword}, '%') or u.display_name like concat('%', #{keyword}, '%') or u.employee_no like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="status != null and status != ''">and u.status = #{status}</if>
+            <if test="orgId != null">and u.org_id = #{orgId}</if>
+            <if test="teamId != null">and u.team_id = #{teamId}</if>
+            <if test="roleId != null">and exists (select 1 from sys_user_role ur_filter where ur_filter.user_id = u.id and ur_filter.role_id = #{roleId})</if>
+        </where>
+    </sql>
+    <select id="findUsers" resultType="com.fanmes.auth.domain.entity.SysUser">
+        select u.id, u.username, u.display_name, u.mobile, u.employee_no, u.org_id, o.org_name,
+               u.team_id, t.team_name, u.status
+        from sys_user u
+        left join mes_system.md_org o on o.id = u.org_id
+        left join mes_system.md_team t on t.id = u.team_id
+        <include refid="userFilter"/>
+        order by u.id desc limit #{offset}, #{pageSize}
+    </select>
+    <select id="countUsers" resultType="long">
+        select count(1) from sys_user u
+        <include refid="userFilter"/>
+    </select>
+    <select id="findUserById" resultType="com.fanmes.auth.domain.entity.SysUser">
+        select u.id, u.username, u.password, u.display_name, u.mobile, u.employee_no,
+               u.org_id, o.org_name, u.team_id, t.team_name, u.status
+        from sys_user u
+        left join mes_system.md_org o on o.id = u.org_id
+        left join mes_system.md_team t on t.id = u.team_id
+        where u.id = #{userId}
+    </select>
+    <select id="findRolesByUserId" resultType="com.fanmes.auth.domain.vo.RoleVO">
+        select r.id, r.role_code, r.role_name, r.status
+        from sys_role r join sys_user_role ur on ur.role_id = r.id
+        where ur.user_id = #{userId} order by r.role_code
+    </select>
+    <select id="findEnabledRoles" resultType="com.fanmes.auth.domain.vo.RoleVO">
+        select id, role_code, role_name, status from sys_role
+        where coalesce(status, '启用') not in ('停用', 'DISABLED') order by role_code
+    </select>
+    <insert id="insertUser">
+        insert into sys_user(id, username, password, display_name, mobile, employee_no, org_id, team_id, status)
+        values(#{user.id}, #{user.username}, #{user.password}, #{user.displayName}, #{user.mobile}, #{user.employeeNo}, #{user.orgId}, #{user.teamId}, #{user.status})
+    </insert>
+    <update id="updateUser">
+        update sys_user set display_name = #{user.displayName}, mobile = #{user.mobile}, employee_no = #{user.employeeNo},
+        org_id = #{user.orgId}, team_id = #{user.teamId} where id = #{user.id}
+    </update>
+    <update id="updateUserStatus">
+        update sys_user set status = #{status} where id = #{userId}
+    </update>
+    <delete id="deleteUserRoles">delete from sys_user_role where user_id = #{userId}</delete>
+    <insert id="insertUserRole">
+        insert into sys_user_role(id, user_id, role_id) values(#{id}, #{userId}, #{roleId})
+    </insert>
+    <select id="countEnabledRoles" resultType="int">
+        select count(1) from sys_role
+        where id in
+        <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">#{roleId}</foreach>
+        and coalesce(status, '启用') not in ('停用', 'DISABLED')
+    </select>
+    <select id="countUsersWithRole" resultType="int">
+        select count(1) from sys_user_role where role_id = #{roleId}
+        <if test="excludeUserId != null">and user_id != #{excludeUserId}</if>
+    </select>
+    <update id="updateProfile">
+        update sys_user set display_name = #{displayName}, mobile = #{mobile} where id = #{userId}
+    </update>
+    <update id="updatePassword">
+        update sys_user set password = #{password} where id = #{userId}
+    </update>
 </mapper>

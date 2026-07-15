@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { hasValidSession } from '@/api/session'
 const AndonExceptionsView = () => import('@/views/AndonExceptionsView.vue')
 const BarcodeListView = () => import('@/views/BarcodeListView.vue')
+const BarcodeGeneratePrintView = () => import('@/views/BarcodeGeneratePrintView.vue')
 const BarcodeRulesView = () => import('@/views/BarcodeRulesView.vue')
 const BarcodeScanView = () => import('@/views/BarcodeScanView.vue')
 const BarcodeTemplatesView = () => import('@/views/BarcodeTemplatesView.vue')
@@ -21,6 +22,7 @@ const ProductionDispatchOrdersView = () => import('@/views/ProductionDispatchOrd
 const ProductionKittingView = () => import('@/views/ProductionKittingView.vue')
 const ProductionKittingBoardView = () => import('@/views/ProductionKittingBoardView.vue')
 const ProductionTasksView = () => import('@/views/ProductionTasksView.vue')
+const ProfileView = () => import('@/views/ProfileView.vue')
 const QualityInspectionView = () => import('@/views/QualityInspectionView.vue')
 const QualityInspectionDetailView = () => import('@/views/QualityInspectionDetailView.vue')
 const QualityCategoriesView = () => import('@/views/QualityCategoriesView.vue')
@@ -53,6 +55,7 @@ const router = createRouter({
   { path: '/', redirect: '/login' },
   { path: '/andon/exceptions', name: 'AndonExceptionsView', component: AndonExceptionsView, meta: { title: "安灯异常 — 风擎工控 AeroForge MES" } },
   { path: '/barcode/list', name: 'BarcodeListView', component: BarcodeListView, meta: { title: "条码管理 — 风擎工控 AeroForge MES" } },
+  { path: '/barcode/generate-print', name: 'BarcodeGeneratePrintView', component: BarcodeGeneratePrintView, meta: { title: "条码生成与打印 — 风擎工控 AeroForge MES" } },
   { path: '/barcode/rules', name: 'BarcodeRulesView', component: BarcodeRulesView, meta: { title: "条码规则 — 风擎工控 AeroForge MES" } },
   { path: '/barcode/scan', name: 'BarcodeScanView', component: BarcodeScanView, meta: { title: "扫码终端 — 风擎工控 AeroForge MES" } },
   { path: '/barcode/templates', name: 'BarcodeTemplatesView', component: BarcodeTemplatesView, meta: { title: "打印模板 — 风擎工控 AeroForge MES" } },
@@ -72,6 +75,7 @@ const router = createRouter({
   { path: '/production/kitting', name: 'ProductionKittingView', component: ProductionKittingView, meta: { title: "齐套分析 — 风擎工控 AeroForge MES" } },
   { path: '/production/kitting-board', name: 'ProductionKittingBoardView', component: ProductionKittingBoardView, meta: { title: "缺料看板 — 风擎工控 AeroForge MES" } },
   { path: '/production/tasks', name: 'ProductionTasksView', component: ProductionTasksView, meta: { title: "生产任务 — 风擎工控 AeroForge MES" } },
+  { path: '/profile', name: 'ProfileView', component: ProfileView, meta: { title: "个人资料 — 风擎工控 AeroForge MES" } },
   { path: '/quality-inspection', name: 'QualityInspectionView', component: QualityInspectionView, meta: { title: "质量检验 — 风擎工控 AeroForge MES" } },
   { path: '/quality/inspection-detail', name: 'QualityInspectionDetailView', component: QualityInspectionDetailView, meta: { title: "检验单详情 — 风擎工控 AeroForge MES", sidebarActive: 'quality' } },
   { path: '/quality/categories', name: 'QualityCategoriesView', component: QualityCategoriesView, meta: { title: "检验项分类 — 风擎工控 AeroForge MES" } },

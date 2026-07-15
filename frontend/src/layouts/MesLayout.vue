@@ -28,12 +28,18 @@ async function handleLogout() {
   logout()
   await router.replace('/login')
 }
+
+function handleProfileClick(event: MouseEvent) {
+  const target = event.target as HTMLElement | null
+  if (!target?.closest('.user-avatar')) return
+  if (router.currentRoute.value.path !== '/profile') void router.push('/profile')
+}
 onMounted(() => document.addEventListener('keydown', handleShortcut))
 onBeforeUnmount(() => document.removeEventListener('keydown', handleShortcut))
 </script>
 
 <template>
-  <div class="app-shell">
+  <div class="app-shell" @click="handleProfileClick">
     <AppSidebar :active="active" />
     <slot />
     <button class="global-logout" type="button" title="退出登录" aria-label="退出登录" @click="handleLogout">

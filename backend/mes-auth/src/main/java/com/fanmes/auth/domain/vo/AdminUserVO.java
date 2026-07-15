@@ -1,19 +1,19 @@
-package com.fanmes.auth.domain.entity;
+package com.fanmes.auth.domain.vo;
 
+import java.util.List;
 import lombok.Data;
 
 @Data
-public class SysUser {
+public class AdminUserVO {
     private Long id;
     private String username;
-    private String password;
     private String displayName;
     private String mobile;
     private String employeeNo;
     private Long orgId;
-    private Long teamId;
-    private String status;
     private String orgName;
+    private Long teamId;
     private String teamName;
-    private String roleNames;
+    private String status;
+    private List<RoleVO> roles;
 }

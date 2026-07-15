@@ -3,6 +3,9 @@ package com.fanmes.system.mapper;
 import com.fanmes.system.domain.dto.OperationLogCreateDTO;
 import com.fanmes.system.domain.entity.SequenceRule;
 import com.fanmes.system.domain.entity.SysMenu;
+import com.fanmes.system.domain.entity.MasterOrg;
+import com.fanmes.system.domain.entity.MasterTeam;
+import com.fanmes.system.domain.entity.MasterWorkshop;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -17,4 +20,7 @@ public interface SystemMapper {
     int updateSequenceValue(@Param("ruleId") Long ruleId, @Param("periodKey") String periodKey,
                             @Param("currentValue") Long currentValue);
     int saveOperationLog(@Param("id") Long id, @Param("dto") OperationLogCreateDTO dto);
+    List<MasterOrg> findEnabledOrgs();
+    List<MasterWorkshop> findEnabledWorkshops(@Param("orgId") Long orgId);
+    List<MasterTeam> findEnabledTeams(@Param("workshopId") Long workshopId);
 }

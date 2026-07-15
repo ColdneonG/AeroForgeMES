@@ -5,10 +5,15 @@ import com.fanmes.system.domain.dto.OperationLogCreateDTO;
 import com.fanmes.system.domain.dto.SequenceNextRequest;
 import com.fanmes.system.domain.entity.SequenceRule;
 import com.fanmes.system.domain.entity.SysMenu;
+import com.fanmes.system.domain.entity.MasterOrg;
+import com.fanmes.system.domain.entity.MasterTeam;
+import com.fanmes.system.domain.entity.MasterWorkshop;
 import com.fanmes.system.mapper.SystemMapper;
 import com.fanmes.system.service.SystemService;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -45,5 +50,28 @@ public class SystemServiceImpl implements SystemService {
     @Override
     public void saveOperationLog(OperationLogCreateDTO dto) {
         systemMapper.saveOperationLog(System.currentTimeMillis(), dto);
+    }
+
+    @Override
+    public List<MasterOrg> orgTree() {
+        List<MasterOrg> orgs = systemMapper.findEnabledOrgs();
+        Map<Long, MasterOrg> byId = new LinkedHashMap<>();
+        orgs.forEach(org -> byId.put(org.getId(), org));
+        List<MasterOrg> roots = new java.util.ArrayList<>();
+        orgs.forEach(org -> {
+            MasterOrg parent = org.getParentId() == null ? null : byId.get(org.getParentId());
+            if (parent == null) roots.add(org); else parent.getChildren().add(org);
+        });
+        return roots;
+    }
+
+    @Override
+    public List<MasterWorkshop> workshops(Long orgId) {
+        return systemMapper.findEnabledWorkshops(orgId);
+    }
+
+    @Override
+    public List<MasterTeam> teams(Long workshopId) {
+        return systemMapper.findEnabledTeams(workshopId);
     }
 }
