@@ -14,11 +14,13 @@ const countUp: Directive<HTMLElement> = {
     const prefix = text.trim().match(/^[^\d]*/)?.[0] || ''
     const suffix = text.includes('%') ? '%' : ''
     const comma = text.includes(',')
+    const fractionDigits = text.includes('.') ? 2 : 0
     const started = performance.now()
     const tick = (now: number) => {
       const progress = Math.min((now - started) / 600, 1)
-      const value = Math.round((1 - Math.pow(1 - progress, 3)) * target)
-      element.textContent = `${prefix}${comma ? value.toLocaleString() : value}${suffix}`
+      const value = (1 - Math.pow(1 - progress, 3)) * target
+      const displayed = fractionDigits ? value.toFixed(fractionDigits) : Math.round(value).toLocaleString()
+      element.textContent = `${prefix}${comma && !fractionDigits ? displayed : displayed}${suffix}`
       if (progress < 1) countFrames.set(element, requestAnimationFrame(tick))
       else element.innerHTML = original
     }

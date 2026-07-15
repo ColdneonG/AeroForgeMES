@@ -2,12 +2,13 @@
 import { onMounted, ref, watch } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
 import { get } from '@/api/client'
+import { formatDisplayValue } from '@/utils/number'
 
 type Row = Record<string, unknown> & { id?: string | number }
 interface Column { key: string; label: string; mono?: boolean }
 const props = defineProps<{ active: string; section: string; title: string; endpoint: string; columns: Column[] }>()
 const rows = ref<Row[]>([]); const total = ref(0); const loading = ref(false); const error = ref('')
-const value = (row: Row, key: string) => String(row[key] ?? '-')
+const value = (row: Row, key: string) => formatDisplayValue(row[key])
 
 function camelCase(key: string) {
   return key.replace(/_([a-z])/g, (_, letter: string) => letter.toUpperCase())

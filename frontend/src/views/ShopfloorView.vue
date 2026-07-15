@@ -2,9 +2,10 @@
 import { computed, onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
 import { get } from '@/api/client'
+import { formatDisplayValue } from '@/utils/number'
 type BoardRow = Record<string, unknown> & { id?: string | number }
 const rows = ref<BoardRow[]>([]); const loading = ref(false); const error = ref('')
-const value = (row: BoardRow, ...keys: string[]) => String(keys.map((key) => row[key]).find((item) => item !== undefined && item !== null) ?? '-')
+const value = (row: BoardRow, ...keys: string[]) => formatDisplayValue(keys.map((key) => row[key]).find((item) => item !== undefined && item !== null))
 const number = (row: BoardRow, ...keys: string[]) => Number(keys.map((key) => row[key]).find((item) => item !== undefined) ?? 0)
 const lines = computed(() => rows.value.slice(0, 6))
 async function load() { loading.value = true; error.value = ''; try { const response = await get<unknown>('/report/boards/workshop'); rows.value = Array.isArray(response) ? response as BoardRow[] : Array.isArray((response as { records?: unknown })?.records) ? (response as { records: BoardRow[] }).records : [] } catch (reason) { rows.value=[]; error.value=reason instanceof Error ? reason.message : '车间看板加载失败' } finally { loading.value=false } }

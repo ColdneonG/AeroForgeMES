@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import * as THREE from 'three'
 import { get } from '@/api/client'
+import { formatDisplayNumber, formatPercent } from '@/utils/number'
 import pageBackground from '@/assets/images/ioftv/pageBg.png'
 import topBackground from '@/assets/images/ioftv/top.png'
 import lightBeam from '@/assets/images/ioftv/guang.png'
@@ -39,7 +40,7 @@ const number = (value: unknown) => {
   return Number.isFinite(result) ? result : 0
 }
 const text = (value: unknown, fallback = '—') => String(value ?? '').trim() || fallback
-const percent = (value: unknown) => `${Math.round(number(value))}%`
+const percent = formatPercent
 const dateText = computed(() => now.value.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }))
 const timeText = computed(() => now.value.toLocaleTimeString('zh-CN', { hour12: false }))
 const trendPoints = computed(() => {
@@ -233,7 +234,7 @@ onBeforeUnmount(() => {
             <article v-for="(kpi, index) in kpis" :key="`${text(kpi.label)}-${index}`" class="kpi-row">
               <div class="kpi-icon" :class="`is-${text(kpi.tone, 'running')}`"><span class="kpi-aura"></span><img :src="kpiIcons[index % kpiIcons.length]" alt="" /></div>
               <div><p>{{ text(kpi.label) }}</p><small>{{ text(kpi.note, '实时监测') }}</small></div>
-              <strong :class="`value-${text(kpi.tone, 'running')}`">{{ typeof kpi.value === 'number' ? number(kpi.value).toLocaleString('zh-CN') : text(kpi.value) }}</strong>
+              <strong :class="`value-${text(kpi.tone, 'running')}`">{{ typeof kpi.value === 'number' ? formatDisplayNumber(kpi.value) : text(kpi.value) }}</strong>
             </article>
             <div v-if="!kpis.length" class="empty">暂无指标数据</div>
           </div>
@@ -310,13 +311,13 @@ onBeforeUnmount(() => {
           <div v-else class="empty">暂无车间数据</div>
           <div v-if="lineRanking.length" class="capsule-ranking">
             <div v-for="(line, index) in lineRanking" :key="line.name" class="capsule-row" :style="{ '--capsule-color': ['#37a2da', '#32c5e9', '#67e0e3', '#9fe6b8'][index] }">
-              <span>{{ line.name }}</span><div><i :style="{ width: `${line.value}%` }"></i></div><b>{{ Math.round(line.value) }}%</b>
+              <span>{{ line.name }}</span><div><i :style="{ width: `${line.value}%` }"></i></div><b>{{ percent(line.value) }}</b>
             </div>
           </div>
         </section>
         <section class="panel equipment-panel">
           <div class="panel-title"><i></i><h2>设备健康度</h2><span>OEE MONITOR</span></div>
-          <div class="health-ring" :style="{ '--gauge': `${oeeValue * 3.6}deg` }"><div class="gauge-inner"><span>设备综合效率</span><b>{{ oeeValue || '—' }}<small>%</small></b></div></div>
+          <div class="health-ring" :style="{ '--gauge': `${oeeValue * 3.6}deg` }"><div class="gauge-inner"><span>设备综合效率</span><b>{{ oeeValue ? oeeValue.toFixed(2) : '—' }}<small>%</small></b></div></div>
           <div class="health-legend"><span><i class="good"></i>正常运行</span><span><i class="caution"></i>关注设备</span></div>
         </section>
       </aside>

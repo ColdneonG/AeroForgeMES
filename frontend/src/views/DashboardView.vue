@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
 import { getAndonExceptions, getManufacturingDashboard, getWorkOrders, type WorkOrder } from '@/api/production'
+import { formatDisplayNumber, formatPercent } from '@/utils/number'
 
 const orders = ref<WorkOrder[]>([])
 const andonCount = ref(0)
@@ -9,15 +10,15 @@ const gauges = ref<Record<string, number>>({})
 const activeOrders = computed(() => orders.value.filter((order) => !['COMPLETED', 'CLOSED', 'VOID'].includes(String(order.status))).slice(0, 4))
 const closedAndonStatuses = new Set(['CLOSED', 'VOID', '关闭', '已关闭', '作废', '已作废'])
 
-function metric(keys: string[], fallback = '-') {
+function metric(keys: string[], fallback = '-', fixedFraction = false) {
   const value = keys.map((key) => gauges.value[key]).find((item) => item !== undefined)
-  return value === undefined ? fallback : new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 1 }).format(value)
+  return value === undefined ? fallback : fixedFraction ? formatPercent(value).slice(0, -1) : formatDisplayNumber(value)
 }
 
 function progress(order: WorkOrder) {
   const planned = Number(order.planQty || 0)
   const completed = Number(order.completedQty || 0)
-  return planned ? Math.min(100, Math.round((completed / planned) * 100)) : 0
+  return planned ? Math.min(100, (completed / planned) * 100) : 0
 }
 
 onMounted(async () => {
@@ -63,12 +64,12 @@ onMounted(async () => {
       </div>
       <div class="kpi-card" data-od-id="kpi-quality">
         <span class="kpi-label">一次合格率</span>
-        <span class="kpi-value" v-count-up>{{ metric(['firstPassRate', 'FIRST_PASS_RATE']) }}<span class="kpi-unit">%</span></span>
+        <span class="kpi-value" v-count-up>{{ metric(['firstPassRate', 'FIRST_PASS_RATE'], '-', true) }}<span class="kpi-unit">%</span></span>
         <span class="kpi-change down">↓ 0.3% 较上周</span>
       </div>
       <div class="kpi-card" data-od-id="kpi-oee">
         <span class="kpi-label">设备综合效率 OEE</span>
-        <span class="kpi-value" v-count-up>{{ metric(['oee', 'OEE']) }}<span class="kpi-unit">%</span></span>
+        <span class="kpi-value" v-count-up>{{ metric(['oee', 'OEE'], '-', true) }}<span class="kpi-unit">%</span></span>
         <span class="kpi-change up">↑ 2.1%</span>
       </div>
       <div class="kpi-card accent-border" data-od-id="kpi-andon">
@@ -98,7 +99,7 @@ onMounted(async () => {
               <td class="cell-mono"><RouterLink :to="{ path: '/production-order-detail', query: { id: order.id } }">{{ order.workOrderNo || `#${order.id}` }}</RouterLink></td>
               <td>产品 #{{ order.productId ?? '-' }}</td>
               <td>{{ order.planQty ?? '-' }}</td>
-              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" :style="{ width: `${progress(order)}%` }"></div></div><span class="progress-label">{{ progress(order) }}%</span></td>
+              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" :style="{ width: `${progress(order)}%` }"></div></div><span class="progress-label">{{ formatPercent(progress(order)) }}</span></td>
               <td><span class="badge badge-status-ok"><span class="badge-dot"></span>{{ order.status || '-' }}</span></td>
             </tr>
           </tbody>
