@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fanmes.report.mapper.ReportMapper">
+    <select id="findMetricDefs" resultType="com.fanmes.report.domain.entity.MetricDef">
+        select id, metric_code, metric_name, metric_type, calc_expression, status from rpt_metric_def
+        <where><if test="metricType != null and metricType != ''">metric_type = #{metricType}</if></where> order by id
+    </select>
+    <select id="findMetricSnapshots" parameterType="com.fanmes.report.domain.dto.MetricQuery" resultType="com.fanmes.report.domain.entity.MetricSnapshot">
+        select s.id, s.metric_id, s.stat_dimension, s.dimension_id, s.stat_period, s.stat_time, s.metric_value
+        from rpt_metric_snapshot s left join rpt_metric_def d on d.id = s.metric_id
+        <where>
+            <if test="metricType != null and metricType != ''">and d.metric_type = #{metricType}</if>
+            <if test="metricId != null">and s.metric_id = #{metricId}</if>
+            <if test="statDimension != null and statDimension != ''">and s.stat_dimension = #{statDimension}</if>
+            <if test="dimensionId != null">and s.dimension_id = #{dimensionId}</if>
+        </where> order by s.stat_time desc limit 100
+    </select>
+    <select id="findDailyOutputReport" resultType="com.fanmes.report.domain.vo.DailyOutputReportVO">
+        select stat_date as statDate, line_code as lineCode, line_name as lineName, work_order_no as workOrderNo,
+        product_code as productCode, product_name as productName, planned_qty as plannedQty, reported_qty as reportedQty,
+        qualified_qty as qualifiedQty, defective_qty as defectiveQty, report_count as reportCount, status
+        from rpt_report_dataset where metric_code = 'OUTPUT_QTY_DAY' order by row_no limit 500
+    </select>
+    <select id="findReportDataset" resultType="map">
+        select metric_code as metricCode, row_no as rowNo, stat_date as statDate, stat_period as statPeriod,
+        dimension_type as dimensionType, dimension_code as dimensionCode, dimension_name as dimensionName,
+        line_code as lineCode, line_name as lineName, work_order_no as workOrderNo, product_code as productCode,
+        product_name as productName, business_no as businessNo, business_type as businessType, reason_name as reasonName,
+        operator_name as operatorName, planned_qty as plannedQty, reported_qty as reportedQty, qualified_qty as qualifiedQty,
+        defective_qty as defectiveQty, report_count as reportCount, availability, performance, quality_rate as qualityRate, oee,
+        total_qty as totalQty, total_amount as totalAmount, started_at as startedAt, ended_at as endedAt, status, remark
+        from rpt_report_dataset where metric_code = #{metricCode} order by row_no limit 500
+    </select>
+    <select id="findBoards" resultType="com.fanmes.report.domain.entity.BoardConfig">
+        select id, board_code, board_name, board_type, refresh_seconds, config_json, status from board_config
+        <where><if test="boardType != null and boardType != ''">board_type = #{boardType}</if></where> order by id
+    </select>
+    <select id="findManufacturingLines" resultType="map">
+        select line_id as lineId, line_code as lineCode, line_name as lineName, batch_no as batchNo,
+        work_order_no as workOrderNo, product_name as productName, planned_qty as plannedQty, completed_qty as completedQty,
+        good_qty as goodQty, defect_qty as defectQty, oee, performance, output_trend as outputTrend,
+        running_order_count as runningOrderCount, active_flag as activeFlag from rpt_dashboard_line order by id
+    </select>
+    <select id="findLineOutputTrend" resultType="map">
+        select line_id as lineId, output_trend as outputTrend from rpt_dashboard_line order by id
+    </select>
+    <select id="findDashboardOeeMetrics" resultType="map">
+        select max(case when metric_key = 'availability' then metric_value end) as availability,
+        max(case when metric_key = 'performance' then metric_value end) as performance,
+        max(case when metric_key = 'quality' then metric_value end) as quality,
+        max(case when metric_key = 'oee' then metric_value end) as oee from rpt_dashboard_metric
+    </select>
+    <select id="findDashboardStock" resultType="map">
+        select material_code as materialCode, material_name as materialName, unit_name as unitName,
+        required_qty as requiredQty, actual_qty as actualQty, stock_status as stockStatus from rpt_dashboard_stock order by id
+    </select>
+</mapper>

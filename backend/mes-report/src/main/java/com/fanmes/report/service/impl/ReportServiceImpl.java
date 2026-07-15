@@ -10,7 +10,7 @@ import com.fanmes.report.domain.vo.DailyOutputReportVO;
 import com.fanmes.report.domain.vo.ManufacturingDashboardVO;
 import com.fanmes.report.domain.vo.ManufacturingLineVO;
 import com.fanmes.report.domain.vo.ReportDatasetVO;
-import com.fanmes.report.repository.ReportRepository;
+import com.fanmes.report.mapper.ReportMapper;
 import com.fanmes.report.service.ReportService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -24,36 +24,36 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
-    private final ReportRepository reportRepository;
+    private final ReportMapper reportMapper;
 
     @Override
     public List<MetricDef> metricDefs(String metricType) {
-        return reportRepository.findMetricDefs(metricType);
+        return reportMapper.findMetricDefs(metricType);
     }
 
     @Override
     public List<MetricSnapshot> metricSnapshots(MetricQuery query) {
-        return reportRepository.findMetricSnapshots(query);
+        return reportMapper.findMetricSnapshots(query);
     }
 
     @Override
     public List<BoardConfig> boards(String boardType) {
-        return reportRepository.findBoards(boardType);
+        return reportMapper.findBoards(boardType);
     }
 
     @Override
     public List<DailyOutputReportVO> dailyOutputReport() {
-        return reportRepository.findDailyOutputReport();
+        return reportMapper.findDailyOutputReport();
     }
 
     @Override
     public ReportDatasetVO reportDataset(String metricCode) {
-        return new ReportDatasetVO(metricCode, reportColumns(metricCode), reportRepository.findReportDataset(metricCode));
+        return new ReportDatasetVO(metricCode, reportColumns(metricCode), reportMapper.findReportDataset(metricCode));
     }
 
     @Override
     public ManufacturingDashboardVO manufacturingDashboard() {
-        List<ManufacturingLineVO> lines = reportRepository.findManufacturingLines().stream()
+        List<ManufacturingLineVO> lines = reportMapper.findManufacturingLines().stream()
                 .map(this::toLine)
                 .toList();
         return new ManufacturingDashboardVO(lines, oeeMetrics(lines), dashboardStock());
@@ -61,20 +61,20 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public List<Map<String, Object>> lineBoard() {
-        List<Map<String, Object>> rows = reportRepository.findManufacturingLines();
+        List<Map<String, Object>> rows = reportMapper.findManufacturingLines();
         if (!rows.isEmpty()) {
             return rows.stream().map(this::toLineBoardRow).toList();
         }
-        rows = reportRepository.findReportDataset("BOARD-LINE-ASSY-01");
+        rows = reportMapper.findReportDataset("BOARD-LINE-ASSY-01");
         if (rows.isEmpty()) {
-            rows = reportRepository.findReportDataset("OUTPUT_QTY_DAY");
+            rows = reportMapper.findReportDataset("OUTPUT_QTY_DAY");
         }
         return rows.stream().map(this::toLineBoardRowFromDataset).toList();
     }
 
     @Override
     public List<Map<String, Object>> workshopBoard() {
-        List<Map<String, Object>> rows = reportRepository.findReportDataset("BOARD-WORKSHOP-ASSY");
+        List<Map<String, Object>> rows = reportMapper.findReportDataset("BOARD-WORKSHOP-ASSY");
         if (rows.isEmpty()) {
             // 无车间区域数据集时，尝试从产线数据聚合为车间级别
             return aggregateWorkshopFromLines();
@@ -157,7 +157,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public Map<String, Object> controlCenterBoard() {
         List<Map<String, Object>> lineRows = lineBoard();
-        List<Map<String, Object>> centerRows = reportRepository.findReportDataset("BOARD-CONTROL-CENTER");
+        List<Map<String, Object>> centerRows = reportMapper.findReportDataset("BOARD-CONTROL-CENTER");
 
         Map<String, Object> result = new LinkedHashMap<>();
         result.put("outputTotal", lineRows.stream()
@@ -318,7 +318,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<DashboardMetricVO> oeeMetrics(List<ManufacturingLineVO> lines) {
-        Map<String, Object> raw = reportRepository.findDashboardOeeMetrics();
+        Map<String, Object> raw = reportMapper.findDashboardOeeMetrics();
         BigDecimal averageOee = average(lines.stream().map(ManufacturingLineVO::getOee).toList());
         BigDecimal averagePerformance = average(lines.stream().map(ManufacturingLineVO::getPerformance).toList());
         return List.of(
@@ -330,7 +330,7 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private List<DashboardStockVO> dashboardStock() {
-        return reportRepository.findDashboardStock().stream().map(row -> {
+        return reportMapper.findDashboardStock().stream().map(row -> {
             DashboardStockVO stock = new DashboardStockVO();
             BigDecimal required = decimal(row.get("requiredQty"));
             BigDecimal actual = decimal(row.get("actualQty"));
@@ -431,7 +431,7 @@ public class ReportServiceImpl implements ReportService {
                 return result;
             }).toList();
         }
-        return oeeMetrics(reportRepository.findManufacturingLines().stream().map(this::toLine).toList()).stream()
+        return oeeMetrics(reportMapper.findManufacturingLines().stream().map(this::toLine).toList()).stream()
                 .map(metric -> {
                     Map<String, Object> result = new LinkedHashMap<>();
                     result.put("label", metric.getMetricKey());

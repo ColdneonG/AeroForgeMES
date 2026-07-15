@@ -4,7 +4,7 @@ import com.fanmes.auth.domain.dto.LoginRequest;
 import com.fanmes.auth.domain.entity.SysUser;
 import com.fanmes.auth.domain.vo.LoginVO;
 import com.fanmes.auth.domain.vo.UserVO;
-import com.fanmes.auth.repository.AuthRepository;
+import com.fanmes.auth.mapper.AuthMapper;
 import com.fanmes.auth.service.AuthService;
 import com.fanmes.common.exception.BusinessException;
 import com.fanmes.common.security.JwtTokenService;
@@ -18,7 +18,7 @@ import org.springframework.util.StringUtils;
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private final AuthRepository authRepository;
+    private final AuthMapper authMapper;
     private final JwtTokenService jwtTokenService;
 
     @Override
@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
         if (!StringUtils.hasText(request.getPassword())) {
             throw new BusinessException("密码不能为空");
         }
-        SysUser user = authRepository.findUserByUsername(request.getUsername());
+        SysUser user = authMapper.findUserByUsername(request.getUsername());
         if (user == null) {
             throw new BusinessException("用户不存在");
         }
@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginVO currentUser(String token) {
         String username = parseUsername(token);
-        SysUser user = authRepository.findUserByUsername(username);
+        SysUser user = authMapper.findUserByUsername(username);
         if (user == null) {
             throw new BusinessException("token 对应用户不存在");
         }
@@ -54,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public List<UserVO> listUsers() {
-        return authRepository.findAllUsers().stream().map(user -> {
+        return authMapper.findAllUsers().stream().map(user -> {
             UserVO vo = new UserVO();
             vo.setId(user.getId());
             vo.setDisplayName(user.getDisplayName());
@@ -63,8 +63,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     private LoginVO buildLogin(SysUser user) {
-        Set<String> roles = new HashSet<>(authRepository.findRoleCodes(user.getId()));
-        Set<String> permissions = new HashSet<>(authRepository.findPermissionCodes(user.getId()));
+        Set<String> roles = new HashSet<>(authMapper.findRoleCodes(user.getId()));
+        Set<String> permissions = new HashSet<>(authMapper.findPermissionCodes(user.getId()));
         LoginVO vo = new LoginVO();
         vo.setAccessToken(jwtTokenService.createToken(user.getId(), user.getUsername(), roles, permissions));
         vo.setUserId(user.getId());
