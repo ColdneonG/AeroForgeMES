@@ -62,3 +62,11 @@ database/
 *.sql
 *.dump
 *.sql.gz
+
+# Local AI and migration records
+frontend/.github/
+frontend/VISUAL_MIGRATION_RECORD.md
+
+# Local test manuals
+test-manual/
+test-manual.rar
