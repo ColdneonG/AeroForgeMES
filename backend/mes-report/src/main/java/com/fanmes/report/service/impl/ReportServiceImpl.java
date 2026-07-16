@@ -165,6 +165,7 @@ public class ReportServiceImpl implements ReportService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add));
         result.put("kpis", controlKpis(centerRows));
         result.put("trend", controlTrend(lineRows));
+        result.put("planTrend", controlPlanTrend(lineRows));
         result.put("lines", lineRows);
         result.put("alerts", controlAlerts(centerRows));
         result.put("workOrders", controlWorkOrders(lineRows));
@@ -446,6 +447,13 @@ public class ReportServiceImpl implements ReportService {
     private List<Integer> controlTrend(List<Map<String, Object>> lineRows) {
         List<BigDecimal> values = lineRows.stream()
                 .map(row -> decimal(row.get("completedQty")))
+                .toList();
+        return normalizedTrend(values);
+    }
+
+    private List<Integer> controlPlanTrend(List<Map<String, Object>> lineRows) {
+        List<BigDecimal> values = lineRows.stream()
+                .map(row -> decimal(row.get("plannedQty")))
                 .toList();
         return normalizedTrend(values);
     }

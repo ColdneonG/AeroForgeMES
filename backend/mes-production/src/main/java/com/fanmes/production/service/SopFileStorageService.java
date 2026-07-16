@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Set;
@@ -59,8 +58,7 @@ public class SopFileStorageService {
         }
 
         String hash = sha256(file);
-        String date = LocalDate.now().toString().replace("-", "");
-        String objectKey = safeFolder(folder) + "/" + date + "/" + UUID.randomUUID() + "." + extension;
+        String objectKey = safeFolder(folder) + "/" + UUID.randomUUID() + "." + extension;
         Path target = storageRoot.resolve(objectKey).normalize();
         if (!target.startsWith(storageRoot)) {
             throw new BadRequestException("invalid storage object key");

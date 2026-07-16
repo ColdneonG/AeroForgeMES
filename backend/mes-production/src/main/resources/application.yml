@@ -10,6 +10,10 @@ spring:
     username: ${MYSQL_USERNAME:root}
     password: ${MYSQL_PASSWORD:123456}
 
+fanmes:
+  sop:
+    storage-root: ${SOP_STORAGE_ROOT:/data/fan-mes/mes-production/sop-files}
+
 management:
   endpoints:
     web:
