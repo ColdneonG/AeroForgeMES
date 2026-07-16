@@ -64,7 +64,6 @@ const sections: MenuSection[] = [
   ]},
   { label: '质量与追溯', items: [
     { id: 'quality', label: '质量检验', to: '/quality-inspection', icon: 'quality' },
-    { id: 'inspexec', label: '检验执行', to: '/quality/inspection-exec', icon: 'scan' },
     { id: 'defects', label: '缺陷记录', to: '/quality/defects', badgeKey: 'defects', icon: 'warn' },
     { id: 'quality-plans', label: '检验方案', to: '/quality/plans', icon: 'quality' },
     { id: 'quality-items', label: '检验项', to: '/quality/items', icon: 'list' },
@@ -91,8 +90,6 @@ const sections: MenuSection[] = [
   ]},
   { label: '控制中心', items: [
     { id: 'ccenter', label: '制造大屏', to: '/reports/control-center', icon: 'board' },
-    { id: 'line-config', label: '产线看板配置', to: '/reports/line-config', icon: 'gear' },
-    { id: 'workshop-config', label: '车间看板配置', to: '/reports/workshop-config', icon: 'gear' },
   ]},
   { label: '集成管理', items: [
     { id: 'erp', label: 'ERP 集成', to: '/integration/erp', icon: 'arrow' },
@@ -105,7 +102,6 @@ const sections: MenuSection[] = [
     { id: 'metrics', label: '指标管理', to: '/reports/metrics', icon: 'gear' },
     { id: 'users', label: '用户管理', to: '/system-users', icon: 'users' },
     { id: 'sys-menus', label: '菜单配置', to: '/system/menus', icon: 'list' },
-    { id: 'sys-sequences', label: '编号序列', to: '/system/sequences', icon: 'boxes' },
   ]},
 ]
 
