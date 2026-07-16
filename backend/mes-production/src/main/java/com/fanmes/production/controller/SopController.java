@@ -92,6 +92,12 @@ public class SopController {
         return ApiResponse.ok(service.createVersion(id, request));
     }
 
+    @GetMapping("/versions/{id}")
+    @RequirePermission("process:sop:query")
+    public ApiResponse<SopVersion> getVersion(@PathVariable Long id) {
+        return ApiResponse.ok(service.getVersion(id));
+    }
+
     @PostMapping("/versions/{id}/copy")
     @RequirePermission("process:sop:copyVersion")
     public ApiResponse<SopVersion> copyVersion(@PathVariable Long id, @Valid @RequestBody SopVersionRequest request) {

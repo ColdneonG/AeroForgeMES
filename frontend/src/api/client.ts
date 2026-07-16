@@ -98,6 +98,9 @@ export async function getBlob(path: string): Promise<Blob> {
     endExpiredSession()
     throw new ApiError('Login session has expired. Please sign in again.', 401)
   }
-  if (!response.ok) throw new ApiError(`请求失败（${response.status}）`, response.status)
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as ApiEnvelope<unknown> | null
+    throw new ApiError(body?.message || `请求失败（${response.status}）`, response.status)
+  }
   return response.blob()
 }

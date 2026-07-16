@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import JsBarcode from 'jsbarcode'
 import MesLayout from '@/layouts/MesLayout.vue'
 import { get, post } from '@/api/client'
 import { getProductionRecords, type ResourceRecord } from '@/api/production'
@@ -21,6 +22,8 @@ type ApplicationRule = {
   itemCode?: string
   itemName?: string
   ruleName?: string
+  ruleExpression?: string
+  serialLength?: number
   templateId?: number
   templateName?: string
   status?: string
@@ -48,18 +51,21 @@ const loading = ref(false)
 const printing = ref(false)
 const error = ref('')
 const notice = ref('')
+const previewBarcode = ref<SVGSVGElement | null>(null)
 
 const selected = computed(() => queue.value.find((item) => item.id === selectedId.value) || null)
 const selectedForPrint = computed(() => queue.value.filter((item) => selectedIds.value.includes(item.id)))
 const selectedRule = computed(() => applicationRules.value.find((item) => item.id === applicationRuleId.value) || null)
 const selectedIsReprint = computed(() => (selected.value?.printCount || 0) > 0)
 const batchNeedsReason = computed(() => selectedForPrint.value.some((item) => (item.printCount || 0) > 0))
+const ruleUsesSequence = computed(() => /\$\{(serial|#+)}/.test(selectedRule.value?.ruleExpression || ''))
 
 const value = (row: BarcodeRecord, key: keyof BarcodeRecord) => String(row[key] ?? '-')
 const isChecked = (id: number) => selectedIds.value.includes(id)
 
 function syncTemplateFromRule() {
   if (selectedRule.value?.templateId) templateId.value = selectedRule.value.templateId
+  if (!ruleUsesSequence.value) quantity.value = 1
 }
 
 async function loadReferences() {
@@ -84,6 +90,10 @@ async function loadReferences() {
 async function generate() {
   if (!applicationRuleId.value) {
     error.value = '请选择应用规则'
+    return
+  }
+  if (!ruleUsesSequence.value && quantity.value > 1) {
+    error.value = '当前规则不含流水号，只能生成一个唯一条码；如需多张同码标签，请使用右侧“份数”打印。'
     return
   }
   loading.value = true
@@ -151,15 +161,26 @@ function escapeHtml(value: string) {
   return value.replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character] || character)
 }
 
+function renderBarcode(element: SVGSVGElement | null, value: string) {
+  if (!element) return
+  JsBarcode(element, value, { format: 'CODE128', displayValue: false, margin: 0, height: 54, width: 1.6 })
+}
+
+function barcodeSvg(value: string) {
+  const element = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  JsBarcode(element, value, { format: 'CODE128', displayValue: false, margin: 0, height: 52, width: 1.45 })
+  return element.outerHTML
+}
+
 function openBrowserPrint(items: BarcodeRecord[]) {
-  const labels = items.map((item) => `<article class="label"><strong>${escapeHtml(item.itemName || item.itemCode || '条码标签')}</strong><div class="barcode">${escapeHtml(item.barcodeValue)}</div><code>${escapeHtml(item.barcodeValue)}</code>${item.batchNo ? `<small>批次：${escapeHtml(item.batchNo)}</small>` : ''}</article>`).join('')
+  const labels = items.flatMap((item) => Array.from({ length: copies.value }, () => `<article class="label"><strong>${escapeHtml(item.itemName || item.itemCode || '条码标签')}</strong><div class="barcode">${barcodeSvg(item.barcodeValue)}</div><code>${escapeHtml(item.barcodeValue)}</code>${item.batchNo ? `<small>批次：${escapeHtml(item.batchNo)}</small>` : ''}</article>`)).join('')
   const popup = window.open('', '_blank')
   if (!popup) {
     notice.value = '已登记打印；浏览器拦截了打印预览窗口，请允许弹窗后重试。'
     return
   }
   popup.opener = null
-  popup.document.write(`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>条码标签</title><style>@page{margin:4mm}body{font-family:Arial,sans-serif}.label{width:90mm;min-height:45mm;border:1px solid #222;padding:4mm;margin:0 0 4mm;box-sizing:border-box;display:grid;gap:3mm;align-content:center}.barcode{font-family:monospace;font-size:20pt;letter-spacing:2px;border-top:12px solid #111;border-bottom:12px solid #111;padding:2mm 0;text-align:center}code{font-size:12pt}small{font-size:9pt}@media print{.label{break-inside:avoid}}</style></head><body>${labels}</body></html>`)
+  popup.document.write(`<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>条码标签</title><style>@page{margin:4mm}body{font-family:Arial,sans-serif}.label{width:90mm;min-height:45mm;border:1px solid #222;padding:4mm;margin:0 0 4mm;box-sizing:border-box;display:grid;gap:3mm;align-content:center}.barcode svg{display:block;width:100%;max-width:76mm;height:auto}code{font-size:12pt;letter-spacing:.08em}small{font-size:9pt}@media print{.label{break-inside:avoid}}</style></head><body>${labels}</body></html>`)
   popup.document.close()
   window.setTimeout(() => popup.print(), 150)
 }
@@ -223,6 +244,11 @@ async function showPrintRecords(item: BarcodeRecord) {
 }
 
 onMounted(loadReferences)
+watch(selectedRule, syncTemplateFromRule)
+watch(selected, async (item) => {
+  await nextTick()
+  if (item) renderBarcode(previewBarcode.value, item.barcodeValue)
+})
 </script>
 
 <template>
@@ -233,12 +259,12 @@ onMounted(loadReferences)
       <div v-if="error" class="alert alert-error mb-4"><span class="alert-icon">!</span>{{ error }}</div>
       <div v-if="notice" class="alert alert-success mb-4"><span class="alert-icon">✓</span>{{ notice }}</div>
 
-      <section class="card mb-5"><div class="card-header"><h2 class="card-title">条码生成</h2></div><div class="generate-row"><div class="form-group rule-select"><label class="form-label">应用规则</label><select v-model.number="applicationRuleId" class="form-select" :disabled="loading" @change="syncTemplateFromRule"><option :value="null">请选择应用规则</option><option v-for="rule in applicationRules" :key="rule.id" :value="rule.id">{{ rule.applicationRuleCode }} · {{ rule.itemName || rule.itemCode }} · {{ rule.ruleName }}</option></select></div><div class="form-group"><label class="form-label">关联物料</label><input class="form-input" :value="selectedRule ? `${selectedRule.itemCode || ''} ${selectedRule.itemName || ''}` : ''" readonly></div><div class="form-group batch-field"><label class="form-label">批次号</label><input v-model="batchNo" class="form-input" placeholder="可选"></div><div class="form-group qty-field"><label class="form-label">生成数量</label><input v-model.number="quantity" class="form-input" type="number" min="1" max="500"></div><button class="btn btn-primary" :disabled="loading" @click="generate">{{ loading ? '生成中…' : '生成条码' }}</button></div></section>
+      <section class="card mb-5"><div class="card-header"><h2 class="card-title">条码生成</h2></div><div class="generate-row"><div class="form-group rule-select"><label class="form-label">应用规则</label><select v-model.number="applicationRuleId" class="form-select" :disabled="loading" @change="syncTemplateFromRule"><option :value="null">请选择应用规则</option><option v-for="rule in applicationRules" :key="rule.id" :value="rule.id">{{ rule.applicationRuleCode }} · {{ rule.itemName || rule.itemCode }} · {{ rule.ruleName }}</option></select></div><div class="form-group"><label class="form-label">关联物料</label><input class="form-input" :value="selectedRule ? `${selectedRule.itemCode || ''} ${selectedRule.itemName || ''}` : ''" readonly></div><div class="form-group batch-field"><label class="form-label">批次号</label><input v-model="batchNo" class="form-input" placeholder="可选"></div><div class="form-group qty-field"><label class="form-label">生成数量</label><input v-model.number="quantity" class="form-input" type="number" min="1" max="500" :disabled="!ruleUsesSequence"></div><button class="btn btn-primary" :disabled="loading" @click="generate">{{ loading ? '生成中…' : '生成条码' }}</button></div><p v-if="selectedRule" class="rule-hint" :class="{ warning: !ruleUsesSequence }"><template v-if="ruleUsesSequence">此规则含流水号（{{ selectedRule.ruleExpression }}），可批量生成唯一条码。</template><template v-else>此规则不含流水号（{{ selectedRule.ruleExpression }}），每次只能生成 1 个唯一条码；如需多张相同标签，请在打印设置中增加“份数”。产品 SN 规则请使用 <code>${serial}</code> 或 <code>${####}</code>。</template></p></section>
 
       <div class="print-zone">
         <section class="card queue-card"><div class="card-header"><h2 class="card-title">待打印清单</h2><div class="queue-toolbar"><button class="btn btn-ghost btn-sm" @click="selectAll">全选</button><button class="btn btn-ghost btn-sm" @click="deselectAll">取消</button><button class="btn btn-ghost btn-sm" @click="clearPrinted">清除已打印</button></div></div><div class="queue-body"><div v-if="!queue.length" class="empty-state"><div class="empty-icon">—</div><p>待打印清单为空</p><span>生成条码后会自动加入此清单</span></div><button v-for="item in queue" :key="item.id" type="button" class="queue-item" :class="{ selected: item.id === selectedId }" @click="selectedId = item.id"><input type="checkbox" :checked="isChecked(item.id)" :aria-label="`选择 ${item.barcodeValue}`" @click.stop="toggleSelection(item.id)"><span class="q-code">{{ item.barcodeValue }}</span><span class="q-meta">{{ value(item, 'itemName') }}</span><span class="q-status" :class="{ printed: (item.printCount || 0) > 0 }">{{ (item.printCount || 0) > 0 ? `已打印 ${item.printCount} 次` : '待打印' }}</span></button></div><div class="queue-footer"><span>已选 {{ selectedIds.length }} / 共 {{ queue.length }} 条</span><button class="btn btn-primary btn-sm" :disabled="printing || !selectedIds.length" @click="printBatch">{{ printing ? '处理中…' : '批量打印选中' }}</button></div></section>
 
-        <aside class="card preview-card"><div class="card-header"><h2 class="card-title">标签预览与打印设置</h2></div><div class="label-preview" :class="{ empty: !selected }"><template v-if="selected"><span v-if="selectedIsReprint" class="printed-badge">已打印</span><strong>{{ selected.itemName || selected.itemCode || '条码标签' }}</strong><div class="barcode-lines" aria-hidden="true"></div><code>{{ selected.barcodeValue }}</code><small>批次：{{ selected.batchNo || '-' }}</small></template><span v-else>← 选择左侧条码查看预览</span></div><div class="print-settings"><div class="settings-row"><div class="form-group"><label class="form-label">打印模板</label><select v-model.number="templateId" class="form-select"><option :value="null">请选择模板</option><option v-for="template in templates" :key="template.id" :value="template.id">{{ template.templateName }}<template v-if="template.paperWidth && template.paperHeight"> · {{ template.paperWidth }} × {{ template.paperHeight }} mm</template></option></select></div><div class="form-group copies-field"><label class="form-label">份数</label><input v-model.number="copies" class="form-input" type="number" min="1" max="100"></div></div><div class="form-group"><label class="form-label">打印机</label><input v-model="printerName" class="form-input" placeholder="BROWSER"></div><div v-if="selectedIsReprint || batchNeedsReason" class="form-group"><label class="form-label">补打原因 <span class="required">*</span></label><select v-model="reprintReason" class="form-select"><option value="">请选择补打原因</option><option>标签污损</option><option>打印不清</option><option>标签脱落</option><option>信息变更</option><option>标签遗失</option><option>其他</option></select></div><button class="btn btn-primary w-full" :disabled="printing || !selected" @click="printSingle">{{ printing ? '处理中…' : selectedIsReprint ? '补打标签' : '打印标签' }}</button><button v-if="selected" class="btn btn-ghost w-full" @click="showPrintRecords(selected)">查看此条打印记录</button></div></aside>
+        <aside class="card preview-card"><div class="card-header"><h2 class="card-title">标签预览与打印设置</h2></div><div class="label-preview" :class="{ empty: !selected }"><template v-if="selected"><span v-if="selectedIsReprint" class="printed-badge">已打印</span><strong>{{ selected.itemName || selected.itemCode || '条码标签' }}</strong><svg ref="previewBarcode" class="barcode-preview" role="img" :aria-label="`Code 128 条码：${selected.barcodeValue}`"></svg><code>{{ selected.barcodeValue }}</code><small>批次：{{ selected.batchNo || '-' }}</small></template><span v-else>← 选择左侧条码查看预览</span></div><div class="print-settings"><div class="settings-row"><div class="form-group"><label class="form-label">打印模板</label><select v-model.number="templateId" class="form-select"><option :value="null">请选择模板</option><option v-for="template in templates" :key="template.id" :value="template.id">{{ template.templateName }}<template v-if="template.paperWidth && template.paperHeight"> · {{ template.paperWidth }} × {{ template.paperHeight }} mm</template></option></select></div><div class="form-group copies-field"><label class="form-label">份数</label><input v-model.number="copies" class="form-input" type="number" min="1" max="100"></div></div><div class="form-group"><label class="form-label">打印机</label><input v-model="printerName" class="form-input" placeholder="BROWSER"></div><div v-if="selectedIsReprint || batchNeedsReason" class="form-group"><label class="form-label">补打原因 <span class="required">*</span></label><select v-model="reprintReason" class="form-select"><option value="">请选择补打原因</option><option>标签污损</option><option>打印不清</option><option>标签脱落</option><option>信息变更</option><option>标签遗失</option><option>其他</option></select></div><button class="btn btn-primary w-full" :disabled="printing || !selected" @click="printSingle">{{ printing ? '处理中…' : selectedIsReprint ? '补打标签' : '打印标签' }}</button><button v-if="selected" class="btn btn-ghost w-full" @click="showPrintRecords(selected)">查看此条打印记录</button></div></aside>
       </div>
 
       <section class="card history-card"><div class="card-header"><h2 class="card-title">最近打印记录</h2><span class="text-muted">最近 {{ history.length }} 条</span></div><div class="data-table-wrap"><table class="data-table"><thead><tr><th>打印时间</th><th>条码</th><th>模板</th><th>打印机</th><th>份数</th><th>操作人</th></tr></thead><tbody><tr v-if="!history.length"><td colspan="6">选择条码后可查看其打印记录；新打印的记录会自动显示在此。</td></tr><tr v-for="record in history" :key="record.id"><td>{{ record.printAt?.replace('T', ' ') || '-' }}</td><td class="cell-mono">{{ record.barcodeValue }}</td><td>{{ record.templateName || '-' }}</td><td>{{ record.printerName || '-' }}</td><td>{{ record.printCount || '-' }}</td><td>{{ record.printByName || '-' }}</td></tr></tbody></table></div></section>
@@ -250,6 +276,9 @@ onMounted(loadReferences)
 <style scoped>
 .barcode-workbench { min-width: 0; }
 .generate-row { display: grid; grid-template-columns: minmax(230px, 1.6fr) minmax(180px, 1fr) minmax(130px, .6fr) 100px auto; gap: var(--space-3); align-items: end; }
+.rule-hint { margin: var(--space-3) 0 0; padding: var(--space-3); border-radius: var(--radius-sm); background: var(--surface); color: var(--fg); font-size: var(--text-caption); }
+.rule-hint.warning { border-left: 3px solid var(--color-warning, #d97706); }
+.rule-hint code { font-family: var(--font-mono); font-weight: 700; }
 .print-zone { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(290px, .7fr); gap: var(--space-5); margin-bottom: var(--space-5); }
 .queue-card, .preview-card { padding: 0; overflow: hidden; }
 .queue-card .card-header, .preview-card .card-header { padding: var(--space-4) var(--space-5); margin-bottom: 0; }
@@ -270,7 +299,7 @@ onMounted(loadReferences)
 .label-preview.empty { color: var(--fg); opacity: .4; font-size: var(--text-small); }
 .label-preview code { font-family: var(--font-mono); font-size: var(--text-body); font-weight: 700; letter-spacing: .06em; }
 .label-preview small { color: var(--fg); opacity: .55; }
-.barcode-lines { width: min(240px, 78%); height: 46px; background: repeating-linear-gradient(90deg, var(--fg) 0 2px, transparent 2px 4px, var(--fg) 4px 5px, transparent 5px 8px, var(--fg) 8px 12px, transparent 12px 14px); }
+.barcode-preview { display: block; width: min(260px, 82%); height: 58px; }
 .printed-badge { position: absolute; top: var(--space-2); right: var(--space-2); padding: 1px 7px; border-radius: 999px; background: var(--muted); font-size: var(--text-caption); }
 .print-settings { display: grid; gap: var(--space-3); padding: 0 var(--space-5); }
 .settings-row { display: grid; grid-template-columns: 1fr 90px; gap: var(--space-2); }
