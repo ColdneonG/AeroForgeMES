@@ -3,6 +3,7 @@ package com.fanmes.production.controller;
 import com.fanmes.common.api.ApiResponse;
 import com.fanmes.production.domain.DispatchOrder;
 import com.fanmes.production.domain.KittingAnalysis;
+import com.fanmes.production.domain.KittingMissingBoardItem;
 import com.fanmes.production.domain.KittingMissingItem;
 import com.fanmes.production.domain.OperationProgress;
 import com.fanmes.production.domain.ShopTask;
@@ -178,7 +179,7 @@ public class ProductionController {
     }
 
     @GetMapping("/kitting-missing-board")
-    public ApiResponse<List<KittingMissingItem>> listMissingBoard() {
+    public ApiResponse<List<KittingMissingBoardItem>> listMissingBoard() {
         return ApiResponse.ok(service.listMissingBoard());
     }
 
@@ -317,23 +318,4 @@ public class ProductionController {
         return ApiResponse.ok(service.listOperationProgress(id));
     }
 
-    @PostMapping("/tasks/{id}/start")
-    public ApiResponse<ShopTask> startShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
-        return ApiResponse.ok(service.startShopTask(id, request));
-    }
-
-    @PostMapping("/tasks/{id}/pause")
-    public ApiResponse<ShopTask> pauseShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
-        return ApiResponse.ok(service.pauseShopTask(id, request));
-    }
-
-    @PostMapping("/tasks/{id}/resume")
-    public ApiResponse<ShopTask> resumeShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
-        return ApiResponse.ok(service.resumeShopTask(id, request));
-    }
-
-    @PostMapping("/tasks/{id}/complete")
-    public ApiResponse<ShopTask> completeShopTask(@PathVariable Long id, @Valid @RequestBody ProductionActionRequest request) {
-        return ApiResponse.ok(service.completeShopTask(id, request));
-    }
 }

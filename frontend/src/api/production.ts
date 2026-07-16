@@ -11,8 +11,26 @@ export interface WorkOrder {
   status?: string
 }
 
+export interface CreateWorkOrderRequest {
+  workOrderNo: string
+  productId: number
+  planQty: number
+  lineId: number
+  externalNo?: string
+  sourceType?: string
+  plannedStartAt?: string
+  plannedEndAt?: string
+  deliveryDate?: string
+  routeId?: number
+  status?: string
+}
+
 export function getWorkOrders(query?: Record<string, string | number | undefined>) {
   return get<WorkOrder[]>('/production/work-orders', query)
+}
+
+export function createWorkOrder(data: CreateWorkOrderRequest) {
+  return post<WorkOrder>('/production/work-orders', data)
 }
 
 export function getWorkOrder(id: string | number) {

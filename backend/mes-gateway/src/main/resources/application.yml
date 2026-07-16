@@ -11,6 +11,8 @@ server:
 fanmes:
   security:
     auth-enabled: true
+  cors:
+    allowed-origins: ${FANMES_CORS_ALLOWED_ORIGINS:http://localhost:3000}
   jwt:
     secret: ${FANMES_JWT_SECRET:fan-mes-change-this-development-secret-2026}
     issuer: fan-mes

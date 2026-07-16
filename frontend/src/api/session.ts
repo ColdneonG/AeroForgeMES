@@ -1,11 +1,4 @@
-const ACCESS_TOKEN_KEY = 'fanmes.accessToken'
-const USER_KEY = 'fanmes.user'
 let accessToken: string | null = null
-
-// Credentials are deliberately kept only in memory so every new app load
-// starts at the login page. Remove tokens created by older versions as well.
-localStorage.removeItem(ACCESS_TOKEN_KEY)
-localStorage.removeItem(USER_KEY)
 
 type JwtPayload = { exp?: unknown }
 

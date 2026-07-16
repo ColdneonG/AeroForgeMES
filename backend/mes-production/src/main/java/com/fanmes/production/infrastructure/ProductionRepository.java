@@ -2,6 +2,7 @@ package com.fanmes.production.infrastructure;
 
 import com.fanmes.production.domain.DispatchOrder;
 import com.fanmes.production.domain.KittingAnalysis;
+import com.fanmes.production.domain.KittingMissingBoardItem;
 import com.fanmes.production.domain.KittingMissingItem;
 import com.fanmes.production.domain.OperationProgress;
 import com.fanmes.production.domain.ShopTask;
@@ -228,16 +229,18 @@ public class ProductionRepository {
                 """, Map.of("id", id), missingItemMapper());
     }
 
-    public List<KittingMissingItem> listMissingBoard() {
+    public List<KittingMissingBoardItem> listMissingBoard() {
         return jdbc.query("""
                 select mi.id, mi.analysis_id, mi.material_id, mi.required_qty, mi.available_qty,
-                       mi.missing_qty, mi.expected_arrival_at
+                       mi.missing_qty, mi.expected_arrival_at, wo.work_order_no,
+                       coalesce(ka.kitting_status, ka.status) as board_status
                 from prod_kitting_missing_item mi
                 join prod_kitting_analysis ka on ka.id = mi.analysis_id
+                left join prod_work_order wo on wo.id = ka.work_order_id
                 where mi.missing_qty > 0
                   and (ka.status is null or ka.status not in ('已关闭', '作废'))
                 order by mi.expected_arrival_at asc, mi.id desc
-                """, missingItemMapper());
+                """, missingBoardItemMapper());
     }
 
     public void insertMissingItem(KittingMissingItem item) {
@@ -369,10 +372,18 @@ public class ProductionRepository {
                 select st.id, st.task_no, st.work_order_id, st.dispatch_id, st.product_id, st.route_id,
                        st.line_id, st.team_id, st.plan_qty, st.started_at, st.ended_at, st.status,
                        st.product_name, st.line_name,
-                       wo.work_order_no,
+                       wo.work_order_no, d.dispatch_no,
                        rh.route_name
+                       ,(select group_concat(distinct rp.process_name order by rp.process_name separator '、')
+                         from shop_operation_task ot
+                         left join route_process rp on rp.id = ot.process_id
+                         where ot.task_id = st.id) as operation_names
+                       ,(select coalesce(max(ot.reported_qty), 0)
+                         from shop_operation_task ot
+                         where ot.task_id = st.id) as completed_qty
                 from shop_task st
                 left join prod_work_order wo on wo.id = st.work_order_id
+                left join prod_dispatch_order d on d.id = st.dispatch_id
                 left join route_header rh on rh.id = st.route_id
                 where 1 = 1
                 """);
@@ -426,16 +437,14 @@ public class ProductionRepository {
                 """, Map.of("dispatchId", dispatchId), shopTaskMapper());
     }
 
-    public int updateTaskStatusByDispatch(Long dispatchId, String newStatus) {
+    public int updateTaskStatusByWorkOrder(Long workOrderId, String newStatus) {
         return jdbc.update("""
                 update shop_task
                 set status = :status
-                where dispatch_id = :dispatchId
-                """, Map.of("dispatchId", dispatchId, "status", newStatus));
-    }
-
-    public int updateShopTaskStatus(Long id, String oldStatus, String newStatus) {
-        return updateStatus("shop_task", id, oldStatus, newStatus);
+                where dispatch_id in (
+                    select id from prod_dispatch_order where work_order_id = :workOrderId
+                )
+                """, Map.of("workOrderId", workOrderId, "status", newStatus));
     }
 
     private int updateStatus(String tableName, Long id, String oldStatus, String newStatus) {
@@ -612,6 +621,20 @@ public class ProductionRepository {
         );
     }
 
+    private RowMapper<KittingMissingBoardItem> missingBoardItemMapper() {
+        return (rs, rowNum) -> new KittingMissingBoardItem(
+                rs.getLong("id"),
+                getLong(rs, "analysis_id"),
+                rs.getString("work_order_no"),
+                getLong(rs, "material_id"),
+                rs.getBigDecimal("required_qty"),
+                rs.getBigDecimal("available_qty"),
+                rs.getBigDecimal("missing_qty"),
+                rs.getString("board_status"),
+                rs.getTimestamp("expected_arrival_at") == null ? null : rs.getTimestamp("expected_arrival_at").toLocalDateTime()
+        );
+    }
+
     private RowMapper<DispatchOrder> dispatchOrderMapper() {
         return (rs, rowNum) -> new DispatchOrder(
                 rs.getLong("id"),
@@ -641,7 +664,7 @@ public class ProductionRepository {
                 rs.getTimestamp("started_at") == null ? null : rs.getTimestamp("started_at").toLocalDateTime(),
                 rs.getTimestamp("ended_at") == null ? null : rs.getTimestamp("ended_at").toLocalDateTime(),
                 rs.getString("status"),
-                null, null, null, null
+                null, null, null, null, null, null, null
         );
     }
 
@@ -659,6 +682,9 @@ public class ProductionRepository {
                 rs.getTimestamp("started_at") == null ? null : rs.getTimestamp("started_at").toLocalDateTime(),
                 rs.getTimestamp("ended_at") == null ? null : rs.getTimestamp("ended_at").toLocalDateTime(),
                 rs.getString("status"),
+                rs.getString("dispatch_no"),
+                rs.getString("operation_names"),
+                rs.getBigDecimal("completed_qty"),
                 rs.getString("work_order_no"),
                 rs.getString("product_name"),
                 rs.getString("route_name"),

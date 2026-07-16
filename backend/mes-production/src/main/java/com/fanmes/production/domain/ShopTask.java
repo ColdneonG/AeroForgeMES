@@ -16,6 +16,9 @@ public record ShopTask(
         LocalDateTime startedAt,
         LocalDateTime endedAt,
         String status,
+        String dispatchNo,
+        String operationNames,
+        BigDecimal completedQty,
         // display names populated by joined list queries (null otherwise)
         String workOrderNo,
         String productName,

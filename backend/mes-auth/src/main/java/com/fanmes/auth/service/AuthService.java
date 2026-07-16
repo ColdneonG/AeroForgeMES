@@ -18,6 +18,7 @@ import java.util.List;
 
 public interface AuthService {
     LoginVO login(LoginRequest request);
+    LoginVO refresh(String refreshToken);
     LoginVO currentUser(String token);
     ProfileVO profile(String token);
     ProfileVO updateProfile(String token, ProfileUpdateRequest request);

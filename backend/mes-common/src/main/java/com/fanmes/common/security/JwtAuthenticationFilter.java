@@ -32,9 +32,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return !enabled
-                || "OPTIONS".equalsIgnoreCase(request.getMethod())
-                || request.getRequestURI().contains("/health")
-                || "/api/auth/login".equals(request.getRequestURI());
+                 || "OPTIONS".equalsIgnoreCase(request.getMethod())
+                 || request.getRequestURI().contains("/health")
+                 || "/api/auth/login".equals(request.getRequestURI())
+                 || "/api/auth/refresh".equals(request.getRequestURI())
+                 || "/api/auth/logout".equals(request.getRequestURI());
     }
 
     @Override

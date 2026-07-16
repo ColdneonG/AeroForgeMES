@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping
 public class EquipmentRecordController {
+    private static final Set<String> RUNNING_STATUSES = Set.of("RUNNING", "IDLE", "FAULT");
     private final GenericRecordService service;
     private final Map<String, TableSpec> specs = specs();
     private final Map<String, String> legacyResources = Map.ofEntries(
@@ -92,7 +95,11 @@ public class EquipmentRecordController {
         if (status == null) {
             throw new IllegalArgumentException("missing required field: equipment_status");
         }
-        return ApiResponse.ok(service.changeEquipmentRunningStatus(id, String.valueOf(status)));
+        String runtimeStatus = String.valueOf(status).trim().toUpperCase(Locale.ROOT);
+        if (!RUNNING_STATUSES.contains(runtimeStatus)) {
+            throw new IllegalArgumentException("unsupported running status: " + runtimeStatus);
+        }
+        return ApiResponse.ok(service.changeEquipmentRunningStatus(id, runtimeStatus));
     }
 
     @GetMapping("/api/mes/{func}")
@@ -168,7 +175,22 @@ public class EquipmentRecordController {
                 " left join mes_system.md_production_line l on e.line_id = l.id" +
                 " left join mes_system.md_workstation ws on e.station_id = ws.id",
                 "e.",
-                "e.*, c.category_name, m.manufacturer_name, l.line_name, ws.station_name"));
+                "e.*, " +
+                "case e.equipment_status " +
+                "when '正常' then 'IDLE' " +
+                "when '待保养' then 'IDLE' " +
+                "when '运行中' then 'RUNNING' " +
+                "when '待机' then 'IDLE' " +
+                "when '停机' then 'IDLE' " +
+                "when '故障' then 'FAULT' " +
+                "when '报警' then 'FAULT' " +
+                "else e.equipment_status end as equipment_status, " +
+                "case " +
+                "when exists (select 1 from eqp_maintenance_task mt where mt.equipment_id = e.id and mt.status = 'PROCESSING') then 'IN_PROGRESS' " +
+                "when e.equipment_status = '待保养' " +
+                "or exists (select 1 from eqp_maintenance_task mt where mt.equipment_id = e.id and mt.status = 'PENDING' and (mt.plan_at is null or mt.plan_at <= current_timestamp)) then 'DUE' " +
+                "else 'NORMAL' end as maintenance_status, " +
+                "c.category_name, m.manufacturer_name, l.line_name, ws.station_name"));
         map.put("maintenance-tasks", new TableSpec("maintenance-tasks", "eqp_maintenance_task",
                 List.of("id", "maintenance_no", "equipment_id", "plan_at", "assigned_to", "completed_at", "result", "status"),
                 List.of("maintenance_no"),

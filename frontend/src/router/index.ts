@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { hasValidSession } from '@/api/session'
+import { restoreSession } from '@/api/auth'
 const AndonExceptionsView = () => import('@/views/AndonExceptionsView.vue')
 const BarcodeListView = () => import('@/views/BarcodeListView.vue')
 const BarcodeGeneratePrintView = () => import('@/views/BarcodeGeneratePrintView.vue')
@@ -44,7 +45,6 @@ const SopExecutionView = () => import('@/views/SopExecutionView.vue')
 const SopStepsView = () => import('@/views/SopStepsView.vue')
 const SopVersionsView = () => import('@/views/SopVersionsView.vue')
 const SystemUsersView = () => import('@/views/SystemUsersView.vue')
-const SystemAuditLogsView = () => import('@/views/SystemAuditLogsView.vue')
 const SystemMenusView = () => import('@/views/SystemMenusView.vue')
 const SystemSequencesView = () => import('@/views/SystemSequencesView.vue')
 const TraceQueryView = () => import('@/views/TraceQueryView.vue')
@@ -97,7 +97,6 @@ const router = createRouter({
   { path: '/sop/steps', name: 'SopStepsView', component: SopStepsView, meta: { title: "SOP步骤编排 — 风擎工控 AeroForge MES" } },
   { path: '/sop/versions', name: 'SopVersionsView', component: SopVersionsView, meta: { title: "SOP版本 — 风擎工控 AeroForge MES" } },
   { path: '/system-users', name: 'SystemUsersView', component: SystemUsersView, meta: { title: "用户管理 — 风擎工控 AeroForge MES" } },
-  { path: '/system/audit-logs', name: 'SystemAuditLogsView', component: SystemAuditLogsView, meta: { title: "操作日志 — 风擎工控 AeroForge MES" } },
   { path: '/system/menus', name: 'SystemMenusView', component: SystemMenusView, meta: { title: "菜单配置 — 风擎工控 AeroForge MES" } },
   { path: '/system/sequences', name: 'SystemSequencesView', component: SystemSequencesView, meta: { title: "编号序列 — 风擎工控 AeroForge MES" } },
   { path: '/trace/query', name: 'TraceQueryView', component: TraceQueryView, meta: { title: "追溯查询 — 风擎工控 AeroForge MES" } },
@@ -133,7 +132,8 @@ reducedMotionQuery.addEventListener('change', (event) => {
 // navigation, so the guard provides the exit transition consistently.
 router.beforeEach(async (to, from) => {
   if (to.path !== '/login' && !hasValidSession()) {
-    return { path: '/login', query: { redirect: to.fullPath } }
+    const restored = await restoreSession()
+    if (!restored) return { path: '/login', query: { redirect: to.fullPath } }
   }
   if (to.path === '/login' && hasValidSession()) return '/dashboard'
   if (initialNavigation) {

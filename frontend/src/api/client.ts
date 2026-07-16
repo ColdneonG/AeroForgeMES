@@ -29,10 +29,10 @@ function endExpiredSession() {
 }
 
 export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
-  // Login must remain callable after an expired token is found in local storage.
-  const isLoginRequest = path.split('?')[0] === '/auth/login'
+  // Login, refresh, and logout are callable without an access token.
+  const isSessionRequest = ['/auth/login', '/auth/refresh', '/auth/logout'].includes(path.split('?')[0])
   const token = getValidAccessToken()
-  if (!isLoginRequest && !token) {
+  if (!isSessionRequest && !token) {
     endExpiredSession()
     throw new ApiError('Login session has expired. Please sign in again.', 401)
   }
@@ -43,12 +43,12 @@ export async function request<T>(path: string, init: RequestInit = {}): Promise<
 
   let response: Response
   try {
-    response = await fetch(`${API_BASE}${path}`, { ...init, headers })
+    response = await fetch(`${API_BASE}${path}`, { ...init, headers, credentials: 'include' })
   } catch {
     throw new ApiError('无法连接后端服务，请确认网关已启动。')
   }
   const body = (await response.json().catch(() => null)) as ApiEnvelope<T> | null
-  if (response.status === 401 || body?.code === 401 || body?.code === '401') {
+  if (!isSessionRequest && (response.status === 401 || body?.code === 401 || body?.code === '401')) {
     endExpiredSession()
     throw new ApiError(body?.message || 'Login session has expired. Please sign in again.', response.status)
   }
@@ -90,7 +90,7 @@ export async function getBlob(path: string): Promise<Blob> {
   }
   let response: Response
   try {
-    response = await fetch(`${API_BASE}${path}`, { headers: { Authorization: `Bearer ${token}` } })
+    response = await fetch(`${API_BASE}${path}`, { headers: { Authorization: `Bearer ${token}` }, credentials: 'include' })
   } catch {
     throw new ApiError('无法连接后端服务，请确认网关已启动。')
   }

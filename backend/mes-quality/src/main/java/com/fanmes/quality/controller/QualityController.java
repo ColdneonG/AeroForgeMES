@@ -335,7 +335,12 @@ public class QualityController {
         return ApiResponse.ok();
     }
 
-    @GetMapping("/defect-records")
+    /**
+     * Lists defect records.  Keep the original short path as a compatibility
+     * alias so already deployed frontend bundles do not receive a 500 from the
+     * gateway's static-resource fallback.
+     */
+    @GetMapping({"/defect-records", "/defects"})
     public ApiResponse<List<QcDefectRecord>> listDefectRecords(
             @RequestParam(required = false) String sourceType,
             @RequestParam(required = false) Long sourceId,

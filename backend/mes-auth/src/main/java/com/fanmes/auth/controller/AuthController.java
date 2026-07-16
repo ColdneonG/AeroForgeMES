@@ -16,10 +16,19 @@ import com.fanmes.auth.domain.vo.RoleVO;
 import com.fanmes.auth.domain.vo.UserPageVO;
 import com.fanmes.auth.service.AuthService;
 import com.fanmes.common.api.Result;
+import com.fanmes.common.exception.BusinessException;
+import com.fanmes.common.security.JwtTokenService;
 import com.fanmes.common.security.RequirePermission;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import java.util.List;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,21 +38,58 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.WebUtils;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final JwtTokenService jwtTokenService;
+
+    @Value("${fanmes.auth.refresh-cookie.name:fanmes_refresh_token}")
+    private String refreshCookieName;
+
+    @Value("${fanmes.auth.refresh-cookie.max-age-seconds:604800}")
+    private long refreshCookieMaxAgeSeconds;
+
+    @Value("${fanmes.auth.refresh-cookie.secure:true}")
+    private boolean refreshCookieSecure;
+
+    @Value("${fanmes.auth.refresh-cookie.same-site:Strict}")
+    private String refreshCookieSameSite;
 
     @PostMapping("/login")
-    public Result<LoginVO> login(@RequestBody LoginRequest request) {
-        return Result.success(authService.login(request));
+    public Result<LoginVO> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        LoginVO login = authService.login(request);
+        writeRefreshCookie(response, jwtTokenService.createRefreshToken(login.getUserId(), login.getUsername()), refreshCookieMaxAgeSeconds);
+        return Result.success(login);
     }
 
     @PostMapping("/logout")
-    public Result<Void> logout() {
+    public Result<Void> logout(HttpServletResponse response) {
+        writeRefreshCookie(response, "", 0);
         return Result.success();
+    }
+
+    @PostMapping("/refresh")
+    public Result<LoginVO> refresh(HttpServletRequest request) {
+        Cookie cookie = WebUtils.getCookie(request, refreshCookieName);
+        if (cookie == null || !org.springframework.util.StringUtils.hasText(cookie.getValue())) {
+            throw new BusinessException("Refresh token is missing");
+        }
+        return Result.success(authService.refresh(cookie.getValue()));
+    }
+
+    private void writeRefreshCookie(HttpServletResponse response, String value, long maxAgeSeconds) {
+        ResponseCookie cookie = ResponseCookie.from(refreshCookieName, value)
+                .httpOnly(true)
+                .secure(refreshCookieSecure)
+                .sameSite(refreshCookieSameSite)
+                .path("/api/auth")
+                .maxAge(Duration.ofSeconds(maxAgeSeconds))
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 
     @GetMapping("/me")

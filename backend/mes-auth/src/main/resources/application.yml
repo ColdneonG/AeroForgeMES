@@ -14,3 +14,12 @@ mybatis:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
+
+fanmes:
+  jwt:
+    expires-in-seconds: 900
+    refresh-expires-in-seconds: 604800
+  auth:
+    refresh-cookie:
+      # Set FANMES_REFRESH_COOKIE_SECURE=true in production; HTTPS is required.
+      secure: ${FANMES_REFRESH_COOKIE_SECURE:false}

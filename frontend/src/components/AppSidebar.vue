@@ -74,7 +74,6 @@ const sections: MenuSection[] = [
     { id: 'equipment', label: '设备监控', to: '/equipment-monitor', icon: 'gear' },
     { id: 'equip-ledger', label: '设备台账', to: '/equipment/ledger', icon: 'list' },
     { id: 'equip-maintain', label: '点检保养', to: '/equipment/maintenance', icon: 'check' },
-    { id: 'equip-detail', label: '设备详情', to: '/equipment/detail', icon: 'gear' },
     { id: 'andon', label: '安灯异常', to: '/andon/exceptions', badgeKey: 'andon', icon: 'warn' },
   ]},
   { label: '条码与追溯', items: [
@@ -89,7 +88,6 @@ const sections: MenuSection[] = [
   { label: '电子 SOP', items: [
     { id: 'sop-docs', label: 'SOP 文档', to: '/sop/documents', icon: 'list' },
     { id: 'sopexec', label: '执行终端', to: '/sop/execution', icon: 'check' },
-    { id: 'sop-steps', label: '步骤编排', to: '/sop/steps', icon: 'boxes' },
   ]},
   { label: '控制中心', items: [
     { id: 'ccenter', label: '制造大屏', to: '/reports/control-center', icon: 'board' },
@@ -108,7 +106,6 @@ const sections: MenuSection[] = [
     { id: 'users', label: '用户管理', to: '/system-users', icon: 'users' },
     { id: 'sys-menus', label: '菜单配置', to: '/system/menus', icon: 'list' },
     { id: 'sys-sequences', label: '编号序列', to: '/system/sequences', icon: 'boxes' },
-    { id: 'sys-audit', label: '操作日志', to: '/system/audit-logs', icon: 'check' },
   ]},
 ]
 

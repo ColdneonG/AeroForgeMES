@@ -8,6 +8,7 @@ import com.fanmes.common.id.IdGenerator;
 import com.fanmes.common.idempotency.IdempotencyService;
 import com.fanmes.production.domain.DispatchOrder;
 import com.fanmes.production.domain.KittingAnalysis;
+import com.fanmes.production.domain.KittingMissingBoardItem;
 import com.fanmes.production.domain.KittingMissingItem;
 import com.fanmes.production.domain.OperationProgress;
 import com.fanmes.production.domain.ProductionStatuses;
@@ -56,12 +57,6 @@ public class ProductionService {
             ProductionStatuses.CLOSED, Set.of(ProductionStatuses.COMPLETED),
             ProductionStatuses.VOIDED, Set.of(ProductionStatuses.DRAFT, ProductionStatuses.WAIT_ISSUE)
     );
-    private static final Map<String, Set<String>> SHOP_TASK_TRANSITIONS = Map.of(
-            ProductionStatuses.RUNNING, Set.of(ProductionStatuses.ISSUED, ProductionStatuses.PAUSED),
-            ProductionStatuses.PAUSED, Set.of(ProductionStatuses.RUNNING),
-            ProductionStatuses.COMPLETED, Set.of(ProductionStatuses.RUNNING, ProductionStatuses.ISSUED, ProductionStatuses.PAUSED)
-    );
-
     private final ProductionRepository repository;
     private final OperationLogService operationLogService;
     private final IdempotencyService idempotencyService;
@@ -179,6 +174,7 @@ public class ProductionService {
                 ProductionStatuses.COMPLETED
         );
         ensureUpdated(repository.completeWorkOrder(id, existing.status(), completed), "prod_work_order", id);
+        repository.updateTaskStatusByWorkOrder(id, ProductionStatuses.COMPLETED);
         operationLogService.recordStatusChange(
                 "production",
                 "prod_work_order",
@@ -249,7 +245,7 @@ public class ProductionService {
         return repository.listMissingItems(analysisId, materialId);
     }
 
-    public List<KittingMissingItem> listMissingBoard() {
+    public List<KittingMissingBoardItem> listMissingBoard() {
         return repository.listMissingBoard();
     }
 
@@ -354,30 +350,22 @@ public class ProductionService {
 
     @Transactional
     public DispatchOrder confirmDispatchIssue(Long id, ProductionActionRequest request) {
-        DispatchOrder dispatch = changeDispatchStatus(id, ProductionStatuses.ISSUED, "confirm-issue", request);
-        repository.updateTaskStatusByDispatch(id, ProductionStatuses.ISSUED);
-        return dispatch;
+        return changeDispatchStatus(id, ProductionStatuses.ISSUED, "confirm-issue", request);
     }
 
     @Transactional
     public DispatchOrder startDispatchOrder(Long id, ProductionActionRequest request) {
-        DispatchOrder dispatch = changeDispatchStatus(id, ProductionStatuses.RUNNING, "start", request);
-        repository.updateTaskStatusByDispatch(id, ProductionStatuses.RUNNING);
-        return dispatch;
+        return changeDispatchStatus(id, ProductionStatuses.RUNNING, "start", request);
     }
 
     @Transactional
     public DispatchOrder completeDispatchOrder(Long id, ProductionActionRequest request) {
-        DispatchOrder dispatch = changeDispatchStatus(id, ProductionStatuses.COMPLETED, "complete", request);
-        repository.updateTaskStatusByDispatch(id, ProductionStatuses.COMPLETED);
-        return dispatch;
+        return changeDispatchStatus(id, ProductionStatuses.COMPLETED, "complete", request);
     }
 
     @Transactional
     public DispatchOrder closeDispatchOrder(Long id, ProductionActionRequest request) {
-        DispatchOrder dispatch = changeDispatchStatus(id, ProductionStatuses.CLOSED, "close", request);
-        repository.updateTaskStatusByDispatch(id, ProductionStatuses.CLOSED);
-        return dispatch;
+        return changeDispatchStatus(id, ProductionStatuses.CLOSED, "close", request);
     }
 
     @Transactional
@@ -393,26 +381,6 @@ public class ProductionService {
         }
         return repository.findTaskByDispatchId(dispatchId)
                 .orElseGet(() -> insertTaskFromDispatch(dispatch, request));
-    }
-
-    @Transactional
-    public ShopTask startShopTask(Long id, ProductionActionRequest request) {
-        return changeShopTaskStatus(id, ProductionStatuses.RUNNING, "start", request);
-    }
-
-    @Transactional
-    public ShopTask pauseShopTask(Long id, ProductionActionRequest request) {
-        return changeShopTaskStatus(id, ProductionStatuses.PAUSED, "pause", request);
-    }
-
-    @Transactional
-    public ShopTask resumeShopTask(Long id, ProductionActionRequest request) {
-        return changeShopTaskStatus(id, ProductionStatuses.RUNNING, "resume", request);
-    }
-
-    @Transactional
-    public ShopTask completeShopTask(Long id, ProductionActionRequest request) {
-        return changeShopTaskStatus(id, ProductionStatuses.COMPLETED, "complete", request);
     }
 
     private WorkOrder insertWorkOrder(WorkOrderRequest request) {
@@ -460,6 +428,7 @@ public class ProductionService {
         WorkOrder existing = getWorkOrder(id);
         ensureTransition(existing.status(), targetStatus, WORK_ORDER_TRANSITIONS, "prod_work_order");
         ensureUpdated(repository.updateWorkOrderStatus(id, existing.status(), targetStatus), "prod_work_order", id);
+        repository.updateTaskStatusByWorkOrder(id, targetStatus);
         recordStatus("prod_work_order", id, actionName, existing.status(), targetStatus, request);
         return new WorkOrder(
                 existing.id(),
@@ -527,21 +496,6 @@ public class ProductionService {
         );
     }
 
-    private ShopTask changeShopTaskStatus(
-            Long id,
-            String targetStatus,
-            String actionName,
-            ProductionActionRequest request
-    ) {
-        ShopTask existing = repository.findShopTaskById(id)
-                .orElseThrow(() -> notFound("shop_task", id));
-        ensureTransition(existing.status(), targetStatus, SHOP_TASK_TRANSITIONS, "shop_task");
-        ensureUpdated(repository.updateShopTaskStatus(id, existing.status(), targetStatus), "shop_task", id);
-        recordStatus("shop_task", id, actionName, existing.status(), targetStatus, request);
-        return repository.findShopTaskById(id)
-                .orElseThrow(() -> notFound("shop_task", id));
-    }
-
     private void refreshKittingSummary(Long analysisId) {
         KittingAnalysis analysis = getKittingAnalysis(analysisId);
         int missingCount = repository.countPositiveMissingByAnalysis(analysisId);
@@ -573,8 +527,8 @@ public class ProductionService {
                 dispatch.planQty(),
                 null,
                 null,
-                dispatch.status(),
-                null, null, null, null
+                workOrder == null ? dispatch.status() : workOrder.status(),
+                null, null, null, null, null, null, null
         );
         repository.insertShopTask(task);
         operationLogService.recordStatusChange(

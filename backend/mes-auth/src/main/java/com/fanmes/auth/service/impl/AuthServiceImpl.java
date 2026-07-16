@@ -61,6 +61,19 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public LoginVO refresh(String refreshToken) {
+        String username = jwtTokenService.verifyRefreshToken(refreshToken).username();
+        SysUser user = authMapper.findUserByUsername(username);
+        if (user == null) {
+            throw new BusinessException("token 对应用户不存在");
+        }
+        if (isDisabled(user.getStatus())) {
+            throw new BusinessException("用户已停用");
+        }
+        return buildLogin(user);
+    }
+
+    @Override
     public LoginVO currentUser(String token) {
         String username = parseUsername(token);
         SysUser user = authMapper.findUserByUsername(username);

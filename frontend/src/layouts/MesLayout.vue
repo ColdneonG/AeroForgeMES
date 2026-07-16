@@ -25,7 +25,7 @@ function handleShortcut(event: KeyboardEvent) {
   }
 }
 async function handleLogout() {
-  logout()
+  await logout()
   await router.replace('/login')
 }
 

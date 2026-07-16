@@ -3,7 +3,7 @@ import { computed, onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
 import { getProfile, updatePassword, updateProfile, type UserProfile } from '@/api/profile'
 
-type ProfileTab = 'info' | 'security' | 'activity'
+type ProfileTab = 'info' | 'security'
 
 const activeTab = ref<ProfileTab>('info')
 const profile = ref<UserProfile | null>(null)
@@ -120,7 +120,6 @@ onMounted(load)
           <div class="profile-nav card mb-5">
             <button class="profile-nav-item" :class="{ active: activeTab === 'info' }" @click="activeTab = 'info'">基本信息</button>
             <button class="profile-nav-item" :class="{ active: activeTab === 'security' }" @click="activeTab = 'security'">账户安全</button>
-            <button class="profile-nav-item" :class="{ active: activeTab === 'activity' }" @click="activeTab = 'activity'">近期操作</button>
           </div>
 
           <section v-if="activeTab === 'info'" class="card">
@@ -152,8 +151,7 @@ onMounted(load)
           </section>
 
           <section v-else class="card">
-            <div class="card-header"><h2 class="card-title">近期操作记录</h2></div>
-            <div class="empty-activity">当前后端尚未提供“我的操作记录”查询接口；接入后可在此展示最近登录及操作日志。</div>
+            <div class="empty-activity">暂无其他信息。</div>
           </section>
         </section>
       </div>
