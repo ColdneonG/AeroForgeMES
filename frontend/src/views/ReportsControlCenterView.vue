@@ -11,10 +11,6 @@ import headerBar from '@/assets/images/ioftv/juxing1.png'
 import panelCorner from '@/assets/images/ioftv/left_top_lan.png'
 import leftSlash from '@/assets/images/ioftv/xiezuo.png'
 import rightSlash from '@/assets/images/ioftv/xieyou.png'
-import kpiIcon1 from '@/assets/images/ioftv/center-details-data1.png'
-import kpiIcon2 from '@/assets/images/ioftv/center-details-data2.png'
-import kpiIcon3 from '@/assets/images/ioftv/center-details-data3.png'
-import kpiIcon4 from '@/assets/images/ioftv/center-details-data4.png'
 
 type BoardItem = Record<string, unknown>
 type ControlCenterBoard = {
@@ -72,6 +68,14 @@ const trendTooltip = computed(() => {
 const outputTotal = computed(() => number(board.value.outputTotal).toLocaleString('zh-CN'))
 const lines = computed(() => lineBoard.value.length ? lineBoard.value : (board.value.lines || []))
 const kpis = computed(() => board.value.kpis || [])
+const metricKey = (kpi: BoardItem) => text(kpi.label, '').toLowerCase().replace(/[\s_-]/g, '')
+const oeeKpi = computed(() => kpis.value.find((kpi) => metricKey(kpi).includes('oee')))
+const componentKpis = computed(() => [
+  { key: 'availability', title: '可用率', abbr: 'AVAIL', matcher: /(availability|可用率)/ },
+  { key: 'performance', title: '性能效率', abbr: 'PERF', matcher: /(performance|性能效率)/ },
+  { key: 'quality', title: '质量指数', abbr: 'QUALITY', matcher: /(quality|质量指数)/ },
+].map((meta) => ({ ...meta, kpi: kpis.value.find((kpi) => meta.matcher.test(text(kpi.label, ''))) })).filter((item) => item.kpi))
+const metricPercent = (value: unknown) => `${number(value).toFixed(2)}%`
 const alerts = computed(() => board.value.alerts || [])
 const workOrders = computed(() => board.value.workOrders || [])
 const rollingAlerts = computed(() => alerts.value.length > 2 ? [...alerts.value, ...alerts.value] : alerts.value)
@@ -86,7 +90,6 @@ const trendPeak = computed(() => {
   const x = (475 / Math.max(values.length - 1, 1)) * Math.max(index, 0)
   return { value, x, y: 180 - value * 1.45 }
 })
-const kpiIcons = [kpiIcon1, kpiIcon2, kpiIcon3, kpiIcon4]
 const oeeValue = computed(() => {
   const item = kpis.value.find((kpi) => text(kpi.label).toUpperCase().includes('OEE'))
   return Math.min(Math.max(number(item?.value), 0), 100)
@@ -294,14 +297,19 @@ onBeforeUnmount(() => {
       <aside class="column left-column">
         <section class="panel kpi-panel">
           <div class="panel-title"><i></i><h2>制造关键指标</h2><span>LIVE</span></div>
-          <div class="kpi-list">
-            <article v-for="(kpi, index) in kpis" :key="`${text(kpi.label)}-${index}`" class="kpi-row">
-              <div class="kpi-icon" :class="`is-${text(kpi.tone, 'running')}`"><span class="kpi-aura"></span><img :src="kpiIcons[index % kpiIcons.length]" alt="" /></div>
-              <div><p>{{ text(kpi.label) }}</p><small>{{ text(kpi.note, '实时监测') }}</small></div>
-              <strong :class="`value-${text(kpi.tone, 'running')}`">{{ typeof kpi.value === 'number' ? formatDisplayNumber(kpi.value) : text(kpi.value) }}</strong>
+          <div v-if="oeeKpi || componentKpis.length" class="manufacturing-kpis">
+            <article v-if="oeeKpi" class="oee-core" :style="{ '--oee-value': `${Math.min(Math.max(number(oeeKpi.value), 0), 100)}%` }">
+              <div class="oee-gauge"><div><span>OEE</span><strong>{{ metricPercent(oeeKpi.value) }}</strong><small>{{ text(oeeKpi.label) }}</small></div></div>
+              <div class="oee-copy"><span>制造综合效率</span><b>OEE</b><small>{{ text(oeeKpi.note, '实时监测') }}</small></div>
             </article>
-            <div v-if="!kpis.length" class="empty">暂无指标数据</div>
+            <div class="component-kpi-grid">
+              <article v-for="item in componentKpis" :key="item.key" class="component-kpi" :class="`is-${text(item.kpi?.tone, 'running')}`">
+                <div><span>{{ item.title }}</span><small>{{ item.abbr }}</small></div><strong>{{ metricPercent(item.kpi?.value) }}</strong>
+                <div class="component-bar"><i :style="{ width: `${Math.min(Math.max(number(item.kpi?.value), 0), 100)}%` }"></i></div>
+              </article>
+            </div>
           </div>
+          <div v-else class="empty">暂无指标数据</div>
         </section>
 
         <section class="panel alert-panel">
@@ -438,6 +446,8 @@ onBeforeUnmount(() => {
 .panel { transform-style:preserve-3d; transition:transform .32s cubic-bezier(.2,.8,.2,1),box-shadow .32s ease,border-color .32s ease; will-change:transform; }.panel.three-hover-active { z-index:8; transform:perspective(900px) translateY(-8px) scale(1.012) rotateX(var(--three-rotate-x,0deg)) rotateY(var(--three-rotate-y,0deg)); border-color:rgba(103,239,255,.9); box-shadow:0 18px 32px rgba(0,0,0,.42),inset 0 0 36px rgba(35,218,255,.18),0 0 24px rgba(31,213,255,.3); }
 .panel { isolation:isolate; animation:panel-breathe 5s ease-in-out infinite; }.hero-scan { position:absolute; z-index:-1; inset:-45% auto -45% -30%; width:30%; transform:rotate(18deg); background:linear-gradient(90deg,transparent,rgba(72,234,255,.13),transparent); animation:hero-scan 5.8s ease-in-out infinite; }.trend-line { stroke-dasharray:760; stroke-dashoffset:760; animation:chart-draw 2.2s ease-out forwards,chart-glow 2.8s ease-in-out 2.2s infinite; }.target-line { stroke-dashoffset:42; animation:target-flow 2s linear infinite; }.peak-dot { animation:peak-flash 1.4s ease-in-out infinite; }
 @keyframes flyline { 0% { transform:translate3d(-60px,60px,0); opacity:0; } 12% { opacity:.85; } 72% { opacity:.5; } 100% { transform:translate3d(220px,-145px,0); opacity:0; } } @keyframes panel-breathe { 50% { border-color:rgba(74,223,255,.68); box-shadow:inset 0 0 34px rgba(0,180,229,.14),0 0 15px rgba(29,196,245,.12); } } @keyframes edge-scan { 0%,100% { left:0; width:38px; } 50% { left:calc(100% - 56px); width:56px; } } @keyframes hero-scan { 0%,18% { transform:translateX(0) rotate(18deg); opacity:0; } 38% { opacity:1; } 70%,100% { transform:translateX(510%) rotate(18deg); opacity:0; } } @keyframes chart-draw { to { stroke-dashoffset:0; } } @keyframes chart-glow { 50% { filter:drop-shadow(0 0 11px #22e6ff); } } @keyframes target-flow { to { stroke-dashoffset:0; } } @keyframes peak-flash { 50% { r:8px; filter:drop-shadow(0 0 11px #ff4ca3); } }
+.kpi-panel { flex:1.05; }.manufacturing-kpis { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:11px; height:calc(100% - 43px); min-height:175px; padding:12px 14px; box-sizing:border-box; }.oee-core { display:grid; grid-template-columns:116px 1fr; align-items:center; min-width:0; padding:8px; border:1px solid rgba(46,220,255,.28); background:radial-gradient(circle at 35% 48%,rgba(29,209,244,.16),transparent 58%),linear-gradient(150deg,rgba(8,53,90,.86),rgba(4,22,53,.8)); }.oee-gauge { display:grid; width:102px; height:102px; place-items:center; border-radius:50%; background:conic-gradient(#30e6ff var(--oee-value),rgba(34,102,134,.38) 0); box-shadow:0 0 18px rgba(38,225,255,.38); }.oee-gauge::before { content:""; position:absolute; width:82px; height:82px; border-radius:50%; background:radial-gradient(circle,#123e60,#071b35 70%); box-shadow:inset 0 0 15px rgba(42,224,255,.22); }.oee-gauge > div { position:relative; z-index:1; display:grid; text-align:center; }.oee-gauge span,.oee-gauge small { color:#75c7d9; font-size:9px; letter-spacing:1px; }.oee-gauge strong { margin:3px 0; color:#e9feff; font:20px/1 Consolas,monospace; text-shadow:0 0 10px #34e7ff; }.oee-copy { min-width:0; display:grid; align-content:center; gap:4px; }.oee-copy span { color:#d8f9ff; font-size:14px; font-weight:700; letter-spacing:1px; }.oee-copy b { color:#46e7fa; font:11px Consolas,monospace; letter-spacing:2px; }.oee-copy small { overflow:hidden; color:#699fb0; font-size:10px; white-space:nowrap; text-overflow:ellipsis; }.component-kpi-grid { display:grid; gap:7px; min-width:0; }.component-kpi { position:relative; display:grid; grid-template-columns:1fr auto; align-items:center; min-height:0; padding:8px 9px 12px; overflow:hidden; border:1px solid rgba(59,190,221,.2); background:rgba(7,39,70,.62); }.component-kpi > div:first-child { display:grid; gap:2px; }.component-kpi span { color:#d8f8ff; font-size:12px; }.component-kpi small { color:#5fa9bc; font:9px Consolas,monospace; letter-spacing:1px; }.component-kpi strong { color:#86f2ff; font:15px/1 Consolas,monospace; }.component-bar { position:absolute; right:9px; bottom:6px; left:9px; height:3px; overflow:hidden; background:#113b55; }.component-bar i { display:block; height:100%; background:linear-gradient(90deg,#0daeca,#4cf1ff); box-shadow:0 0 7px #36e6ff; }.component-kpi.is-warn strong,.component-kpi.is-danger strong { color:#ffc35d; }.component-kpi.is-warn .component-bar i,.component-kpi.is-danger .component-bar i { background:linear-gradient(90deg,#ee9f35,#ffd36d); box-shadow:0 0 7px #ffc353; }
 @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; scroll-behavior:auto !important; } }
+.oee-gauge { position:relative; }
 @media (max-width:1100px) { .screen { overflow:auto; }.screen-grid { height:auto; grid-template-columns:1fr; }.column { min-height:350px; }.center-column { min-height:600px; }.screen-title { min-width:0; }.header-rule { display:none; } }
 </style>

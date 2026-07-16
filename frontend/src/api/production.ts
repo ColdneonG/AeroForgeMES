@@ -42,7 +42,25 @@ export function getAndonExceptions() {
 }
 
 export interface DashboardMetric { metricKey: string; value: number }
-export interface ManufacturingDashboard { gauges: DashboardMetric[] }
+export interface ManufacturingLine {
+  lineId?: number
+  lineCode?: string
+  lineName?: string
+  workOrderNo?: string
+  productName?: string
+  plannedQty?: number
+  completedQty?: number
+  goodQty?: number
+  defectQty?: number
+  completionRate?: number
+  oee?: number
+  active?: boolean
+}
+
+export interface ManufacturingDashboard {
+  gauges: DashboardMetric[]
+  lines: ManufacturingLine[]
+}
 
 export function getManufacturingDashboard() {
   return get<ManufacturingDashboard>('/report/dashboard/manufacturing')

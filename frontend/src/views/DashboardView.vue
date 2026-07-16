@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
-import { getAndonExceptions, getManufacturingDashboard, getWorkOrders, type WorkOrder } from '@/api/production'
+import { getAndonExceptions, getManufacturingDashboard, getWorkOrders, type ManufacturingLine, type WorkOrder } from '@/api/production'
 import { formatDisplayNumber, formatPercent } from '@/utils/number'
 
 const orders = ref<WorkOrder[]>([])
 const andonCount = ref(0)
+const andonExceptions = ref<Record<string, unknown>[]>([])
 const gauges = ref<Record<string, number>>({})
+const manufacturingLines = ref<ManufacturingLine[]>([])
 const activeOrders = computed(() => orders.value.filter((order) => !['COMPLETED', 'CLOSED', 'VOID'].includes(String(order.status))).slice(0, 4))
 const closedAndonStatuses = new Set(['CLOSED', 'VOID', '关闭', '已关闭', '作废', '已作废'])
+const activeAndonExceptions = computed(() => andonExceptions.value
+  .filter((item) => !closedAndonStatuses.has(String(item.status || '').trim().toUpperCase()))
+  .slice(0, 3))
 
 function metric(keys: string[], fallback = '-', fixedFraction = false) {
   const value = keys.map((key) => gauges.value[key]).find((item) => item !== undefined)
@@ -24,8 +29,14 @@ function progress(order: WorkOrder) {
 onMounted(async () => {
   const [workOrders, dashboard, andon] = await Promise.allSettled([getWorkOrders(), getManufacturingDashboard(), getAndonExceptions()])
   if (workOrders.status === 'fulfilled') orders.value = workOrders.value
-  if (dashboard.status === 'fulfilled') gauges.value = Object.fromEntries(dashboard.value.gauges.map((item) => [item.metricKey, Number(item.value)]))
-  if (andon.status === 'fulfilled') andonCount.value = andon.value.filter((item) => !closedAndonStatuses.has(String(item.status || '').trim().toUpperCase())).length
+  if (dashboard.status === 'fulfilled') {
+    gauges.value = Object.fromEntries(dashboard.value.gauges.map((item) => [item.metricKey, Number(item.value)]))
+    manufacturingLines.value = dashboard.value.lines || []
+  }
+  if (andon.status === 'fulfilled') {
+    andonExceptions.value = andon.value
+    andonCount.value = andon.value.filter((item) => !closedAndonStatuses.has(String(item.status || '').trim().toUpperCase())).length
+  }
 })
 </script>
 
@@ -138,7 +149,16 @@ onMounted(async () => {
 
         <div v-else class="card" style="margin-bottom:var(--space-5);">
           <div class="card-header"><h2 class="card-title">安灯异常</h2><span class="badge badge-status-error"><span class="badge-dot"></span>{{ andonCount }} 条未关闭</span></div>
-          <p class="text-muted">异常明细接口尚未接入，未展示模拟异常记录。</p>
+          <div v-if="activeAndonExceptions.length">
+            <div v-for="(exception, index) in activeAndonExceptions" :key="String(exception.id || index)" class="alert alert-error dashboard-andon-exception">
+              <span class="alert-icon">!</span>
+              <div>
+                <strong>{{ exception.exceptionType || exception.reasonName || '安灯异常' }}</strong><br>
+                <span class="text-subtle">产线 {{ exception.lineId || '-' }} · 上报时间 {{ exception.triggeredAt || '-' }} · {{ exception.status || '-' }}</span>
+              </div>
+            </div>
+          </div>
+          <p v-else class="text-muted">暂无未关闭安灯异常。</p>
         </div>
 
         <div v-if="false" class="card" data-od-id="dashboard-recent">
@@ -155,9 +175,33 @@ onMounted(async () => {
             </tbody>
           </table>
         </div>
-        <div v-else class="card" data-od-id="dashboard-recent"><div class="card-header"><h2 class="card-title">近期事件</h2></div><p class="text-muted">近期事件接口尚未接入，未展示模拟事件。</p></div>
       </section>
     </div>
+
+    <section class="card dashboard-line-overview" data-od-id="dashboard-line-overview">
+      <div class="card-header">
+        <h2 class="card-title">产线运行概览</h2>
+        <span class="text-subtle">{{ manufacturingLines.filter((line) => line.active).length }} 条运行中</span>
+      </div>
+      <div class="data-table-wrap">
+        <table class="data-table" style="border:none;">
+          <thead>
+            <tr><th>产线</th><th>当前工单</th><th>产品</th><th>生产进度</th><th>OEE</th><th>不良数</th></tr>
+          </thead>
+          <tbody>
+            <tr v-if="!manufacturingLines.length"><td colspan="6" class="text-muted">暂无产线运行数据</td></tr>
+            <tr v-for="line in manufacturingLines" :key="line.lineId || line.lineCode || line.lineName">
+              <td><strong>{{ line.lineName || line.lineCode || '-' }}</strong></td>
+              <td class="cell-mono">{{ line.workOrderNo || '-' }}</td>
+              <td>{{ line.productName || '-' }}</td>
+              <td class="cell-progress"><div class="progress-bar"><div class="progress-fill" :style="{ width: `${Math.min(100, Number(line.completionRate || 0))}%` }"></div></div><span class="progress-label">{{ formatPercent(line.completionRate || 0) }}</span></td>
+              <td>{{ formatPercent(line.oee || 0) }}</td>
+              <td>{{ formatDisplayNumber(line.defectQty || 0) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <!-- Status Bar -->
@@ -172,3 +216,19 @@ onMounted(async () => {
   </footer>
 </MesLayout>
 </template>
+
+<style scoped>
+.dashboard-andon-exception {
+  background: #fff;
+  border: 1px solid #2563eb;
+  color: #000;
+}
+
+.dashboard-andon-exception .text-subtle {
+  color: #000;
+}
+
+.dashboard-line-overview {
+  margin-top: var(--space-5);
+}
+</style>
