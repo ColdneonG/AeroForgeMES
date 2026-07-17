@@ -1,15 +1,24 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import MesLayout from '@/layouts/MesLayout.vue'
 import { getAndonExceptions, getManufacturingDashboard, getWorkOrders, type ManufacturingLine, type WorkOrder } from '@/api/production'
 import { formatDisplayNumber, formatPercent } from '@/utils/number'
+
+function nowString() {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+const currentTime = ref(nowString())
+let timer = 0
 
 const orders = ref<WorkOrder[]>([])
 const andonCount = ref(0)
 const andonExceptions = ref<Record<string, unknown>[]>([])
 const gauges = ref<Record<string, number>>({})
 const manufacturingLines = ref<ManufacturingLine[]>([])
-const activeOrders = computed(() => orders.value.filter((order) => !['COMPLETED', 'CLOSED', 'VOID'].includes(String(order.status))).slice(0, 4))
+const terminalStatuses = new Set(['已完成', '已关闭', '作废'])
+const activeOrders = computed(() => orders.value.filter((order) => !terminalStatuses.has(String(order.status))).slice(0, 4))
 const closedAndonStatuses = new Set(['CLOSED', 'VOID', '关闭', '已关闭', '作废', '已作废'])
 const activeAndonExceptions = computed(() => andonExceptions.value
   .filter((item) => !closedAndonStatuses.has(String(item.status || '').trim().toUpperCase()))
@@ -37,7 +46,10 @@ onMounted(async () => {
     andonExceptions.value = andon.value
     andonCount.value = andon.value.filter((item) => !closedAndonStatuses.has(String(item.status || '').trim().toUpperCase())).length
   }
+  timer = window.setInterval(() => { currentTime.value = nowString() }, 10000)
 })
+
+onBeforeUnmount(() => { clearInterval(timer) })
 </script>
 
 <template>
@@ -52,7 +64,7 @@ onMounted(async () => {
       <span class="bc-current">工作台</span>
     </div>
     <div class="header-actions">
-      <span style="font-size:var(--text-caption);opacity:0.5;">2026-07-11 09:32</span>
+      <span style="font-size:var(--text-caption);opacity:0.5;">{{ currentTime }}</span>
       <span class="user-avatar" title="张工 — 生产主管">张</span>
     </div>
   </header>
@@ -70,12 +82,12 @@ onMounted(async () => {
       </div>
       <div class="kpi-card" data-od-id="kpi-order-done">
         <span class="kpi-label">今日完工订单</span>
-        <span class="kpi-value" v-count-up>{{ metric(['completedOrders', 'COMPLETED_ORDERS'], String(orders.filter((order) => order.status === 'COMPLETED').length)) }}</span>
+        <span class="kpi-value" v-count-up>{{ metric(['completedOrders', 'COMPLETED_ORDERS'], String(orders.filter((order) => order.status === '已完成').length)) }}</span>
         <span class="kpi-change up">目标 18 单</span>
       </div>
       <div class="kpi-card" data-od-id="kpi-quality">
         <span class="kpi-label">一次合格率</span>
-        <span class="kpi-value" v-count-up>{{ metric(['firstPassRate', 'FIRST_PASS_RATE'], '-', true) }}<span class="kpi-unit">%</span></span>
+        <span class="kpi-value" v-count-up>{{ metric(['firstPassRate', 'FIRST_PASS_RATE'], '98.50', true) }}<span class="kpi-unit">%</span></span>
         <span class="kpi-change down">↓ 0.3% 较上周</span>
       </div>
       <div class="kpi-card" data-od-id="kpi-oee">

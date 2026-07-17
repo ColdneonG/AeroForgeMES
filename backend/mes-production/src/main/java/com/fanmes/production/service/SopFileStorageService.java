@@ -1,6 +1,7 @@
 package com.fanmes.production.service;
 
 import com.fanmes.common.exception.BadRequestException;
+import com.fanmes.common.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -91,7 +92,7 @@ public class SopFileStorageService {
         try {
             Resource resource = new UrlResource(target.toUri());
             if (!resource.exists() || !resource.isReadable()) {
-                throw new BadRequestException("SOP file does not exist: " + objectKey);
+                throw new NotFoundException("SOP file does not exist: " + objectKey);
             }
             return resource;
         } catch (MalformedURLException e) {

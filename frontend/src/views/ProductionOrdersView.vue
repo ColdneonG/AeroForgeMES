@@ -184,7 +184,7 @@ onMounted(load)
         <div class="order-form">
           <label>订单号<input v-model="form.workOrderNo" class="form-input" maxlength="64" required></label>
           <label>产品 ID<input v-model="form.productId" class="form-input" type="number" min="1" required></label>
-          <label>计划数量<input v-model="form.planQty" class="form-input" type="number" min="0.0001" step="any" required></label>
+          <label>计划数量<input v-model="form.planQty" class="form-input" type="number" min="0" step="any" required></label>
           <label>产线 ID<input v-model="form.lineId" class="form-input" type="number" min="1" required></label>
           <label>外部订单号<input v-model="form.externalNo" class="form-input" maxlength="64"></label>
           <label>工艺路线 ID<input v-model="form.routeId" class="form-input" type="number" min="1"></label>

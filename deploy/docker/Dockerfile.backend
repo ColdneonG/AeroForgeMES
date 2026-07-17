@@ -1,0 +1,15 @@
+FROM eclipse-temurin:17-jre-jammy
+
+WORKDIR /app
+
+ARG JAR_FILE
+
+COPY ${JAR_FILE} /app/app.jar
+
+RUN groupadd --system aeroforge \
+    && useradd --system --gid aeroforge --home-dir /app aeroforge \
+    && chown -R aeroforge:aeroforge /app
+
+USER aeroforge
+
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

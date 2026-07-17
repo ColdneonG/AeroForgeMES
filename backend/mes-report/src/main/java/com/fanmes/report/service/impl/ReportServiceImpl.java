@@ -14,6 +14,7 @@ import com.fanmes.report.mapper.ReportMapper;
 import com.fanmes.report.service.ReportService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class ReportServiceImpl implements ReportService {
         List<ManufacturingLineVO> lines = reportMapper.findManufacturingLines().stream()
                 .map(this::toLine)
                 .toList();
-        return new ManufacturingDashboardVO(lines, oeeMetrics(lines), dashboardStock());
+        return new ManufacturingDashboardVO(lines, dashboardMetrics(lines), dashboardStock());
     }
 
     @Override
@@ -449,6 +450,25 @@ public class ReportServiceImpl implements ReportService {
                 .map(row -> decimal(row.get("completedQty")))
                 .toList();
         return normalizedTrend(values);
+    }
+
+    private List<DashboardMetricVO> dashboardMetrics(List<ManufacturingLineVO> lines) {
+        List<DashboardMetricVO> metrics = new ArrayList<>(oeeMetrics(lines));
+        List<DailyOutputReportVO> today = reportMapper.findDailyOutputReport().stream()
+                .filter(row -> LocalDate.now().equals(row.getStatDate()))
+                .toList();
+        BigDecimal output = today.stream()
+                .map(row -> row.getReportedQty() == null ? decimal(row.getQualifiedQty()) : row.getReportedQty())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal qualified = today.stream()
+                .map(row -> decimal(row.getQualifiedQty()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal defective = today.stream()
+                .map(row -> decimal(row.getDefectiveQty()))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        metrics.add(new DashboardMetricVO("dailyOutput", output));
+        metrics.add(new DashboardMetricVO("firstPassRate", percent(qualified, qualified.add(defective))));
+        return metrics;
     }
 
     private List<Integer> controlPlanTrend(List<Map<String, Object>> lineRows) {
