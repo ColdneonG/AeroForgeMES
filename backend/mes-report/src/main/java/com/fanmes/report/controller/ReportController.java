@@ -1,6 +1,6 @@
 package com.fanmes.report.controller;
 
-import com.fanmes.common.api.Result;
+import com.fanmes.common.api.ApiResponse;
 import com.fanmes.report.domain.dto.MetricQuery;
 import com.fanmes.report.domain.entity.BoardConfig;
 import com.fanmes.report.domain.entity.MetricDef;
@@ -25,63 +25,63 @@ public class ReportController {
     private final ReportService reportService;
 
     @GetMapping("/metrics")
-    public Result<List<MetricDef>> metricDefs(@RequestParam(required = false) String metricType) {
-        return Result.success(reportService.metricDefs(metricType));
+    public ApiResponse<List<MetricDef>> metricDefs(@RequestParam(required = false) String metricType) {
+        return ApiResponse.ok(reportService.metricDefs(metricType));
     }
 
     @GetMapping("/metric-snapshots")
-    public Result<List<MetricSnapshot>> metricSnapshots(MetricQuery query) {
-        return Result.success(reportService.metricSnapshots(query));
+    public ApiResponse<List<MetricSnapshot>> metricSnapshots(MetricQuery query) {
+        return ApiResponse.ok(reportService.metricSnapshots(query));
     }
 
     @GetMapping("/boards")
-    public Result<List<BoardConfig>> boards(@RequestParam(required = false) String boardType) {
-        return Result.success(reportService.boards(boardType));
+    public ApiResponse<List<BoardConfig>> boards(@RequestParam(required = false) String boardType) {
+        return ApiResponse.ok(reportService.boards(boardType));
     }
 
     @GetMapping("/metric-data/{metricCode}")
-    public Result<ReportDatasetVO> metricData(@PathVariable String metricCode) {
-        return Result.success(reportService.reportDataset(metricCode));
+    public ApiResponse<ReportDatasetVO> metricData(@PathVariable String metricCode) {
+        return ApiResponse.ok(reportService.reportDataset(metricCode));
     }
 
     @GetMapping("/dashboard/manufacturing")
-    public Result<ManufacturingDashboardVO> manufacturingDashboard() {
-        return Result.success(reportService.manufacturingDashboard());
+    public ApiResponse<ManufacturingDashboardVO> manufacturingDashboard() {
+        return ApiResponse.ok(reportService.manufacturingDashboard());
     }
 
     @GetMapping("/production-output")
-    public Result<List<MetricSnapshot>> productionOutput(MetricQuery query) {
+    public ApiResponse<List<MetricSnapshot>> productionOutput(MetricQuery query) {
         query.setMetricType("产量");
-        return Result.success(reportService.metricSnapshots(query));
+        return ApiResponse.ok(reportService.metricSnapshots(query));
     }
 
     @GetMapping("/production-output/daily")
-    public Result<List<DailyOutputReportVO>> dailyProductionOutput() {
-        return Result.success(reportService.dailyOutputReport());
+    public ApiResponse<List<DailyOutputReportVO>> dailyProductionOutput() {
+        return ApiResponse.ok(reportService.dailyOutputReport());
     }
 
     @GetMapping("/boards/line")
-    public Result<List<Map<String, Object>>> lineBoardData() {
-        return Result.success(reportService.lineBoard());
+    public ApiResponse<List<Map<String, Object>>> lineBoardData() {
+        return ApiResponse.ok(reportService.lineBoard());
     }
 
     @GetMapping("/boards/workshop")
-    public Result<List<Map<String, Object>>> workshopBoardData() {
-        return Result.success(reportService.workshopBoard());
+    public ApiResponse<List<Map<String, Object>>> workshopBoardData() {
+        return ApiResponse.ok(reportService.workshopBoard());
     }
 
     @GetMapping("/boards/control-center")
-    public Result<Map<String, Object>> controlCenterBoardData() {
-        return Result.success(reportService.controlCenterBoard());
+    public ApiResponse<Map<String, Object>> controlCenterBoardData() {
+        return ApiResponse.ok(reportService.controlCenterBoard());
     }
 
     @GetMapping("/boards/line-config")
-    public Result<List<BoardConfig>> lineBoards() {
-        return Result.success(reportService.boards("产线"));
+    public ApiResponse<List<BoardConfig>> lineBoards() {
+        return ApiResponse.ok(reportService.boards("产线"));
     }
 
     @GetMapping("/boards/workshop-config")
-    public Result<List<BoardConfig>> workshopBoards() {
-        return Result.success(reportService.boards("车间"));
+    public ApiResponse<List<BoardConfig>> workshopBoards() {
+        return ApiResponse.ok(reportService.boards("车间"));
     }
 }

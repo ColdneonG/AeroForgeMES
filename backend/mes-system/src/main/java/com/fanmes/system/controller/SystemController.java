@@ -1,6 +1,6 @@
 package com.fanmes.system.controller;
 
-import com.fanmes.common.api.Result;
+import com.fanmes.common.api.ApiResponse;
 import com.fanmes.system.domain.dto.OperationLogCreateDTO;
 import com.fanmes.system.domain.dto.SequenceNextRequest;
 import com.fanmes.system.domain.entity.SysMenu;
@@ -25,36 +25,36 @@ public class SystemController {
     private final SystemService systemService;
 
     @GetMapping("/menus/tree")
-    public Result<List<SysMenu>> menus() {
-        return Result.success(systemService.menus());
+    public ApiResponse<List<SysMenu>> menus() {
+        return ApiResponse.ok(systemService.menus());
     }
 
     @PostMapping("/sequences/next")
-    public Result<String> nextCode(@RequestBody SequenceNextRequest request) {
-        return Result.success(systemService.nextCode(request));
+    public ApiResponse<String> nextCode(@RequestBody SequenceNextRequest request) {
+        return ApiResponse.ok(systemService.nextCode(request));
     }
 
     @PostMapping("/operation-logs")
-    public Result<Void> saveOperationLog(@RequestBody OperationLogCreateDTO dto) {
+    public ApiResponse<Void> saveOperationLog(@RequestBody OperationLogCreateDTO dto) {
         systemService.saveOperationLog(dto);
-        return Result.success();
+        return ApiResponse.ok();
     }
 
     @GetMapping("/orgs/tree")
     @RequirePermission("system:user:view")
-    public Result<List<MasterOrg>> orgTree() {
-        return Result.success(systemService.orgTree());
+    public ApiResponse<List<MasterOrg>> orgTree() {
+        return ApiResponse.ok(systemService.orgTree());
     }
 
     @GetMapping("/workshops")
     @RequirePermission("system:user:view")
-    public Result<List<MasterWorkshop>> workshops(@RequestParam(required = false) Long orgId) {
-        return Result.success(systemService.workshops(orgId));
+    public ApiResponse<List<MasterWorkshop>> workshops(@RequestParam(required = false) Long orgId) {
+        return ApiResponse.ok(systemService.workshops(orgId));
     }
 
     @GetMapping("/teams")
     @RequirePermission("system:user:view")
-    public Result<List<MasterTeam>> teams(@RequestParam(required = false) Long workshopId) {
-        return Result.success(systemService.teams(workshopId));
+    public ApiResponse<List<MasterTeam>> teams(@RequestParam(required = false) Long workshopId) {
+        return ApiResponse.ok(systemService.teams(workshopId));
     }
 }
