@@ -28,6 +28,7 @@ replay_pid*
 !.env.example
 !.env.*.example
 *.local
+application-local.yml
 
 # IDE
 .idea/
